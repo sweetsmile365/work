@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background: #fbfaf7;
+}
+
+body {
+  margin: 0;
+  background: #fbfaf7;
+  color: #17212b;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+.focus-ring {
+  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plum;
+}
