@@ -10,6 +10,7 @@ const routeRoles: Record<AppRoute, UserRole[]> = {
   "/account": ["admin", "parent", "child_editor"],
   "/settings": ["admin"],
   "/settings/account": ["admin"],
+  "/settings/password": ["admin"],
   "/backup": ["admin"],
   "/company": ["admin", "parent"],
   "/import-inbox": ["admin", "parent"],

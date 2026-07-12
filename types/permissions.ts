@@ -15,5 +15,6 @@ export type AppRoute =
   | "/backup"
   | "/settings"
   | "/settings/account"
+  | "/settings/password"
   | "/account"
   | "/recycle-bin";

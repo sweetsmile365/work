@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays } from "lucide-react";
-import { loginAs } from "@/lib/db";
+import { CalendarDays, LockKeyhole } from "lucide-react";
+import { hasCustomLoginPassword, loginAs, verifyLoginPassword } from "@/lib/db";
 import type { UserRole } from "@/types/permissions";
 
 const roles: { role: UserRole; label: string; note: string }[] = [
@@ -13,6 +14,21 @@ const roles: { role: UserRole; label: string; note: string }[] = [
 
 export default function LoginPage() {
   const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submittingRole, setSubmittingRole] = useState<UserRole | null>(null);
+
+  function handleLogin(role: UserRole) {
+    setSubmittingRole(role);
+    setError("");
+    if (!verifyLoginPassword(password)) {
+      setSubmittingRole(null);
+      setError("パスワードが違います。");
+      return;
+    }
+    loginAs(role);
+    router.push("/dashboard");
+  }
 
   return (
     <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-8">
@@ -27,15 +43,32 @@ export default function LoginPage() {
           </div>
         </div>
 
+        <label className="mb-4 block">
+          <span className="mb-2 flex items-center gap-2 text-base font-semibold text-slate-800">
+            <LockKeyhole size={18} />
+            ログインパスワード
+          </span>
+          <input
+            className="h-12 w-full rounded-lg border border-slate-300 px-4 text-base outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            type="password"
+            inputMode="text"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="パスワードを入力"
+          />
+        </label>
+
+        {error ? <div className="mb-3 rounded-lg bg-red-50 p-3 text-base font-medium text-red-700">{error}</div> : null}
+        {!hasCustomLoginPassword() ? <div className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">初期パスワードは 1234 です。ログイン後に設定から変更してください。</div> : null}
+
         <div className="grid gap-3">
           {roles.map((item) => (
             <button
               key={item.role}
-              className="focus-ring min-h-14 rounded-lg border border-slate-200 p-4 text-left text-base hover:bg-slate-50"
-              onClick={() => {
-                loginAs(item.role);
-                router.push("/dashboard");
-              }}
+              className="focus-ring min-h-14 rounded-lg border border-slate-200 p-4 text-left text-base hover:bg-slate-50 disabled:opacity-60"
+              disabled={submittingRole === item.role}
+              onClick={() => handleLogin(item.role)}
             >
               <div className="text-lg font-semibold text-slate-950">{item.label}</div>
               <div className="mt-1 text-base text-slate-500">{item.note}</div>

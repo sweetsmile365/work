@@ -428,6 +428,8 @@ const initialState: AppState = {
 };
 
 const key = "family-schedule-hub-state";
+const passwordKey = "family-schedule-hub-login-password";
+const defaultPassword = "1234";
 
 function mergeDefaultData(state: AppState): AppState {
   const existingEventIds = new Set(state.events.map((event) => event.id));
@@ -499,6 +501,25 @@ export function loginAs(role: UserRole) {
   const next = { ...state, currentUser };
   saveState(next);
   return next;
+}
+
+export function verifyLoginPassword(password: string) {
+  if (typeof window === "undefined") return false;
+  return password === (window.localStorage.getItem(passwordKey) ?? defaultPassword);
+}
+
+export function updateLoginPassword(currentPassword: string, nextPassword: string) {
+  if (typeof window === "undefined") return { ok: false, message: "ブラウザで操作してください。" };
+  if (!verifyLoginPassword(currentPassword)) return { ok: false, message: "現在のパスワードが違います。" };
+  const trimmed = nextPassword.trim();
+  if (trimmed.length < 4) return { ok: false, message: "新しいパスワードは4文字以上にしてください。" };
+  window.localStorage.setItem(passwordKey, trimmed);
+  return { ok: true, message: "パスワードを保存しました。" };
+}
+
+export function hasCustomLoginPassword() {
+  if (typeof window === "undefined") return false;
+  return Boolean(window.localStorage.getItem(passwordKey));
 }
 
 export function logout() {
