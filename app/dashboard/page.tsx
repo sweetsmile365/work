@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Save, Trash2 } from "lucide-react";
 import { RoleGuard } from "@/components/RoleGuard";
+import { DayTimeline } from "@/components/responsive/DayTimeline";
 import { MobileEventCard } from "@/components/responsive/MobileEventCard";
 import { MobileEventEditorSheet } from "@/components/responsive/MobileEventEditorSheet";
 import { MobileLayout } from "@/components/responsive/MobileLayout";
@@ -10,7 +11,7 @@ import { TabletLayout } from "@/components/responsive/TabletLayout";
 import { checkConflicts } from "@/lib/conflictChecker";
 import { defaultChecklists, loadState, saveState, softDeleteEvent, type AppState } from "@/lib/db";
 import { zhText } from "@/lib/displayText";
-import { isParentTransport, normalizeTransportOwner, transportOwnerLabel, transportOwnerOptions } from "@/lib/transport";
+import { isParentTransport, normalizeTransportOwner, transportOwnerOptions } from "@/lib/transport";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
 import type { CalendarType, EventType, FamilyEvent } from "@/types/events";
 
@@ -242,6 +243,7 @@ export default function DashboardPage() {
         <p className="text-base text-slate-500">{todayKey}</p>
         <h2 className="mt-1 text-xl font-bold text-slate-950">{todayEvents.length ? "今日の重要事項" : "今日は予定がありません"}</h2>
       </section>
+      <DayTimeline events={state.events.filter((event) => !isPlainDadCompanyDayOff(event))} date={todayKey} onEventClick={setEditingEvent} />
       <section className="space-y-3">
         <h2 className="text-xl font-bold">子どもの今日</h2>
         {todayChildEvents.length ? todayChildEvents.map((event) => <MobileEventCard key={event.id} event={event} onClick={() => setEditingEvent(event)} />) : <div className="rounded-xl bg-white p-4 text-base text-slate-500">子どもの予定はありません。</div>}
@@ -330,12 +332,9 @@ export default function DashboardPage() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-3 rounded-xl bg-white p-4 shadow-sm">
-                <h2 className="text-lg font-bold">{selectedDate} の予定</h2>
-                {selectedEvents.length ? selectedEvents.map((event) => <button key={event.id} className={`w-full rounded-lg border p-4 text-left ${eventTone(event)}`} onClick={() => setEditingEvent(event)}>
-                  <div className="font-semibold">{timeLabel(event)} {zhText(event.title)}</div>
-                  <div className="mt-1 text-sm opacity-75">{zhText(event.location)} {event.transport_owner ? `送迎：${transportOwnerLabel(event.transport_owner)}` : ""}</div>
-                </button>) : <button className="w-full rounded-lg border border-dashed border-slate-300 p-6 text-left text-sm text-slate-500" onClick={() => setEditingEvent(createEmptyEvent(selectedDate))}>この日の予定はありません。クリックして追加できます。</button>}
+              <div className="space-y-3">
+                <DayTimeline events={state.events.filter((event) => !isPlainDadCompanyDayOff(event))} date={selectedDate} onEventClick={setEditingEvent} />
+                {selectedEvents.length === 0 ? <button className="w-full rounded-lg border border-dashed border-slate-300 bg-white p-6 text-left text-sm text-slate-500 shadow-sm" onClick={() => setEditingEvent(createEmptyEvent(selectedDate))}>この日の予定はありません。クリックして追加できます。</button> : null}
               </div>
             )}
           </main>

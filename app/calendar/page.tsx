@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { CalendarView } from "@/components/CalendarView";
 import { RoleGuard } from "@/components/RoleGuard";
+import { DayTimeline } from "@/components/responsive/DayTimeline";
 import { MobileEventCard } from "@/components/responsive/MobileEventCard";
 import { MobileEventEditorSheet } from "@/components/responsive/MobileEventEditorSheet";
 import { TabletSplitView } from "@/components/responsive/TabletSplitView";
@@ -204,11 +205,15 @@ export default function CalendarPage() {
       {mode === "week" ? (
         <section className="space-y-3">
           <h2 className="text-xl font-bold text-slate-950">{shortDateLabel(selectedDate)} の予定</h2>
-          {selectedDateEvents.map((event) => <MobileEventCard key={event.id} event={event} onClick={() => openEditor(event)} />)}
+          <DayTimeline events={events} date={selectedDate} onEventClick={openEditor} />
+          <div className="space-y-3">
+            {selectedDateEvents.map((event) => <MobileEventCard key={event.id} event={event} onClick={() => openEditor(event)} />)}
+          </div>
           {selectedDateEvents.length === 0 ? <div className="rounded-xl bg-white p-5 text-base text-slate-500 shadow-sm">予定はありません</div> : null}
         </section>
       ) : (
         <>
+          {mode === "today" ? <DayTimeline events={events} date={selectedDate} onEventClick={openEditor} /> : null}
           {Object.entries(grouped).map(([date, dayEvents]) => (
             <section key={date} className="space-y-3">
               <h2 className="text-xl font-bold text-slate-950">{shortDateLabel(date)}</h2>
