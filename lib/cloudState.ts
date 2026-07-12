@@ -30,11 +30,12 @@ export function queueCloudStateSave(state: AppState) {
 
   saveTimer = setTimeout(async () => {
     try {
-      await fetch("/api/sync/state", {
+      const response = await fetch("/api/sync/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ state: sharedState(state) })
       });
+      if (!response.ok) console.warn("Cloud sync save failed", response.status, await response.text());
     } catch (error) {
       console.warn("Cloud sync save failed", error);
     }
