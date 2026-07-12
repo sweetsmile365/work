@@ -563,15 +563,16 @@ export function addBusTimetable(item: Omit<BusTimetable, "id" | "active">) {
   return next;
 }
 
-export function createImportFromText(rawText: string) {
+export function createImportFromText(rawText: string, options?: { sourceType?: string; ocrStatus?: ImportRecord["ocr_status"]; errorMessage?: string }) {
   const state = loadState();
   const importRecord: ImportRecord = {
     id: crypto.randomUUID(),
-    source_type: "pasted_text",
+    source_type: options?.sourceType ?? "pasted_text",
     document_type: "other",
-    status: "pending_confirmation",
-    ocr_status: "fallback_mock",
+    status: options?.errorMessage ? "failed" : "pending_confirmation",
+    ocr_status: options?.ocrStatus ?? "fallback_mock",
     raw_ocr_text: rawText,
+    ocr_error_message: options?.errorMessage,
     created_at: new Date().toISOString()
   };
   const parsed = parseImportText(rawText);
@@ -585,6 +586,20 @@ export function createImportFromText(rawText: string) {
   };
   saveState(next);
   return next;
+}
+
+export function updateCandidate(candidateId: string, patch: Partial<ImportCandidate>) {
+  const state = loadState();
+  const next = {
+    ...state,
+    importCandidates: state.importCandidates.map((item) => (item.id === candidateId ? { ...item, ...patch } : item))
+  };
+  saveState(next);
+  return next;
+}
+
+export function ignoreCandidate(candidateId: string) {
+  return updateCandidate(candidateId, { ignored: true });
 }
 
 export function confirmCandidate(candidateId: string) {

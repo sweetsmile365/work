@@ -1,10 +1,20 @@
 "use client";
 
-import type { ImportCandidate, BusTimetableCandidate } from "@/types/imports";
+import type { BusTimetableCandidate, ImportCandidate } from "@/types/imports";
 import { OcrStatusBadge } from "./OcrStatusBadge";
 import { zhText } from "@/lib/displayText";
 
-export function ImportInboxTable({ candidates, busCandidates, onConfirm }: { candidates: ImportCandidate[]; busCandidates: BusTimetableCandidate[]; onConfirm: (id: string) => void }) {
+export function ImportInboxTable({
+  candidates,
+  busCandidates,
+  onConfirm,
+  onIgnore
+}: {
+  candidates: ImportCandidate[];
+  busCandidates: BusTimetableCandidate[];
+  onConfirm: (id: string) => void;
+  onIgnore: (id: string) => void;
+}) {
   return (
     <div className="space-y-4">
       <section className="rounded-md bg-white p-4 shadow-soft">
@@ -12,18 +22,19 @@ export function ImportInboxTable({ candidates, busCandidates, onConfirm }: { can
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="text-black/55">
-              <tr><th className="p-2">日付</th><th className="p-2">タイトル</th><th className="p-2">タイプ</th><th className="p-2">信頼度</th><th className="p-2">状態</th><th className="p-2">操作</th></tr>
+              <tr><th className="p-2">日付</th><th className="p-2">タイトル</th><th className="p-2">種類</th><th className="p-2">信頼度</th><th className="p-2">状態</th><th className="p-2">操作</th></tr>
             </thead>
             <tbody>
-              {candidates.map((item) => (
+              {candidates.filter((item) => !item.ignored).map((item) => (
                 <tr key={item.id} className={item.confidence < 0.8 || item.date_parse_status !== "ok" ? "bg-yellow-50" : ""}>
                   <td className="p-2">{item.date ?? "未解析"}</td>
                   <td className="p-2">{zhText(item.title)}<div className="text-xs text-black/45">{zhText(item.raw_text_jp)}</div></td>
                   <td className="p-2">{item.event_type}</td>
                   <td className="p-2">{Math.round(item.confidence * 100)}%</td>
                   <td className="p-2"><OcrStatusBadge status={item.confirmed ? "confirmed" : item.date_parse_status} /></td>
-                  <td className="p-2">
+                  <td className="flex gap-2 p-2">
                     <button disabled={item.confirmed || item.date_parse_status === "failed"} className="focus-ring rounded-md border border-black/10 px-3 py-2 disabled:opacity-40" onClick={() => onConfirm(item.id)}>確認して保存</button>
+                    <button disabled={item.confirmed} className="focus-ring rounded-md border border-black/10 px-3 py-2 disabled:opacity-40" onClick={() => onIgnore(item.id)}>無視</button>
                   </td>
                 </tr>
               ))}
