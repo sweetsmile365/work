@@ -35,6 +35,8 @@ const calendarTypes: { value: CalendarType; label: string }[] = [
 
 export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit: (draft: EventDraft) => void }) {
   const today = new Date().toISOString().slice(0, 10);
+  const [isMultiDay, setIsMultiDay] = useState(false);
+  const [endDate, setEndDate] = useState(today);
   const [draft, setDraft] = useState<EventDraft>({
     title: "",
     event_type: "family_event",
@@ -47,6 +49,32 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
   });
   const update = (patch: Partial<EventDraft>) => setDraft((prev) => ({ ...prev, ...patch }));
 
+  function addDays(dateKey: string, days: number) {
+    const date = new Date(`${dateKey}T00:00:00+09:00`);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  function dateRange(start: string, end: string) {
+    const range: string[] = [];
+    let cursor = start;
+    const safeEnd = end < start ? start : end;
+    while (cursor <= safeEnd && range.length < 366) {
+      range.push(cursor);
+      cursor = addDays(cursor, 1);
+    }
+    return range;
+  }
+
+  function draftForDate(base: EventDraft, date: string): EventDraft {
+    return {
+      ...base,
+      date,
+      start_datetime: base.start_datetime ? `${date}T${base.start_datetime.slice(11, 16)}:00+09:00` : undefined,
+      end_datetime: base.end_datetime ? `${date}T${base.end_datetime.slice(11, 16)}:00+09:00` : undefined
+    };
+  }
+
   function updateEventType(value: EventType) {
     const option = eventTypes.find((item) => item.value === value);
     update({ event_type: value, calendar_type: option?.calendarType ?? draft.calendar_type });
@@ -57,12 +85,16 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
       className="grid gap-4 rounded-lg bg-white p-4 shadow-soft lg:grid-cols-2"
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit({
+        const baseDraft = {
           ...draft,
           title: draft.title.trim(),
           transport_owner: normalizeTransportOwner(draft.transport_owner) || undefined
-        });
+        };
+        const dates = isMultiDay ? dateRange(draft.date, endDate) : [draft.date];
+        dates.forEach((date) => onSubmit(draftForDate(baseDraft, date)));
         setDraft({ ...draft, title: "" });
+        setIsMultiDay(false);
+        setEndDate(draft.date);
       }}
     >
       <label className="grid gap-1 text-base font-medium lg:col-span-2">
@@ -74,6 +106,7 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
         日付
         <input type="date" required className="focus-ring h-12 rounded-lg border border-black/10 px-3 text-base" value={draft.date} onChange={(event) => {
           const date = event.target.value;
+          if (endDate < date) setEndDate(date);
           update({
             date,
             start_datetime: draft.start_datetime ? `${date}T${draft.start_datetime.slice(11, 16)}:00+09:00` : undefined,
@@ -81,6 +114,20 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
           });
         }} />
       </label>
+
+      <div className="grid gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-3 lg:col-span-2">
+        <label className="flex min-h-11 items-center gap-2 text-base font-semibold text-blue-950">
+          <input className="size-5" type="checkbox" checked={isMultiDay} onChange={(event) => setIsMultiDay(event.target.checked)} />
+          連続日程として追加
+        </label>
+        {isMultiDay ? (
+          <label className="grid gap-1 text-base font-medium text-blue-950">
+            終了日
+            <input type="date" required className="focus-ring h-12 rounded-lg border border-blue-200 bg-white px-3 text-base" min={draft.date} value={endDate < draft.date ? draft.date : endDate} onChange={(event) => setEndDate(event.target.value)} />
+            <span className="text-sm font-normal text-blue-700">{dateRange(draft.date, endDate).length}日分の予定を作成します</span>
+          </label>
+        ) : null}
+      </div>
 
       <label className="flex items-end gap-2 text-base font-medium">
         <input className="mb-4 size-5" type="checkbox" checked={Boolean(draft.all_day)} onChange={(event) => update({ all_day: event.target.checked, start_datetime: event.target.checked ? undefined : `${draft.date}T09:00:00+09:00`, end_datetime: event.target.checked ? undefined : `${draft.date}T10:00:00+09:00` })} />
