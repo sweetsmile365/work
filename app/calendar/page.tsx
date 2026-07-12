@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { CalendarView } from "@/components/CalendarView";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -87,12 +87,10 @@ export default function CalendarPage() {
   const selectedDateEvents = eventsByDate[selectedDate] ?? [];
   const weekDays = Array.from({ length: 7 }, (_, index) => addDays(range.start, index));
   const selected = mobileEvents[0];
-  const grouped = useMemo(() => {
-    return mobileEvents.reduce<Record<string, FamilyEvent[]>>((acc, event) => {
-      acc[event.date] = [...(acc[event.date] ?? []), event];
-      return acc;
-    }, {});
-  }, [mobileEvents]);
+  const grouped = mobileEvents.reduce<Record<string, FamilyEvent[]>>((acc, event) => {
+    acc[event.date] = [...(acc[event.date] ?? []), event];
+    return acc;
+  }, {});
 
   function moveDate(direction: -1 | 1) {
     const step = mode === "list" ? 30 : mode === "week" ? 7 : 1;
