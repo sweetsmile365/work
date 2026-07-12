@@ -199,7 +199,7 @@ export default function CalendarPage() {
 
   return (
     <RoleGuard>
-      <AppShell title="日历">
+      <AppShell title="カレンダー">
         {isMobile ? mobileContent : isTablet ? tabletContent : <CalendarView events={state.events} onDelete={(id) => setState(softDeleteEvent(id, state.currentUser?.id))} />}
       </AppShell>
     </RoleGuard>

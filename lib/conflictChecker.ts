@@ -21,7 +21,7 @@ export function checkConflicts(events: FamilyEvent[], routes: RoutePath[] = []):
   const conflicts: Conflict[] = [];
   active.forEach((event) => {
     if (event.calendar_type === "china_reference_holiday") {
-      conflicts.push({ id: `info-${event.id}`, level: "info", title: "中国休日参考", detail: `${event.title} は参考情報のみで、強い競合判定には使いません。`, eventIds: [event.id] });
+      conflicts.push({ id: `info-${event.id}`, level: "info", title: "中国の祝日（参考）", detail: `${event.title} は参考情報のみで、強い競合判定には使いません。`, eventIds: [event.id] });
     }
     if ((event.pickup_required || event.dropoff_required || event.need_transport) && !event.transport_owner) {
       conflicts.push({ id: `transport-owner-${event.id}`, level: "high", title: "送迎未設定", detail: `${event.title} は送迎が必要ですが、担当が未設定です。`, eventIds: [event.id] });

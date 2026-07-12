@@ -7,18 +7,18 @@ import type { UserRole } from "@/types/permissions";
 
 const parentItems = [
   { href: "/dashboard", label: "今日", icon: Home },
-  { href: "/calendar", label: "日历", icon: CalendarDays },
-  { href: "/child-schedule", label: "孩子", icon: School },
-  { href: "/import-inbox", label: "导入", icon: Inbox },
-  { href: "/account", label: "我的", icon: User }
+  { href: "/calendar", label: "カレンダー", icon: CalendarDays },
+  { href: "/child-schedule", label: "子ども", icon: School },
+  { href: "/import-inbox", label: "取り込み", icon: Inbox },
+  { href: "/account", label: "マイページ", icon: User }
 ];
 
 const childItems = [
   { href: "/dashboard", label: "今日", icon: Home },
-  { href: "/add-event", label: "我的予定", icon: CalendarDays },
-  { href: "/child-schedule", label: "任务", icon: ListTodo },
-  { href: "/calendar", label: "日历", icon: CalendarDays },
-  { href: "/account", label: "我的", icon: User }
+  { href: "/add-event", label: "自分の予定", icon: CalendarDays },
+  { href: "/child-schedule", label: "タスク", icon: ListTodo },
+  { href: "/calendar", label: "カレンダー", icon: CalendarDays },
+  { href: "/account", label: "マイページ", icon: User }
 ];
 
 export function BottomNav({ role }: { role?: UserRole }) {

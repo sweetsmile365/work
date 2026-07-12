@@ -406,7 +406,7 @@ const initialState: AppState = {
     { id: "e3", title: "ピアノレッスン", event_type: "piano_lesson", calendar_type: "child_activity", date: isoDate(2), start_datetime: isoAt(isoDate(2), "16:30"), end_datetime: isoAt(isoDate(2), "17:15"), location: "ピアノ教室", visibility: "family", route_id: "r9", transport_owner: "パパ" },
     { id: "e4", title: "会社朝会", event_type: "company_meeting", calendar_type: "company", date: isoDate(0), start_datetime: isoAt(isoDate(0), "15:00"), end_datetime: isoAt(isoDate(0), "16:00"), visibility: "parents_only" },
     { id: "e5", title: "家族旅行", event_type: "travel", calendar_type: "family", date: isoDate(6), all_day: true, visibility: "family" },
-    { id: "e6", title: "中国休日参考", event_type: "china_public_holiday_reference", calendar_type: "china_reference_holiday", date: isoDate(7), all_day: true, visibility: "family" }
+    { id: "e6", title: "中国の祝日（参考）", event_type: "china_public_holiday_reference", calendar_type: "china_reference_holiday", date: isoDate(7), all_day: true, visibility: "family" }
   ],
   routes: [
     { id: "r1", name: "並木大橋 → 茗溪学園", from_label: "並木大橋", to_label: "茗溪学園", transport_mode: "bus", estimated_minutes: 22, buffer_minutes: 8, default_departure_reminder_minutes: 10, active: true },

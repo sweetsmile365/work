@@ -38,7 +38,7 @@ const weekLabels = ["日", "月", "火", "水", "木", "金", "土"];
 type ViewMode = "month" | "week" | "day";
 
 const menuItems = [
-  { href: "/dashboard", label: "日程", icon: CalendarCheck },
+  { href: "/dashboard", label: "予定", icon: CalendarCheck },
   { href: "/calendar", label: "カレンダー", icon: CalendarDays, active: true },
   { href: "/import-inbox", label: "取り込み Inbox", icon: Inbox, badge: 3 },
   { href: "/child-schedule", label: "タスク", icon: CheckSquare },
@@ -382,7 +382,7 @@ export default function DashboardPage() {
           <section className="rounded-2xl bg-white p-4 shadow-sm">
             <h2 className="text-xl font-bold">準備物</h2>
             <div className="mt-3 flex flex-wrap gap-2">
-              {["弁当", "ラケット", "教材", "作业", ...defaultChecklists.badminton.slice(0, 4)].map((item) => <span key={item} className="rounded-full bg-emerald-50 px-3 py-2 text-base font-medium text-emerald-800">{item}</span>)}
+              {["弁当", "ラケット", "教材", "宿題", ...defaultChecklists.badminton.slice(0, 4)].map((item) => <span key={item} className="rounded-full bg-emerald-50 px-3 py-2 text-base font-medium text-emerald-800">{item}</span>)}
             </div>
           </section>
 
@@ -392,7 +392,7 @@ export default function DashboardPage() {
           </section>
 
           <section className="rounded-2xl bg-white p-4 shadow-sm">
-            <h2 className="text-xl font-bold">冲突提醒</h2>
+            <h2 className="text-xl font-bold">競合アラート</h2>
             {visibleConflicts.length ? <div className="mt-3 space-y-2">{visibleConflicts.map((conflict) => <div key={conflict.id} className="rounded-xl bg-amber-50 p-3 text-base font-medium text-amber-900">{conflict.title}</div>)}</div> : <p className="mt-2 text-base text-slate-500">high / medium の競合はありません。</p>}
           </section>
 
