@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { CalendarView } from "@/components/CalendarView";
 import { RoleGuard } from "@/components/RoleGuard";
 import { MobileEventCard } from "@/components/responsive/MobileEventCard";
+import { MobileEventEditorSheet } from "@/components/responsive/MobileEventEditorSheet";
 import { TabletSplitView } from "@/components/responsive/TabletSplitView";
-import { loadState, softDeleteEvent, type AppState } from "@/lib/db";
+import { loadState, saveState, softDeleteEvent, type AppState } from "@/lib/db";
+import { normalizeTransportOwner } from "@/lib/transport";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
 import type { FamilyEvent } from "@/types/events";
 
@@ -65,9 +67,15 @@ export default function CalendarPage() {
   const [mode, setMode] = useState<MobileCalendarMode>("week");
   const [anchorDate, setAnchorDate] = useState(() => dateKey(new Date()));
   const [selectedDate, setSelectedDate] = useState(() => dateKey(new Date()));
+  const [editingEvent, setEditingEvent] = useState<FamilyEvent | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saved">("idle");
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isMobile, isTablet } = useResponsiveLayout();
 
   useEffect(() => setState(loadState()), []);
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
   if (!state) return null;
 
   const today = dateKey(new Date());
@@ -92,6 +100,40 @@ export default function CalendarPage() {
     return acc;
   }, {});
 
+  function persist(next: AppState) {
+    saveState(next);
+    setState(next);
+  }
+
+  function saveEditedEvent() {
+    if (!state || !editingEvent?.title.trim()) return;
+    const owner = normalizeTransportOwner(editingEvent.transport_owner);
+    const nextEvent: FamilyEvent = {
+      ...editingEvent,
+      title: editingEvent.title.trim(),
+      transport_owner: owner || undefined,
+      need_transport: Boolean(owner)
+    };
+    const next = { ...state, events: state.events.map((event) => (event.id === nextEvent.id ? nextEvent : event)) };
+    persist(next);
+    setEditingEvent(nextEvent);
+    setSelectedDate(nextEvent.date);
+    setSaveStatus("saved");
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setSaveStatus("idle"), 1500);
+  }
+
+  function deleteEditedEvent() {
+    if (!state || !editingEvent) return;
+    setState(softDeleteEvent(editingEvent.id, state.currentUser?.id));
+    setEditingEvent(null);
+  }
+
+  function openEditor(event: FamilyEvent) {
+    setSaveStatus("idle");
+    setEditingEvent(event);
+  }
+
   function moveDate(direction: -1 | 1) {
     const step = mode === "list" ? 30 : mode === "week" ? 7 : 1;
     const next = addDays(anchorDate, step * direction);
@@ -113,20 +155,14 @@ export default function CalendarPage() {
     <div className="space-y-5">
       <div className="rounded-2xl bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between gap-2">
-          <button className="min-h-11 rounded-xl border border-slate-200 px-4 text-base font-semibold text-slate-700" onClick={() => moveDate(-1)}>
-            前へ
-          </button>
+          <button className="min-h-11 rounded-xl border border-slate-200 px-4 text-base font-semibold text-slate-700" onClick={() => moveDate(-1)}>前へ</button>
           <div className="min-w-0 text-center">
             <div className="text-xl font-bold text-slate-950">{monthLabel(anchorDate)}</div>
             <div className="text-sm font-medium text-slate-500">{rangeLabel(mode, anchorDate)}</div>
           </div>
-          <button className="min-h-11 rounded-xl border border-slate-200 px-4 text-base font-semibold text-slate-700" onClick={() => moveDate(1)}>
-            次へ
-          </button>
+          <button className="min-h-11 rounded-xl border border-slate-200 px-4 text-base font-semibold text-slate-700" onClick={() => moveDate(1)}>次へ</button>
         </div>
-        <button className="mt-3 min-h-11 w-full rounded-xl bg-slate-100 text-base font-semibold text-slate-700" onClick={resetToToday}>
-          今日に戻る
-        </button>
+        <button className="mt-3 min-h-11 w-full rounded-xl bg-slate-100 text-base font-semibold text-slate-700" onClick={resetToToday}>今日に戻る</button>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -168,7 +204,7 @@ export default function CalendarPage() {
       {mode === "week" ? (
         <section className="space-y-3">
           <h2 className="text-xl font-bold text-slate-950">{shortDateLabel(selectedDate)} の予定</h2>
-          {selectedDateEvents.map((event) => <MobileEventCard key={event.id} event={event} />)}
+          {selectedDateEvents.map((event) => <MobileEventCard key={event.id} event={event} onClick={() => openEditor(event)} />)}
           {selectedDateEvents.length === 0 ? <div className="rounded-xl bg-white p-5 text-base text-slate-500 shadow-sm">予定はありません</div> : null}
         </section>
       ) : (
@@ -176,24 +212,21 @@ export default function CalendarPage() {
           {Object.entries(grouped).map(([date, dayEvents]) => (
             <section key={date} className="space-y-3">
               <h2 className="text-xl font-bold text-slate-950">{shortDateLabel(date)}</h2>
-              {dayEvents.map((event) => <MobileEventCard key={event.id} event={event} />)}
+              {dayEvents.map((event) => <MobileEventCard key={event.id} event={event} onClick={() => openEditor(event)} />)}
             </section>
           ))}
           {mobileEvents.length === 0 ? <div className="rounded-xl bg-white p-5 text-base text-slate-500 shadow-sm">予定はありません</div> : null}
         </>
       )}
+
+      <MobileEventEditorSheet event={editingEvent} saveStatus={saveStatus} onChange={setEditingEvent} onSave={saveEditedEvent} onDelete={deleteEditedEvent} onClose={() => setEditingEvent(null)} />
     </div>
   );
 
   const tabletContent = (
     <TabletSplitView
-      left={<div className="space-y-3">{mobileEvents.map((event) => <MobileEventCard key={event.id} event={event} />)}</div>}
-      right={
-        <div className="rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="text-xl font-bold">詳細</h2>
-          {selected ? <div className="mt-4"><MobileEventCard event={selected} /></div> : <p className="mt-4 text-slate-500">予定を選んでください。</p>}
-        </div>
-      }
+      left={<div className="space-y-3">{mobileEvents.map((event) => <MobileEventCard key={event.id} event={event} onClick={() => openEditor(event)} />)}</div>}
+      right={<div className="rounded-xl bg-white p-5 shadow-sm"><h2 className="text-xl font-bold">詳細</h2>{selected ? <div className="mt-4"><MobileEventCard event={selected} /></div> : <p className="mt-4 text-slate-500">予定を選んでください。</p>}</div>}
     />
   );
 

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Save, Trash2 } from "lucide-react";
 import { RoleGuard } from "@/components/RoleGuard";
 import { MobileEventCard } from "@/components/responsive/MobileEventCard";
+import { MobileEventEditorSheet } from "@/components/responsive/MobileEventEditorSheet";
 import { MobileLayout } from "@/components/responsive/MobileLayout";
 import { TabletLayout } from "@/components/responsive/TabletLayout";
 import { checkConflicts } from "@/lib/conflictChecker";
@@ -22,6 +23,7 @@ const eventTypeOptions: { value: EventType; label: string }[] = [
   { value: "personal_event", label: "個人予定" },
   { value: "company_meeting", label: "会社予定" },
   { value: "school_event", label: "学校予定" },
+  { value: "school_holiday", label: "学校休み" },
   { value: "badminton_practice", label: "バドミントン" },
   { value: "piano_lesson", label: "ピアノ" },
   { value: "english_lesson", label: "英語" },
@@ -35,6 +37,7 @@ const calendarTypeByEvent: Partial<Record<EventType, CalendarType>> = {
   personal_event: "personal",
   company_meeting: "company",
   school_event: "school",
+  school_holiday: "school",
   badminton_practice: "child_activity",
   piano_lesson: "child_activity",
   english_lesson: "child_activity",
@@ -263,6 +266,7 @@ export default function DashboardPage() {
           <p className="mt-2 text-base text-slate-600">{pendingImportCount} 件の候補があります。</p>
         </section>
       ) : null}
+      <MobileEventEditorSheet event={editingEvent} saveStatus={saveStatus} onChange={setEditingEvent} onSave={saveEvent} onDelete={() => editingEvent ? removeEvent(editingEvent.id) : undefined} onClose={() => setEditingEvent(null)} />
     </div>
   );
 
@@ -358,9 +362,7 @@ function EditorPanel({
   saveEvent: () => void;
   removeEvent: (id: string) => void;
 }) {
-  if (!editingEvent) {
-    return <div className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">日付または予定をクリックすると編集できます。</div>;
-  }
+  if (!editingEvent) return <div className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">日付または予定をクリックすると編集できます。</div>;
 
   return (
     <div className="space-y-3">

@@ -34,30 +34,10 @@ export function MobileEventCard({ event, onClick }: { event: FamilyEvent; onClic
         <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">{typeLabel(event)}</span>
       </div>
       <div className="mt-3 grid gap-2 text-base text-slate-600">
-        {event.location ? (
-          <span className="flex items-center gap-2">
-            <MapPin size={18} />
-            {zhText(event.location)}
-          </span>
-        ) : null}
-        {event.transport_owner ? (
-          <span className="flex items-center gap-2">
-            <UserRound size={18} />
-            送迎：{transportOwnerLabel(event.transport_owner)}
-          </span>
-        ) : null}
-        {event.route_id || event.bus_timetable_id ? (
-          <span className="flex items-center gap-2">
-            <Route size={18} />
-            ルート確認あり
-          </span>
-        ) : null}
-        {!event.all_day && event.start_datetime ? (
-          <span className="flex items-center gap-2">
-            <Clock size={18} />
-            出発時間を確認
-          </span>
-        ) : null}
+        {event.location ? <span className="flex items-center gap-2"><MapPin size={18} />{zhText(event.location)}</span> : null}
+        {event.transport_owner ? <span className="flex items-center gap-2"><UserRound size={18} />送迎：{transportOwnerLabel(event.transport_owner)}</span> : null}
+        {event.route_id || event.bus_timetable_id ? <span className="flex items-center gap-2"><Route size={18} />ルート確認あり</span> : null}
+        {!event.all_day && event.start_datetime ? <span className="flex items-center gap-2"><Clock size={18} />出発時間を確認</span> : null}
       </div>
     </button>
   );
