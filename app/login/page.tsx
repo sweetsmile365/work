@@ -6,39 +6,44 @@ import { loginAs } from "@/lib/db";
 import type { UserRole } from "@/types/permissions";
 
 const roles: { role: UserRole; label: string; note: string }[] = [
-  { role: "admin", label: "ママ", note: "admin：すべての管理、バックアップ、設定" },
-  { role: "parent", label: "パパ", note: "parent：予定、取り込み、ルート管理" },
-  { role: "child_editor", label: "子ども", note: "child_editor：自分の予定の確認と編集" }
+  { role: "admin", label: "ママ", note: "管理者：予定、バックアップ、設定を管理できます" },
+  { role: "parent", label: "パパ", note: "保護者：予定、送迎、ルートを確認できます" },
+  { role: "child_editor", label: "子ども", note: "自分の予定、タスク、チェックリストを確認できます" }
 ];
 
 export default function LoginPage() {
   const router = useRouter();
+
   return (
-    <main className="grid min-h-screen place-items-center px-4 py-8">
-      <section className="w-full max-w-md rounded-md bg-white p-5 shadow-soft">
-        <div className="mb-5 flex items-center gap-2">
-          <CalendarDays />
+    <main className="grid min-h-screen place-items-center bg-slate-50 px-4 py-8">
+      <section className="w-full max-w-md rounded-lg bg-white p-5 shadow-soft">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="grid size-11 place-items-center rounded-full bg-blue-50 text-blue-600">
+            <CalendarDays />
+          </div>
           <div>
-            <h1 className="text-xl font-semibold">Family Schedule Hub</h1>
-            <p className="text-sm text-black/55">家族専用スケジュール管理 PWA</p>
+            <h1 className="text-xl font-semibold text-slate-950">Family Schedule Hub</h1>
+            <p className="text-base text-slate-500">家族専用の予定管理 PWA</p>
           </div>
         </div>
-        <div className="grid gap-2">
+
+        <div className="grid gap-3">
           {roles.map((item) => (
             <button
               key={item.role}
-              className="focus-ring rounded-md border border-black/10 p-3 text-left hover:bg-black/5"
+              className="focus-ring min-h-14 rounded-lg border border-slate-200 p-4 text-left text-base hover:bg-slate-50"
               onClick={() => {
                 loginAs(item.role);
                 router.push("/dashboard");
               }}
             >
-              <div className="font-medium">{item.label}</div>
-              <div className="text-sm text-black/55">{item.note}</div>
+              <div className="text-lg font-semibold text-slate-950">{item.label}</div>
+              <div className="mt-1 text-base text-slate-500">{item.note}</div>
             </button>
           ))}
         </div>
-        <button className="focus-ring mt-4 w-full rounded-md border border-black/10 px-3 py-2 text-sm hover:bg-black/5">パスワードを忘れた場合</button>
+
+        <p className="mt-4 text-center text-sm text-slate-400">家族の端末で同じリンクから開けます</p>
       </section>
     </main>
   );

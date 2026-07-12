@@ -476,14 +476,20 @@ function mergeDefaultData(state: AppState): AppState {
 
 export function loadState(): AppState {
   if (typeof window === "undefined") return initialState;
-  const stored = window.localStorage.getItem(key);
-  if (!stored) return initialState;
-  const state = mergeDefaultData(JSON.parse(stored));
-  saveState(state);
-  return state;
+  try {
+    const stored = window.localStorage.getItem(key);
+    if (!stored) return initialState;
+    const state = mergeDefaultData(JSON.parse(stored));
+    saveState(state);
+    return state;
+  } catch {
+    window.localStorage.removeItem(key);
+    return initialState;
+  }
 }
 
 export function saveState(state: AppState) {
+  if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(state));
 }
 

@@ -1,5 +1,5 @@
-const CACHE_NAME = "family-schedule-hub-v1";
-const APP_SHELL = ["/", "/dashboard", "/calendar", "/manifest.json"];
+const CACHE_NAME = "family-schedule-hub-v2";
+const APP_SHELL = ["/", "/dashboard", "/calendar", "/login", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
@@ -15,5 +15,16 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request).then((res) => res || caches.match("/dashboard"))));
+  event.respondWith(
+    fetch(event.request).catch(async () => {
+      const cached = await caches.match(event.request);
+      if (cached) return cached;
+
+      if (event.request.mode === "navigate") {
+        return caches.match("/dashboard");
+      }
+
+      return Response.error();
+    })
+  );
 });
