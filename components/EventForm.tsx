@@ -33,10 +33,23 @@ const calendarTypes: { value: CalendarType; label: string }[] = [
   { value: "china_reference_holiday", label: "中国の祝日（参考）" }
 ];
 
+const weekdayOptions = [
+  { value: 0, label: "日" },
+  { value: 1, label: "月" },
+  { value: 2, label: "火" },
+  { value: 3, label: "水" },
+  { value: 4, label: "木" },
+  { value: 5, label: "金" },
+  { value: 6, label: "土" }
+];
+
 export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit: (draft: EventDraft) => void }) {
   const today = new Date().toISOString().slice(0, 10);
   const [isMultiDay, setIsMultiDay] = useState(false);
   const [endDate, setEndDate] = useState(today);
+  const [isWeekly, setIsWeekly] = useState(false);
+  const [weeklyEndDate, setWeeklyEndDate] = useState(today);
+  const [weekdays, setWeekdays] = useState<number[]>([new Date(`${today}T00:00:00+09:00`).getDay()]);
   const [draft, setDraft] = useState<EventDraft>({
     title: "",
     event_type: "family_event",
@@ -66,6 +79,19 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
     return range;
   }
 
+  function dayOfWeek(dateKey: string) {
+    return new Date(`${dateKey}T00:00:00+09:00`).getDay();
+  }
+
+  function weeklyDates(start: string, end: string, selectedWeekdays: number[]) {
+    const selected = selectedWeekdays.length ? selectedWeekdays : [dayOfWeek(start)];
+    return dateRange(start, end).filter((date) => selected.includes(dayOfWeek(date)));
+  }
+
+  function toggleWeekday(day: number) {
+    setWeekdays((prev) => (prev.includes(day) ? prev.filter((item) => item !== day) : [...prev, day].sort()));
+  }
+
   function draftForDate(base: EventDraft, date: string): EventDraft {
     return {
       ...base,
@@ -90,11 +116,13 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
           title: draft.title.trim(),
           transport_owner: normalizeTransportOwner(draft.transport_owner) || undefined
         };
-        const dates = isMultiDay ? dateRange(draft.date, endDate) : [draft.date];
+        const dates = isWeekly ? weeklyDates(draft.date, weeklyEndDate, weekdays) : isMultiDay ? dateRange(draft.date, endDate) : [draft.date];
         dates.forEach((date) => onSubmit(draftForDate(baseDraft, date)));
         setDraft({ ...draft, title: "" });
         setIsMultiDay(false);
+        setIsWeekly(false);
         setEndDate(draft.date);
+        setWeeklyEndDate(draft.date);
       }}
     >
       <label className="grid gap-1 text-base font-medium lg:col-span-2">
@@ -107,6 +135,8 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
         <input type="date" required className="focus-ring h-12 rounded-lg border border-black/10 px-3 text-base" value={draft.date} onChange={(event) => {
           const date = event.target.value;
           if (endDate < date) setEndDate(date);
+          if (weeklyEndDate < date) setWeeklyEndDate(date);
+          setWeekdays((prev) => (prev.length ? prev : [dayOfWeek(date)]));
           update({
             date,
             start_datetime: draft.start_datetime ? `${date}T${draft.start_datetime.slice(11, 16)}:00+09:00` : undefined,
@@ -117,7 +147,10 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
 
       <div className="grid gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-3 lg:col-span-2">
         <label className="flex min-h-11 items-center gap-2 text-base font-semibold text-blue-950">
-          <input className="size-5" type="checkbox" checked={isMultiDay} onChange={(event) => setIsMultiDay(event.target.checked)} />
+          <input className="size-5" type="checkbox" checked={isMultiDay} onChange={(event) => {
+            setIsMultiDay(event.target.checked);
+            if (event.target.checked) setIsWeekly(false);
+          }} />
           連続日程として追加
         </label>
         {isMultiDay ? (
@@ -126,6 +159,43 @@ export function EventForm({ routes, onSubmit }: { routes: RoutePath[]; onSubmit:
             <input type="date" required className="focus-ring h-12 rounded-lg border border-blue-200 bg-white px-3 text-base" min={draft.date} value={endDate < draft.date ? draft.date : endDate} onChange={(event) => setEndDate(event.target.value)} />
             <span className="text-sm font-normal text-blue-700">{dateRange(draft.date, endDate).length}日分の予定を作成します</span>
           </label>
+        ) : null}
+      </div>
+
+      <div className="grid gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 lg:col-span-2">
+        <label className="flex min-h-11 items-center gap-2 text-base font-semibold text-emerald-950">
+          <input className="size-5" type="checkbox" checked={isWeekly} onChange={(event) => {
+            setIsWeekly(event.target.checked);
+            if (event.target.checked) {
+              setIsMultiDay(false);
+              if (!weekdays.length) setWeekdays([dayOfWeek(draft.date)]);
+            }
+          }} />
+          毎週くり返しとして追加
+        </label>
+        {isWeekly ? (
+          <div className="grid gap-3">
+            <div className="flex flex-wrap gap-2">
+              {weekdayOptions.map((day) => {
+                const selected = weekdays.includes(day.value);
+                return (
+                  <button
+                    key={day.value}
+                    type="button"
+                    className={`min-h-11 min-w-11 rounded-full px-3 text-base font-semibold ${selected ? "bg-emerald-600 text-white" : "bg-white text-emerald-900 ring-1 ring-emerald-200"}`}
+                    onClick={() => toggleWeekday(day.value)}
+                  >
+                    {day.label}
+                  </button>
+                );
+              })}
+            </div>
+            <label className="grid gap-1 text-base font-medium text-emerald-950">
+              くり返し終了日
+              <input type="date" required className="focus-ring h-12 rounded-lg border border-emerald-200 bg-white px-3 text-base" min={draft.date} value={weeklyEndDate < draft.date ? draft.date : weeklyEndDate} onChange={(event) => setWeeklyEndDate(event.target.value)} />
+              <span className="text-sm font-normal text-emerald-700">{weeklyDates(draft.date, weeklyEndDate, weekdays).length}件の予定を作成します</span>
+            </label>
+          </div>
         ) : null}
       </div>
 
