@@ -510,7 +510,7 @@ export function verifyLoginPassword(password: string) {
 
 export function updateLoginPassword(currentPassword: string, nextPassword: string) {
   if (typeof window === "undefined") return { ok: false, message: "ブラウザで操作してください。" };
-  if (!verifyLoginPassword(currentPassword)) return { ok: false, message: "現在のパスワードが違います。" };
+  if (!verifyLoginPassword(currentPassword.trim())) return { ok: false, message: "現在のパスワードが違います。初期設定のままなら 1234 を入力してください。" };
   const trimmed = nextPassword.trim();
   if (trimmed.length < 4) return { ok: false, message: "新しいパスワードは4文字以上にしてください。" };
   window.localStorage.setItem(passwordKey, trimmed);
