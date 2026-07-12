@@ -316,6 +316,12 @@ create table if not exists public.backup_jobs (
   created_by uuid references public.profiles(id)
 );
 
+create table if not exists public.family_app_states (
+  family_id text primary key,
+  state jsonb not null,
+  updated_at timestamptz default now()
+);
+
 create or replace function public.capture_event_revision()
 returns trigger language plpgsql as $$
 begin
@@ -345,6 +351,7 @@ alter table public.imports enable row level security;
 alter table public.import_files enable row level security;
 alter table public.import_candidates enable row level security;
 alter table public.backup_jobs enable row level security;
+alter table public.family_app_states enable row level security;
 
 create policy "family members can read profiles" on public.profiles for select using (auth.uid() = id);
 create policy "authenticated can read family data" on public.family_groups for select using (auth.role() = 'authenticated');

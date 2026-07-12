@@ -6,6 +6,7 @@ import type { FamilyEvent, EventDraft } from "@/types/events";
 import type { ImportCandidate, ImportRecord, BusTimetableCandidate } from "@/types/imports";
 import type { UserRole } from "@/types/permissions";
 import type { RoutePath } from "@/types/routes";
+import { pullCloudStateToLocal, queueCloudStateSave, subscribeToCloudStateUpdates } from "./cloudState";
 import { parseImportText } from "./importParser";
 import { zhText } from "./displayText";
 
@@ -480,12 +481,17 @@ export function loadState(): AppState {
   if (typeof window === "undefined") return initialState;
   try {
     const stored = window.localStorage.getItem(key);
-    if (!stored) return initialState;
+    if (!stored) {
+      void pullCloudStateToLocal(initialState, key, mergeDefaultData);
+      return initialState;
+    }
     const state = mergeDefaultData(JSON.parse(stored));
-    saveState(state);
+    window.localStorage.setItem(key, JSON.stringify(state));
+    void pullCloudStateToLocal(state, key, mergeDefaultData);
     return state;
   } catch {
     window.localStorage.removeItem(key);
+    void pullCloudStateToLocal(initialState, key, mergeDefaultData);
     return initialState;
   }
 }
@@ -493,6 +499,11 @@ export function loadState(): AppState {
 export function saveState(state: AppState) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(state));
+  queueCloudStateSave(state);
+}
+
+export function onStateSynced(callback: (state: AppState) => void) {
+  return subscribeToCloudStateUpdates(callback);
 }
 
 export function loginAs(role: UserRole) {
