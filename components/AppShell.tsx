@@ -14,7 +14,7 @@ import type { AppRoute } from "@/types/permissions";
 const nav = [
   ["/dashboard", "今日", Home],
   ["/calendar", "カレンダー", CalendarDays],
-  ["/add-event", "予定追加", PlusCircle],
+  ["/add-event", "手動入力", PlusCircle],
   ["/child-schedule", "子ども", School],
   ["/school", "学校", School],
   ["/company", "会社", Building2],

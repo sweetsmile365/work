@@ -2,20 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Home, Inbox, ListTodo, User, School } from "lucide-react";
+import { CalendarDays, Home, Inbox, ListTodo, PlusCircle, User } from "lucide-react";
 import type { UserRole } from "@/types/permissions";
 
 const parentItems = [
   { href: "/dashboard", label: "今日", icon: Home },
   { href: "/calendar", label: "カレンダー", icon: CalendarDays },
-  { href: "/child-schedule", label: "子ども", icon: School },
+  { href: "/add-event", label: "追加", icon: PlusCircle },
   { href: "/import-inbox", label: "取り込み", icon: Inbox },
   { href: "/account", label: "マイページ", icon: User }
 ];
 
 const childItems = [
   { href: "/dashboard", label: "今日", icon: Home },
-  { href: "/add-event", label: "自分の予定", icon: CalendarDays },
+  { href: "/add-event", label: "自分の予定", icon: PlusCircle },
   { href: "/child-schedule", label: "タスク", icon: ListTodo },
   { href: "/calendar", label: "カレンダー", icon: CalendarDays },
   { href: "/account", label: "マイページ", icon: User }
