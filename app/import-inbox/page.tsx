@@ -29,6 +29,60 @@ function readFileAsBase64(file: File) {
   });
 }
 
+function loadImageFromFile(file: File) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("画像を読み込めませんでした。"));
+    image.src = URL.createObjectURL(file);
+  });
+}
+
+function canvasToBase64(canvas: HTMLCanvasElement, quality = 0.92) {
+  return canvas.toDataURL("image/jpeg", quality).split(",")[1] ?? "";
+}
+
+async function createOcrImageVariants(file: File) {
+  const original = await readFileAsBase64(file);
+  const image = await loadImageFromFile(file);
+  const maxSide = 2200;
+  const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+  const width = Math.max(1, Math.round(image.naturalWidth * scale));
+  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return [original];
+
+  context.drawImage(image, 0, 0, width, height);
+  URL.revokeObjectURL(image.src);
+  const resized = canvasToBase64(canvas);
+  const source = context.getImageData(0, 0, width, height);
+  const enhanced = new ImageData(new Uint8ClampedArray(source.data), width, height);
+  const threshold = new ImageData(new Uint8ClampedArray(source.data), width, height);
+
+  for (let index = 0; index < source.data.length; index += 4) {
+    const gray = source.data[index] * 0.299 + source.data[index + 1] * 0.587 + source.data[index + 2] * 0.114;
+    const contrast = Math.max(0, Math.min(255, (gray - 128) * 1.45 + 128));
+    enhanced.data[index] = contrast;
+    enhanced.data[index + 1] = contrast;
+    enhanced.data[index + 2] = contrast;
+
+    const binary = contrast > 168 ? 255 : 0;
+    threshold.data[index] = binary;
+    threshold.data[index + 1] = binary;
+    threshold.data[index + 2] = binary;
+  }
+
+  context.putImageData(enhanced, 0, 0);
+  const enhancedBase64 = canvasToBase64(canvas);
+  context.putImageData(threshold, 0, 0);
+  const thresholdBase64 = canvasToBase64(canvas);
+
+  return Array.from(new Set([original, resized, enhancedBase64, thresholdBase64].filter(Boolean)));
+}
+
 export default function ImportInboxPage() {
   const [state, setState] = useState<AppState | null>(null);
   const [text, setText] = useState(sample);
@@ -60,13 +114,13 @@ export default function ImportInboxPage() {
     setOcrState("reading");
     setStatusMessage("写真を読み込み中...");
     try {
-      const image = await readFileAsBase64(file);
+      const imageVariants = await createOcrImageVariants(file);
       setOcrState("running");
       setStatusMessage("OCR 実行中...");
       const res = await fetch("/api/ocr/image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image, languageHints: ["ja", "en"] })
+        body: JSON.stringify({ imageVariants, languageHints: ["ja", "zh", "zh-Hans", "en"] })
       });
       const data = await res.json();
       if (!res.ok || data.status === "failed") throw new Error(data.error ?? "OCR に失敗しました。");
