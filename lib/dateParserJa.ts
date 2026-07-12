@@ -1,4 +1,5 @@
 import { classifyJapaneseEvent } from "./eventClassifierJa";
+import { zhText } from "./displayText";
 import type { ImportCandidate } from "@/types/imports";
 
 const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
@@ -52,15 +53,16 @@ export function parse_text_to_events_japanese(rawText: string, sourceType = "pas
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line, index) => {
-      const parsed = parseJapaneseDate(line, fiscalYear);
-      const classified = classifyJapaneseEvent(`${sourceType} ${line}`);
+      const normalizedLine = zhText(line);
+      const parsed = parseJapaneseDate(normalizedLine, fiscalYear);
+      const classified = classifyJapaneseEvent(`${sourceType} ${normalizedLine}`);
       const title = line.replace(/\d{4}年|\d{1,2}月|\d{1,2}日|[（）()日月火水木金土/.\sR令和年]/g, "").trim() || line;
       return {
         id: `candidate-${Date.now()}-${index}`,
         import_id: "local",
         date: "date" in parsed ? parsed.date : undefined,
         title,
-        raw_text_jp: line,
+        raw_text_jp: normalizedLine,
         event_type: classified.event_type,
         calendar_type: classified.calendar_type,
         confidence: parsed.status === "ok" ? 0.86 : 0.62,

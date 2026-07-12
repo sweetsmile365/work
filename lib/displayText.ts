@@ -56,7 +56,19 @@ const replacements: Record<string, string> = {
   "建议日": "奨励日"
 };
 
+const ocrCorrections: Record<string, string> = {
+  "若茗渓学": "茗渓学園",
+  "若茗渓学園": "茗渓学園",
+  "茗渓学": "茗渓学園",
+  "茗溪学": "茗渓学園",
+  "茗溪学園": "茗渓学園",
+  "若溪学": "茗渓学園",
+  "若溪学園": "茗渓学園",
+  "茗渓学院": "茗渓学園"
+};
+
 export function zhText(value?: string | null) {
   if (!value) return "";
-  return Object.entries(replacements).reduce((text, [from, to]) => text.replaceAll(from, to), value);
+  const corrected = Object.entries(ocrCorrections).reduce((text, [from, to]) => text.replaceAll(from, to), value);
+  return Object.entries(replacements).reduce((text, [from, to]) => text.replaceAll(from, to), corrected);
 }
