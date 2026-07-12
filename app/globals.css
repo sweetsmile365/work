@@ -9,8 +9,20 @@
 
 body {
   margin: 0;
-  background: #fbfaf7;
+  background:
+    linear-gradient(rgba(251, 250, 247, 0.78), rgba(251, 250, 247, 0.82)),
+    url("/feng-shui-background.png") center / cover fixed no-repeat,
+    #fbfaf7;
   color: #17212b;
+}
+
+@media (max-width: 767px) {
+  body {
+    background:
+      linear-gradient(rgba(251, 250, 247, 0.84), rgba(251, 250, 247, 0.88)),
+      url("/feng-shui-background.png") center top / auto 100vh fixed no-repeat,
+      #fbfaf7;
+  }
 }
 
 button, input, select, textarea {
