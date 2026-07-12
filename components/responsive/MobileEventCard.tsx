@@ -3,6 +3,7 @@
 import { Clock, MapPin, Route, UserRound } from "lucide-react";
 import type { FamilyEvent } from "@/types/events";
 import { zhText } from "@/lib/displayText";
+import { transportOwnerLabel } from "@/lib/transport";
 
 function timeLabel(event: FamilyEvent) {
   if (event.all_day) return "終日";
@@ -42,7 +43,7 @@ export function MobileEventCard({ event, onClick }: { event: FamilyEvent; onClic
         {event.transport_owner ? (
           <span className="flex items-center gap-2">
             <UserRound size={18} />
-            送迎：{event.transport_owner}
+            送迎：{transportOwnerLabel(event.transport_owner)}
           </span>
         ) : null}
         {event.route_id || event.bus_timetable_id ? (
