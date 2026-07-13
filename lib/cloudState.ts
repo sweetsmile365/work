@@ -56,7 +56,7 @@ export async function saveCloudStateNow(state: AppState): Promise<CloudSyncResul
   if (typeof window === "undefined") return "failed";
   try {
     const response = await fetch("/api/sync/state", {
-      method: "PUT",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ state: sharedState(state) })
     });

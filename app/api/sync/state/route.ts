@@ -31,7 +31,7 @@ export async function GET() {
   return NextResponse.json({ state: data?.state ?? null, updated_at: data?.updated_at ?? null });
 }
 
-export async function PUT(request: Request) {
+async function saveState(request: Request) {
   const client = getServerClient();
   if (!client) {
     return NextResponse.json({ error: "Supabase sync is not configured." }, { status: 503 });
@@ -53,4 +53,12 @@ export async function PUT(request: Request) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+export async function POST(request: Request) {
+  return saveState(request);
+}
+
+export async function PUT(request: Request) {
+  return saveState(request);
 }
