@@ -45,10 +45,11 @@ export function queueCloudStateSave(state: AppState) {
 export async function pullCloudStateToLocal(
   localState: AppState,
   storageKey: string,
-  normalize: (state: AppState) => AppState
+  normalize: (state: AppState) => AppState,
+  options?: { force?: boolean }
 ) {
   if (typeof window === "undefined" || pullInFlight) return;
-  if (Date.now() - lastPullAt < 15000) return;
+  if (!options?.force && Date.now() - lastPullAt < 15000) return;
 
   pullInFlight = true;
   lastPullAt = Date.now();

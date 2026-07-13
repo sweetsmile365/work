@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { CloudSyncRegister } from "@/components/CloudSyncRegister";
+import { CloudRefreshButton } from "@/components/CloudRefreshButton";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ServiceWorkerRegister />
         <CloudSyncRegister />
+        <CloudRefreshButton />
         {children}
       </body>
     </html>

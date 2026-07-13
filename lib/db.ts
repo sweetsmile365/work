@@ -496,6 +496,18 @@ export function loadState(): AppState {
   }
 }
 
+export async function refreshCloudStateNow() {
+  if (typeof window === "undefined") return;
+  let state = initialState;
+  try {
+    const stored = window.localStorage.getItem(key);
+    state = stored ? mergeDefaultData(JSON.parse(stored)) : initialState;
+  } catch {
+    state = initialState;
+  }
+  await pullCloudStateToLocal(state, key, mergeDefaultData, { force: true });
+}
+
 export function saveState(state: AppState) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(state));
