@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { ChildScheduleCard } from "@/components/ChildScheduleCard";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -41,6 +42,9 @@ export default function ChildSchedulePage() {
 
   const mobileContent = (
     <div className="space-y-5">
+      <Link href="/timetable" className="block rounded-2xl border border-blue-100 bg-blue-50 p-4 text-base font-bold text-blue-800">
+        学校時間割を見る・編集する
+      </Link>
       <section className="space-y-3">
         <h2 className="text-xl font-bold">今日の子どもの予定</h2>
         {todayEvents.length ? todayEvents.map((event) => <MobileEventCard key={event.id} event={event} />) : <div className="rounded-xl bg-white p-4 text-base text-slate-500">今日の予定はありません。</div>}

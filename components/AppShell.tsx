@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Archive, AlertTriangle, Building2, Bus, CalendarDays, Home, Inbox, LogOut, Map, PlusCircle, School, Settings, ShieldCheck, Trash2, User } from "lucide-react";
+import { Archive, AlertTriangle, BookOpen, Building2, Bus, CalendarDays, Home, Inbox, LogOut, Map, PlusCircle, School, Settings, ShieldCheck, Trash2, User } from "lucide-react";
 import { logout, loadState, type FamilyUser } from "@/lib/db";
 import { canAccessRoute } from "@/lib/permissions";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
@@ -12,6 +12,7 @@ import { TabletLayout } from "@/components/responsive/TabletLayout";
 import type { AppRoute } from "@/types/permissions";
 
 const nav = [
+  ["/timetable", "時間割", BookOpen],
   ["/dashboard", "今日", Home],
   ["/calendar", "カレンダー", CalendarDays],
   ["/add-event", "手動入力", PlusCircle],

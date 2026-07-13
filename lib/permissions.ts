@@ -7,6 +7,7 @@ const routeRoles: Record<AppRoute, UserRole[]> = {
   "/calendar": ["admin", "parent", "child_editor"],
   "/add-event": ["admin", "parent", "child_editor"],
   "/child-schedule": ["admin", "parent", "child_editor"],
+  "/timetable": ["admin", "parent", "child_editor"],
   "/account": ["admin", "parent", "child_editor"],
   "/settings": ["admin"],
   "/settings/account": ["admin"],

@@ -6,6 +6,7 @@ export type AppRoute =
   | "/add-event"
   | "/import-inbox"
   | "/child-schedule"
+  | "/timetable"
   | "/school"
   | "/company"
   | "/holidays"

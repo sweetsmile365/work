@@ -6,6 +6,7 @@ import type { FamilyEvent, EventDraft } from "@/types/events";
 import type { ImportCandidate, ImportRecord, BusTimetableCandidate } from "@/types/imports";
 import type { UserRole } from "@/types/permissions";
 import type { RoutePath } from "@/types/routes";
+import type { SchoolTimetable } from "@/types/timetable";
 import { pullCloudStateToLocal, queueCloudStateSave, subscribeToCloudStateUpdates } from "./cloudState";
 import { parseImportText } from "./importParser";
 import { zhText } from "./displayText";
@@ -32,6 +33,7 @@ export type AppState = {
   importCandidates: ImportCandidate[];
   busCandidates: BusTimetableCandidate[];
   tasks: ChildTask[];
+  schoolTimetable: SchoolTimetable;
 };
 
 const today = new Date();
@@ -394,6 +396,22 @@ export const defaultChecklists = {
   chinese: ["中国語教材", "宿題ノート", "作文", "ノート", "朗読資料"]
 };
 
+const defaultSchoolTimetable: SchoolTimetable = {
+  gradeClass: "1年E組",
+  dayTimes: ["9:00-9:50", "10:00-10:50", "11:00-11:50", "12:45-13:35", "13:45-14:35", "14:45-15:35", "15:40-15:55"],
+  weekdays: {
+    mon: [{ subject: "数学" }, { subject: "国語" }, { subject: "英語" }, { subject: "生物" }, { subject: "体育" }, { subject: "道徳" }, { subject: "LHR" }],
+    tue: [{ subject: "体育" }, { subject: "英語" }, { subject: "美術" }, { subject: "美術" }, { subject: "化学" }, { subject: "地理" }, { subject: "数学" }],
+    wed: [{ subject: "国語" }, { subject: "数学" }, { subject: "総合" }, { subject: "英語" }, { subject: "数学" }, { subject: "音楽" }, { subject: "歴史" }],
+    thu: [{ subject: "英語" }, { subject: "英TT" }, { subject: "体育" }, { subject: "国語" }, { subject: "音楽" }, { subject: "化学" }, { subject: "数学" }],
+    fri: [{ subject: "家庭" }, { subject: "家庭" }, { subject: "生物" }, { subject: "歴史" }, { subject: "総合" }, { subject: "国語" }, { subject: "地理" }]
+  },
+  afterSchoolNotes: {
+    tue: "新聞（4C）",
+    fri: "図書館 / 委員会"
+  }
+};
+
 const initialState: AppState = {
   currentUser: null,
   users,
@@ -425,7 +443,8 @@ const initialState: AppState = {
   tasks: [
     { id: "t1", title: "英語宿題", task_type: "homework", due_date: isoDate(2), status: "todo" },
     { id: "t2", title: "バドミントン 弁当確認", task_type: "bring_item", due_date: isoDate(1), status: "todo" }
-  ]
+  ],
+  schoolTimetable: defaultSchoolTimetable
 };
 
 const key = "family-schedule-hub-state";
@@ -473,7 +492,8 @@ function mergeDefaultData(state: AppState): AppState {
       ...task,
       title: zhText(task.title),
       note: zhText(task.note)
-    }))
+    })),
+    schoolTimetable: state.schoolTimetable ?? defaultSchoolTimetable
   };
 }
 
@@ -512,6 +532,12 @@ export function saveState(state: AppState) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(state));
   queueCloudStateSave(state);
+}
+
+export function saveSchoolTimetable(schoolTimetable: SchoolTimetable) {
+  const next = { ...loadState(), schoolTimetable };
+  saveState(next);
+  return next;
 }
 
 export function onStateSynced(callback: (state: AppState) => void) {
