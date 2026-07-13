@@ -7,7 +7,7 @@ import type { ImportCandidate, ImportRecord, BusTimetableCandidate } from "@/typ
 import type { UserRole } from "@/types/permissions";
 import type { RoutePath } from "@/types/routes";
 import type { SchoolTimetable } from "@/types/timetable";
-import { pullCloudStateToLocal, queueCloudStateSave, subscribeToCloudStateUpdates } from "./cloudState";
+import { pullCloudStateToLocal, queueCloudStateSave, subscribeToCloudStateUpdates, syncCloudStateNow } from "./cloudState";
 import { parseImportText } from "./importParser";
 import { zhText } from "./displayText";
 
@@ -34,6 +34,7 @@ export type AppState = {
   busCandidates: BusTimetableCandidate[];
   tasks: ChildTask[];
   schoolTimetable: SchoolTimetable;
+  cloud_updated_at?: string;
 };
 
 const today = new Date();
@@ -525,13 +526,14 @@ export async function refreshCloudStateNow() {
   } catch {
     state = initialState;
   }
-  await pullCloudStateToLocal(state, key, mergeDefaultData, { force: true });
+  return syncCloudStateNow(state, key, mergeDefaultData);
 }
 
 export function saveState(state: AppState) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(key, JSON.stringify(state));
-  queueCloudStateSave(state);
+  const next = { ...state, cloud_updated_at: new Date().toISOString() };
+  window.localStorage.setItem(key, JSON.stringify(next));
+  queueCloudStateSave(next);
 }
 
 export function saveSchoolTimetable(schoolTimetable: SchoolTimetable) {

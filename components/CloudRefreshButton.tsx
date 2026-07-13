@@ -4,8 +4,9 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { refreshCloudStateNow } from "@/lib/db";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
+import type { CloudSyncResult } from "@/lib/cloudState";
 
-type RefreshStatus = "idle" | "loading" | "done" | "error";
+type RefreshStatus = "idle" | "loading" | "done" | "uploaded" | "downloaded" | "error";
 
 export function CloudRefreshButton() {
   const { isMobile } = useResponsiveLayout();
@@ -15,8 +16,8 @@ export function CloudRefreshButton() {
     if (status === "loading") return;
     setStatus("loading");
     try {
-      await refreshCloudStateNow();
-      setStatus("done");
+      const result = (await refreshCloudStateNow()) as CloudSyncResult | undefined;
+      setStatus(result === "uploaded" ? "uploaded" : result === "downloaded" ? "downloaded" : result === "failed" ? "error" : "done");
       window.setTimeout(() => setStatus("idle"), 1800);
     } catch {
       setStatus("error");
@@ -24,18 +25,22 @@ export function CloudRefreshButton() {
     }
   }
 
-  const label = status === "loading" ? "更新中" : status === "done" ? "更新しました" : status === "error" ? "更新できません" : "更新";
+  const label =
+    status === "loading" ? "同期中" :
+    status === "uploaded" ? "アップロード済み" :
+    status === "downloaded" ? "取得しました" :
+    status === "done" ? "最新です" :
+    status === "error" ? "同期できません" :
+    "同期";
 
   return (
     <button
       type="button"
-      aria-label="クラウドから最新データを更新"
+      aria-label="クラウドと同期"
       onClick={handleRefresh}
       disabled={status === "loading"}
       className={`fixed z-50 flex min-h-11 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/95 px-4 text-sm font-semibold text-slate-800 shadow-lg shadow-slate-900/10 backdrop-blur transition hover:bg-slate-50 disabled:opacity-70 ${
-        isMobile
-          ? "bottom-[calc(88px+env(safe-area-inset-bottom))] right-4"
-          : "right-5 top-5"
+        isMobile ? "bottom-[calc(88px+env(safe-area-inset-bottom))] right-4" : "right-5 top-5"
       }`}
     >
       <RefreshCw size={18} className={status === "loading" ? "animate-spin" : ""} />
