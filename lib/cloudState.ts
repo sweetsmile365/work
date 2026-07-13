@@ -9,8 +9,24 @@ let lastPullAt = 0;
 
 export type CloudSyncResult = "uploaded" | "downloaded" | "fresh" | "empty" | "failed";
 
+async function waitForIdle(maxWaitMs = 3000) {
+  const startedAt = Date.now();
+  while (pullInFlight && Date.now() - startedAt < maxWaitMs) {
+    await new Promise((resolve) => window.setTimeout(resolve, 120));
+  }
+  return !pullInFlight;
+}
+
 function sharedState(state: AppState): AppState {
-  return { ...state, currentUser: null, cloud_updated_at: state.cloud_updated_at ?? new Date().toISOString() };
+  return {
+    ...state,
+    currentUser: null,
+    cloud_updated_at: state.cloud_updated_at ?? new Date().toISOString(),
+    users: state.users.map((user) => ({
+      ...user,
+      avatar: typeof user.avatar === "string" && user.avatar.startsWith("data:image") && user.avatar.length > 250_000 ? "👤" : user.avatar
+    }))
+  };
 }
 
 function dispatchStateUpdate(state: AppState) {
@@ -97,7 +113,9 @@ export async function syncCloudStateNow(
   storageKey: string,
   normalize: (state: AppState) => AppState
 ): Promise<CloudSyncResult> {
-  if (typeof window === "undefined" || pullInFlight) return "failed";
+  if (typeof window === "undefined") return "failed";
+  const ready = await waitForIdle();
+  if (!ready) return "failed";
   pullInFlight = true;
   lastPullAt = Date.now();
   try {
