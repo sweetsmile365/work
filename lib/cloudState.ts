@@ -86,7 +86,7 @@ export async function pullCloudStateToLocal(
   localState: AppState,
   storageKey: string,
   normalize: (state: AppState) => AppState,
-  options?: { force?: boolean }
+  options?: { force?: boolean; reload?: boolean }
 ): Promise<CloudSyncResult> {
   if (typeof window === "undefined" || pullInFlight) return "failed";
   if (!options?.force && Date.now() - lastPullAt < 15000) return "fresh";
@@ -110,7 +110,7 @@ export async function pullCloudStateToLocal(
 
     window.localStorage.setItem(storageKey, nextJson);
     dispatchStateUpdate(nextState);
-    window.location.reload();
+    if (options?.reload) window.location.reload();
     return "downloaded";
   } catch (error) {
     console.warn("Cloud sync load failed", error);
