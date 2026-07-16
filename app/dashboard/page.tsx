@@ -224,11 +224,13 @@ export default function DashboardPage() {
     };
     const next = { ...state, events: exists ? state.events.map((event) => (event.id === nextEvent.id ? nextEvent : event)) : [nextEvent, ...state.events] };
     persist(next);
-    setEditingEvent(nextEvent);
     setSelectedDate(nextEvent.date);
     setSaveStatus("saved");
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setSaveStatus("idle"), 1500);
+    timerRef.current = setTimeout(() => {
+      setEditingEvent(null);
+      setSaveStatus("idle");
+    }, 700);
   }
 
   function removeEvent(id: string) {
