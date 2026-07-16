@@ -30,7 +30,7 @@ export function CloudRefreshButton() {
     status === "uploaded" ? "アップロード済み" :
     status === "downloaded" ? "取得しました" :
     status === "done" ? "最新です" :
-    status === "error" ? "同期できません" :
+    status === "error" ? "同期不可" :
     "同期";
 
   return (
@@ -40,7 +40,7 @@ export function CloudRefreshButton() {
       onClick={handleRefresh}
       disabled={status === "loading"}
       className={`fixed z-50 flex min-h-11 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white/95 px-4 text-sm font-semibold text-slate-800 shadow-lg shadow-slate-900/10 backdrop-blur transition hover:bg-slate-50 disabled:opacity-70 ${
-        isMobile ? "bottom-[calc(88px+env(safe-area-inset-bottom))] right-4" : "right-5 top-5"
+        isMobile ? "bottom-[calc(88px+env(safe-area-inset-bottom))] right-4" : "bottom-5 right-5"
       }`}
     >
       <RefreshCw size={18} className={status === "loading" ? "animate-spin" : ""} />

@@ -29,6 +29,17 @@ function sharedState(state: AppState): AppState {
   };
 }
 
+function isEmptyCloudState(state: AppState | null | undefined) {
+  if (!state) return true;
+  return (
+    (!Array.isArray(state.users) || state.users.length === 0) &&
+    (!Array.isArray(state.events) || state.events.length === 0) &&
+    (!Array.isArray(state.tasks) || state.tasks.length === 0) &&
+    (!Array.isArray(state.importCandidates) || state.importCandidates.length === 0) &&
+    (!state.schoolTimetable?.gradeClass)
+  );
+}
+
 function dispatchStateUpdate(state: AppState) {
   window.dispatchEvent(new CustomEvent<AppState>(syncEventName, { detail: state }));
 }
@@ -88,6 +99,7 @@ export async function pullCloudStateToLocal(
 
     const payload = await response.json();
     if (!payload?.state) return "empty";
+    if (isEmptyCloudState(payload.state as AppState)) return "empty";
 
     const nextState = normalize({
       ...(payload.state as AppState),
@@ -126,7 +138,7 @@ export async function syncCloudStateNow(
     const localTime = Date.parse(localState.cloud_updated_at ?? "1970-01-01T00:00:00.000Z");
     const cloudRawState = payload?.state as AppState | null;
 
-    if (!cloudRawState) {
+    if (!cloudRawState || isEmptyCloudState(cloudRawState)) {
       return await saveCloudStateNow(localState);
     }
 

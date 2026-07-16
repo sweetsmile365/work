@@ -455,6 +455,15 @@ const defaultPassword = "1234";
 function mergeDefaultData(state: AppState): AppState {
   const existingEventIds = new Set(state.events.map((event) => event.id));
   const defaultUserById = new Map(users.map((user) => [user.id, user]));
+  const existingUsers = Array.isArray(state.users) ? state.users : [];
+  const mergedUsers = [
+    ...users.map((defaultUser) => ({
+      ...defaultUser,
+      ...(existingUsers.find((user) => user.id === defaultUser.id) ?? {}),
+      avatar: existingUsers.find((user) => user.id === defaultUser.id)?.avatar ?? defaultUser.avatar
+    })),
+    ...existingUsers.filter((user) => !defaultUserById.has(user.id))
+  ];
   const defaultBadmintonEvents = createBadmintonClubCalendarEvents();
   const defaultBadmintonById = new Map(defaultBadmintonEvents.map((event) => [event.id, event]));
   const missingCompanyEvents = createDadCompanyCalendarEvents().filter((event) => !existingEventIds.has(event.id));
@@ -463,10 +472,7 @@ function mergeDefaultData(state: AppState): AppState {
   const missingMomEvents = createMomHandwrittenCalendarEvents().filter((event) => !existingEventIds.has(event.id));
   return {
     ...state,
-    users: state.users.map((user) => ({
-      ...user,
-      avatar: user.avatar ?? defaultUserById.get(user.id)?.avatar
-    })),
+    users: mergedUsers,
     events: [...missingCompanyEvents, ...missingSchoolEvents, ...missingBadmintonEvents, ...missingMomEvents, ...state.events].map((event) => ({
       ...event,
       start_datetime: defaultBadmintonById.get(event.id)?.start_datetime ?? event.start_datetime,

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, LockKeyhole } from "lucide-react";
-import { hasCustomLoginPassword, loginAs, verifyLoginPassword } from "@/lib/db";
+import { loginAs, verifyLoginPassword } from "@/lib/db";
 import type { UserRole } from "@/types/permissions";
 
 const roles: { role: UserRole; label: string; note: string }[] = [
@@ -60,7 +60,6 @@ export default function LoginPage() {
         </label>
 
         {error ? <div className="mb-3 rounded-lg bg-red-50 p-3 text-base font-medium text-red-700">{error}</div> : null}
-        {!hasCustomLoginPassword() ? <div className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">初期パスワードは 1234 です。ログイン後に設定から変更してください。</div> : null}
 
         <div className="grid gap-3">
           {roles.map((item) => (
