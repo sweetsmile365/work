@@ -258,40 +258,40 @@ const badmintonClubEvents: Array<{
   { date: "2026-07-01", title: "バドミントン部 練習", start: "17:00", end: "17:45", location: "学校体育館" },
   { date: "2026-07-02", title: "バドミントン部 OFF" },
   { date: "2026-07-03", title: "バドミントン部 練習 2面", location: "学校体育館" },
-  { date: "2026-07-04", title: "国体予選（長谷川）・若溪午後", event_type: "badminton_tournament", location: "若溪", need_transport: true },
-  { date: "2026-07-05", title: "国体予選（長谷川）・若溪午前", event_type: "badminton_tournament", location: "若溪", need_transport: true },
+  { date: "2026-07-04", title: "国体予選（長谷川）・茗渓学園 午後", event_type: "badminton_tournament", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-05", title: "国体予選（長谷川）・茗渓学園 午前", event_type: "badminton_tournament", location: "茗渓学園", need_transport: true },
   { date: "2026-07-06", title: "バドミントン部 練習 2面", location: "学校体育館" },
   { date: "2026-07-07", title: "バドミントン部 練習 4面", location: "学校体育館" },
   { date: "2026-07-08", title: "バドミントン部 練習", start: "17:00", end: "17:45", location: "学校体育館" },
   { date: "2026-07-09", title: "バドミントン部 OFF" },
   { date: "2026-07-10", title: "バドミントン部 練習 2面", location: "学校体育館" },
-  { date: "2026-07-11", title: "バドミントン部 若溪午後（県大会出場者）", location: "若溪", need_transport: true },
-  { date: "2026-07-12", title: "バドミントン部 若溪午後（コーチ）", location: "若溪", need_transport: true },
-  { date: "2026-07-12", title: "雨天時 練習 12:00-15:00", start: "12:00", end: "15:00", location: "若溪" },
+  { date: "2026-07-11", title: "バドミントン部 茗渓学園 午後（県大会出場者）", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-12", title: "バドミントン部 茗渓学園 午後（コーチ）", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-12", title: "雨天時 練習 12:00-15:00", start: "12:00", end: "15:00", location: "茗渓学園" },
   { date: "2026-07-13", title: "バドミントン部 練習 2面", location: "学校体育館" },
   { date: "2026-07-14", title: "バドミントン部 練習 4面", location: "学校体育館" },
   { date: "2026-07-15", title: "バドミントン部 練習", start: "17:00", end: "17:45", location: "学校体育館" },
   { date: "2026-07-16", title: "バドミントン部 OFF" },
   { date: "2026-07-17", title: "バドミントン部 練習 2面", location: "学校体育館" },
-  { date: "2026-07-18", title: "バドミントン部 若溪午後", location: "若溪", need_transport: true },
-  { date: "2026-07-19", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
-  { date: "2026-07-20", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
-  { date: "2026-07-21", title: "バドミントン部 若溪午後", location: "若溪", need_transport: true },
+  { date: "2026-07-18", title: "バドミントン部 茗渓学園 午後", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-19", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-20", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-21", title: "バドミントン部 茗渓学園 午後", location: "茗渓学園", need_transport: true },
   { date: "2026-07-22", title: "県総体（アダストリア）", event_type: "badminton_tournament", location: "アダストリア", need_transport: true },
   { date: "2026-07-23", title: "県総体（アダストリア）", event_type: "badminton_tournament", location: "アダストリア", need_transport: true },
   { date: "2026-07-24", title: "バドミントン部 OFF" },
   { date: "2026-07-25", title: "バドミントン部 OFF" },
   { date: "2026-07-26", title: "バドミントン部 1日練習", location: "学校体育館", need_transport: true },
   { date: "2026-07-27", title: "バドミントン部 1日練習", location: "学校体育館", need_transport: true },
-  { date: "2026-07-28", title: "バドミントン部 若溪午後", location: "若溪", need_transport: true },
-  { date: "2026-07-29", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
-  { date: "2026-07-30", title: "バドミントン部 若溪午後", location: "若溪", need_transport: true },
-  { date: "2026-07-31", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
-  { date: "2026-08-01", title: "バドミントン部 若溪午後 4面", location: "若溪", need_transport: true },
+  { date: "2026-07-28", title: "バドミントン部 茗渓学園 午後", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-29", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-30", title: "バドミントン部 茗渓学園 午後", location: "茗渓学園", need_transport: true },
+  { date: "2026-07-31", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
+  { date: "2026-08-01", title: "バドミントン部 茗渓学園 午後 4面", location: "茗渓学園", need_transport: true },
   { date: "2026-08-02", title: "スウィングカップ団体（石岡）", event_type: "badminton_tournament", location: "石岡", need_transport: true, pickup_required: true },
-  { date: "2026-08-03", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
-  { date: "2026-08-04", title: "バドミントン部 若溪午後", location: "若溪", need_transport: true },
-  { date: "2026-08-05", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
+  { date: "2026-08-03", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
+  { date: "2026-08-04", title: "バドミントン部 茗渓学園 午後", location: "茗渓学園", need_transport: true },
+  { date: "2026-08-05", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
   { date: "2026-08-06", title: "関東大会（アダストリア）", event_type: "badminton_tournament", location: "アダストリア", need_transport: true },
   { date: "2026-08-07", title: "関東大会（アダストリア）", event_type: "badminton_tournament", location: "アダストリア", need_transport: true },
   { date: "2026-08-08", title: "関東大会（アダストリア）", event_type: "badminton_tournament", location: "アダストリア", need_transport: true },
@@ -300,18 +300,18 @@ const badmintonClubEvents: Array<{
   { date: "2026-08-11", title: "バドミントン部 OFF" },
   { date: "2026-08-12", title: "バドミントン部 OFF" },
   { date: "2026-08-13", title: "バドミントン部 OFF" },
-  { date: "2026-08-14", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
-  { date: "2026-08-15", title: "コーチ1養成・若溪午後", location: "若溪", need_transport: true },
-  { date: "2026-08-16", title: "コーチ1養成・若溪午後", location: "若溪", need_transport: true },
-  { date: "2026-08-17", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
-  { date: "2026-08-18", title: "JOC全日本ジュニア県予選・若溪午後", event_type: "badminton_tournament", location: "若溪", need_transport: true },
-  { date: "2026-08-19", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
+  { date: "2026-08-14", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
+  { date: "2026-08-15", title: "コーチ1養成・茗渓学園 午後", location: "茗渓学園", need_transport: true },
+  { date: "2026-08-16", title: "コーチ1養成・茗渓学園 午後", location: "茗渓学園", need_transport: true },
+  { date: "2026-08-17", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
+  { date: "2026-08-18", title: "JOC全日本ジュニア県予選・茗渓学園 午後", event_type: "badminton_tournament", location: "茗渓学園", need_transport: true },
+  { date: "2026-08-19", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
   { date: "2026-08-20", title: "全中（米子産業体育館）", event_type: "badminton_tournament", location: "米子産業体育館", need_transport: true },
-  { date: "2026-08-20", title: "バドミントン部 若溪午後", location: "若溪", need_transport: true },
+  { date: "2026-08-20", title: "バドミントン部 茗渓学園 午後", location: "茗渓学園", need_transport: true },
   { date: "2026-08-21", title: "全中（米子産業体育館）", event_type: "badminton_tournament", location: "米子産業体育館", need_transport: true },
-  { date: "2026-08-21", title: "バドミントン部 若溪午前", location: "若溪", need_transport: true },
+  { date: "2026-08-21", title: "バドミントン部 茗渓学園 午前", location: "茗渓学園", need_transport: true },
   { date: "2026-08-22", title: "全中（米子産業体育館）", event_type: "badminton_tournament", location: "米子産業体育館", need_transport: true },
-  { date: "2026-08-22", title: "バドミントン部 若溪午後", location: "若溪", need_transport: true },
+  { date: "2026-08-22", title: "バドミントン部 茗渓学園 午後", location: "茗渓学園", need_transport: true },
   { date: "2026-08-23", title: "全中（米子産業体育館）", event_type: "badminton_tournament", location: "米子産業体育館", need_transport: true },
   { date: "2026-08-23", title: "スウィングカップ個人（たつのこ）", event_type: "badminton_tournament", location: "たつのこ", need_transport: true, pickup_required: true },
   { date: "2026-08-28", title: "バドミントン部 諸活動停止" },
@@ -453,7 +453,17 @@ const passwordKey = "family-schedule-hub-login-password";
 const defaultPassword = "1234";
 
 function mergeDefaultData(state: AppState): AppState {
+  const eventKey = (event: FamilyEvent) => [
+    event.date,
+    zhText(event.title),
+    event.event_type,
+    event.calendar_type,
+    event.start_datetime ?? "",
+    event.end_datetime ?? "",
+    event.location ? zhText(event.location) : ""
+  ].join("|");
   const existingEventIds = new Set(state.events.map((event) => event.id));
+  const existingEventKeys = new Set(state.events.map(eventKey));
   const defaultUserById = new Map(users.map((user) => [user.id, user]));
   const existingUsers = Array.isArray(state.users) ? state.users : [];
   const mergedUsers = [
@@ -466,21 +476,31 @@ function mergeDefaultData(state: AppState): AppState {
   ];
   const defaultBadmintonEvents = createBadmintonClubCalendarEvents();
   const defaultBadmintonById = new Map(defaultBadmintonEvents.map((event) => [event.id, event]));
-  const missingCompanyEvents = createDadCompanyCalendarEvents().filter((event) => !existingEventIds.has(event.id));
-  const missingSchoolEvents = createSchoolYearCalendarEvents().filter((event) => !existingEventIds.has(event.id));
-  const missingBadmintonEvents = defaultBadmintonEvents.filter((event) => !existingEventIds.has(event.id));
-  const missingMomEvents = createMomHandwrittenCalendarEvents().filter((event) => !existingEventIds.has(event.id));
-  return {
-    ...state,
-    users: mergedUsers,
-    events: [...missingCompanyEvents, ...missingSchoolEvents, ...missingBadmintonEvents, ...missingMomEvents, ...state.events].map((event) => ({
+  const isMissingEvent = (event: FamilyEvent) => !existingEventIds.has(event.id) && !existingEventKeys.has(eventKey(event));
+  const missingCompanyEvents = createDadCompanyCalendarEvents().filter(isMissingEvent);
+  const missingSchoolEvents = createSchoolYearCalendarEvents().filter(isMissingEvent);
+  const missingBadmintonEvents = defaultBadmintonEvents.filter(isMissingEvent);
+  const missingMomEvents = createMomHandwrittenCalendarEvents().filter(isMissingEvent);
+  const seenMergedEventKeys = new Set<string>();
+  const mergedEvents = [...missingCompanyEvents, ...missingSchoolEvents, ...missingBadmintonEvents, ...missingMomEvents, ...state.events]
+    .map((event) => ({
       ...event,
       start_datetime: defaultBadmintonById.get(event.id)?.start_datetime ?? event.start_datetime,
       end_datetime: defaultBadmintonById.get(event.id)?.end_datetime ?? event.end_datetime,
       all_day: defaultBadmintonById.has(event.id) ? defaultBadmintonById.get(event.id)?.all_day : event.all_day,
       title: zhText(event.title),
       location: zhText(event.location)
-    })),
+    }))
+    .filter((event) => {
+      const key = eventKey(event);
+      if (seenMergedEventKeys.has(key)) return false;
+      seenMergedEventKeys.add(key);
+      return true;
+    });
+  return {
+    ...state,
+    users: mergedUsers,
+    events: mergedEvents,
     routes: state.routes.map((route) => ({
       ...route,
       name: zhText(route.name),
