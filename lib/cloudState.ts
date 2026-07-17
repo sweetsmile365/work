@@ -1,6 +1,7 @@
 "use client";
 
 import type { AppState } from "./db";
+import { dedupeEvents } from "./eventDedupe";
 
 const syncEventName = "family-state-updated";
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -21,6 +22,7 @@ function sharedState(state: AppState): AppState {
   return {
     ...state,
     currentUser: null,
+    events: dedupeEvents(state.events),
     cloud_updated_at: state.cloud_updated_at ?? new Date().toISOString(),
     users: state.users.map((user) => ({
       ...user,

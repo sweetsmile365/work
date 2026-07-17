@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { dedupeEvents } from "@/lib/eventDedupe";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -41,10 +42,14 @@ async function saveState(request: Request) {
   if (!body?.state) {
     return NextResponse.json({ error: "Missing state." }, { status: 400 });
   }
+  const state = {
+    ...body.state,
+    events: Array.isArray(body.state.events) ? dedupeEvents(body.state.events) : []
+  };
 
   const { error } = await client.from("family_app_states").upsert({
     family_id: familyId,
-    state: body.state,
+    state,
     updated_at: new Date().toISOString()
   });
 

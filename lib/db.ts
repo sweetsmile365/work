@@ -10,6 +10,7 @@ import type { SchoolTimetable } from "@/types/timetable";
 import { pullCloudStateToLocal, queueCloudStateSave, subscribeToCloudStateUpdates, syncCloudStateNow } from "./cloudState";
 import { parseImportText } from "./importParser";
 import { zhText } from "./displayText";
+import { dedupeEvents, eventDedupeKey } from "./eventDedupe";
 
 export type FamilyUser = {
   id: string;
@@ -453,17 +454,8 @@ const passwordKey = "family-schedule-hub-login-password";
 const defaultPassword = "1234";
 
 function mergeDefaultData(state: AppState): AppState {
-  const eventKey = (event: FamilyEvent) => [
-    event.date,
-    zhText(event.title),
-    event.event_type,
-    event.calendar_type,
-    event.start_datetime ?? "",
-    event.end_datetime ?? "",
-    event.location ? zhText(event.location) : ""
-  ].join("|");
   const existingEventIds = new Set(state.events.map((event) => event.id));
-  const existingEventKeys = new Set(state.events.map(eventKey));
+  const existingEventKeys = new Set(state.events.map(eventDedupeKey));
   const defaultUserById = new Map(users.map((user) => [user.id, user]));
   const existingUsers = Array.isArray(state.users) ? state.users : [];
   const mergedUsers = [
@@ -476,12 +468,11 @@ function mergeDefaultData(state: AppState): AppState {
   ];
   const defaultBadmintonEvents = createBadmintonClubCalendarEvents();
   const defaultBadmintonById = new Map(defaultBadmintonEvents.map((event) => [event.id, event]));
-  const isMissingEvent = (event: FamilyEvent) => !existingEventIds.has(event.id) && !existingEventKeys.has(eventKey(event));
+  const isMissingEvent = (event: FamilyEvent) => !existingEventIds.has(event.id) && !existingEventKeys.has(eventDedupeKey(event));
   const missingCompanyEvents = createDadCompanyCalendarEvents().filter(isMissingEvent);
   const missingSchoolEvents = createSchoolYearCalendarEvents().filter(isMissingEvent);
   const missingBadmintonEvents = defaultBadmintonEvents.filter(isMissingEvent);
   const missingMomEvents = createMomHandwrittenCalendarEvents().filter(isMissingEvent);
-  const seenMergedEventKeys = new Set<string>();
   const mergedEvents = [...missingCompanyEvents, ...missingSchoolEvents, ...missingBadmintonEvents, ...missingMomEvents, ...state.events]
     .map((event) => ({
       ...event,
@@ -490,17 +481,11 @@ function mergeDefaultData(state: AppState): AppState {
       all_day: defaultBadmintonById.has(event.id) ? defaultBadmintonById.get(event.id)?.all_day : event.all_day,
       title: zhText(event.title),
       location: zhText(event.location)
-    }))
-    .filter((event) => {
-      const key = eventKey(event);
-      if (seenMergedEventKeys.has(key)) return false;
-      seenMergedEventKeys.add(key);
-      return true;
-    });
+    }));
   return {
     ...state,
     users: mergedUsers,
-    events: mergedEvents,
+    events: dedupeEvents(mergedEvents),
     routes: state.routes.map((route) => ({
       ...route,
       name: zhText(route.name),
@@ -557,7 +542,7 @@ export async function refreshCloudStateNow() {
 
 export function saveState(state: AppState) {
   if (typeof window === "undefined") return;
-  const next = { ...state, cloud_updated_at: new Date().toISOString() };
+  const next = { ...state, events: dedupeEvents(state.events), cloud_updated_at: new Date().toISOString() };
   window.localStorage.setItem(key, JSON.stringify(next));
   queueCloudStateSave(next);
 }
@@ -607,7 +592,7 @@ export function logout() {
 export function addEvent(draft: EventDraft) {
   const state = loadState();
   const event: FamilyEvent = { ...draft, id: crypto.randomUUID() };
-  const next = { ...state, events: [event, ...state.events] };
+  const next = { ...state, events: dedupeEvents([event, ...state.events]) };
   saveState(next);
   return next;
 }
@@ -697,7 +682,7 @@ export function confirmCandidate(candidateId: string) {
   };
   const next = {
     ...state,
-    events: [nextEvent, ...state.events],
+    events: dedupeEvents([nextEvent, ...state.events]),
     importCandidates: state.importCandidates.map((item) => (item.id === candidateId ? { ...item, confirmed: true } : item))
   };
   saveState(next);
