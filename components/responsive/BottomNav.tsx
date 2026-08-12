@@ -2,14 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Home, Inbox, ListTodo, PlusCircle, User } from "lucide-react";
+import {
+  BookOpenCheck,
+  CalendarDays,
+  Home,
+  ListTodo,
+  PlusCircle,
+  User
+} from "lucide-react";
 import type { UserRole } from "@/types/permissions";
 
 const parentItems = [
   { href: "/dashboard", label: "今日", icon: Home },
   { href: "/calendar", label: "カレンダー", icon: CalendarDays },
   { href: "/add-event", label: "追加", icon: PlusCircle },
-  { href: "/import-inbox", label: "取り込み", icon: Inbox },
+  { href: "/learning", label: "学習", icon: BookOpenCheck },
   { href: "/account", label: "マイページ", icon: User }
 ];
 
@@ -17,7 +24,7 @@ const childItems = [
   { href: "/dashboard", label: "今日", icon: Home },
   { href: "/add-event", label: "自分の予定", icon: PlusCircle },
   { href: "/child-schedule", label: "タスク", icon: ListTodo },
-  { href: "/calendar", label: "カレンダー", icon: CalendarDays },
+  { href: "/learning", label: "学習", icon: BookOpenCheck },
   { href: "/account", label: "マイページ", icon: User }
 ];
 
@@ -31,7 +38,15 @@ export function BottomNav({ role }: { role?: UserRole }) {
         {items.map((item) => {
           const active = pathname === item.href;
           return (
-            <Link key={item.href} href={item.href} className={`flex min-h-12 flex-col items-center justify-center rounded-xl text-xs font-medium ${active ? "bg-blue-50 text-blue-700" : "text-slate-600"}`}>
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex min-h-12 flex-col items-center justify-center rounded-xl text-xs font-medium ${
+                active
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "text-slate-600"
+              }`}
+            >
               <item.icon size={20} />
               <span className="mt-0.5">{item.label}</span>
             </Link>
