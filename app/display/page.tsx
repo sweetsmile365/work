@@ -1,9 +1,43 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Bell, BookOpenCheck, CalendarDays, Clock3, MapPin, Moon, Sparkles, SunMedium } from "lucide-react";
-import { loadState, refreshCloudStateNow, onStateSynced, type AppState } from "@/lib/db";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AlertCircle, Bell, CheckCircle2, Circle, CloudSun, MapPin, Music2, Pause, Play, Volume2 } from "lucide-react";
+import { loadState, onStateSynced, refreshCloudStateNow, type AppState } from "@/lib/db";
+import type { ChildTask } from "@/types/activities";
 import type { FamilyEvent } from "@/types/events";
+
+type WeatherPoint = {
+  id: string;
+  label: string;
+  latitude: number;
+  longitude: number;
+};
+
+type WeatherValue = {
+  temp?: number;
+  code?: number;
+  precipitation?: number;
+  unavailable?: boolean;
+};
+
+type MusicStation = {
+  id: string;
+  label: string;
+  url: string;
+};
+
+const weatherLocations: WeatherPoint[] = [
+  { id: "hitachi", label: "日立", latitude: 36.599, longitude: 140.651 },
+  { id: "tsukuba", label: "つくば", latitude: 36.083, longitude: 140.076 },
+  { id: "hitachinaka", label: "ひたちなか", latitude: 36.396, longitude: 140.534 }
+];
+
+const musicStations: MusicStation[] = [
+  { id: "classical", label: "Classical", url: "https://ice1.somafm.com/gsclassic-128-mp3" },
+  { id: "jazz", label: "Jazz", url: "https://ice1.somafm.com/sonicuniverse-128-mp3" },
+  { id: "english", label: "English Radio", url: "https://ice1.somafm.com/illstreet-128-mp3" },
+  { id: "study", label: "Study / Relax", url: "https://ice1.somafm.com/dronezone-128-mp3" }
+];
 
 const todayKey = (date = new Date()) => {
   const year = date.getFullYear();
@@ -12,7 +46,7 @@ const todayKey = (date = new Date()) => {
   return `${year}-${month}-${day}`;
 };
 
-const formatDate = (date: Date) =>
+const formatHeaderDate = (date: Date) =>
   new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
     month: "long",
@@ -20,21 +54,21 @@ const formatDate = (date: Date) =>
     weekday: "long"
   }).format(date);
 
-const formatEventDate = (date: string) =>
+const formatShortDate = (date: string) =>
   new Intl.DateTimeFormat("ja-JP", { month: "numeric", day: "numeric", weekday: "short" }).format(new Date(`${date}T00:00:00+09:00`));
+
+const formatClock = (date: Date) => new Intl.DateTimeFormat("ja-JP", { hour: "2-digit", minute: "2-digit", hour12: false }).format(date);
 
 const formatTime = (value?: string) => {
   if (!value) return "終日";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "終日";
-  return new Intl.DateTimeFormat("ja-JP", { hour: "2-digit", minute: "2-digit", hour12: false }).format(date);
+  return formatClock(date);
 };
 
 const eventTimeRange = (event: FamilyEvent) => {
   if (event.all_day || !event.start_datetime) return "終日";
-  const start = formatTime(event.start_datetime);
-  const end = event.end_datetime ? formatTime(event.end_datetime) : "";
-  return end ? `${start} - ${end}` : start;
+  return event.end_datetime ? `${formatTime(event.start_datetime)}-${formatTime(event.end_datetime)}` : formatTime(event.start_datetime);
 };
 
 const greeting = (date: Date) => {
@@ -45,6 +79,12 @@ const greeting = (date: Date) => {
   return "こんばんは";
 };
 
+const isVisibleEvent = (event: FamilyEvent) => !event.deleted_at && !event.id.startsWith("dad-company-off-");
+
+const eventSortKey = (event: FamilyEvent) => `${event.date}${event.start_datetime ?? "00:00"}`;
+
+const sortEvents = (a: FamilyEvent, b: FamilyEvent) => eventSortKey(a).localeCompare(eventSortKey(b));
+
 const categoryColor = (event: FamilyEvent) => {
   if (event.calendar_type === "school") return "bg-sky-300";
   if (event.calendar_type === "child_activity") return "bg-emerald-300";
@@ -54,16 +94,187 @@ const categoryColor = (event: FamilyEvent) => {
   return "bg-amber-300";
 };
 
-const isVisibleEvent = (event: FamilyEvent) => !event.deleted_at && !event.id.startsWith("dad-company-off-");
+const weatherLabel = (code?: number) => {
+  if (code === undefined) return "取得不可";
+  if (code === 0) return "晴れ";
+  if ([1, 2].includes(code)) return "ほぼ晴れ";
+  if (code === 3) return "くもり";
+  if ([45, 48].includes(code)) return "霧";
+  if ([51, 53, 55, 56, 57, 61, 80].includes(code)) return "小雨";
+  if ([63, 65, 66, 67, 81, 82].includes(code)) return "雨";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "雪";
+  if ([95, 96, 99].includes(code)) return "雷雨";
+  return "くもり";
+};
 
-const sortEvents = (a: FamilyEvent, b: FamilyEvent) =>
-  `${a.date}${a.start_datetime ?? "00:00"}`.localeCompare(`${b.date}${b.start_datetime ?? "00:00"}`);
+const learningTypes = new Set<ChildTask["task_type"]>(["homework", "practice", "exam_preparation"]);
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
+const dueText = (date?: string) => (date ? formatShortDate(date) : "");
+
+async function fetchWeather() {
+  const entries = await Promise.all(
+    weatherLocations.map(async (location) => {
+      try {
+        const params = new URLSearchParams({
+          latitude: String(location.latitude),
+          longitude: String(location.longitude),
+          current: "temperature_2m,weather_code",
+          hourly: "precipitation_probability",
+          timezone: "Asia/Tokyo",
+          forecast_days: "1"
+        });
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`Weather ${response.status}`);
+        const payload = await response.json();
+        const localNow = new Date();
+        const nowHour = `${todayKey(localNow)}T${String(localNow.getHours()).padStart(2, "0")}`;
+        const times = Array.isArray(payload?.hourly?.time) ? payload.hourly.time : [];
+        const precipitationValues = Array.isArray(payload?.hourly?.precipitation_probability) ? payload.hourly.precipitation_probability : [];
+        const hourIndex = times.findIndex((time: string) => time.startsWith(nowHour));
+        const temp = Number(payload?.current?.temperature_2m);
+        const code = Number(payload?.current?.weather_code);
+        const value: WeatherValue = {
+          temp: Number.isFinite(temp) ? Math.round(temp) : undefined,
+          code: Number.isFinite(code) ? code : undefined,
+          precipitation: hourIndex >= 0 ? Number(precipitationValues[hourIndex]) : undefined
+        };
+        return [location.id, value] as const;
+      } catch {
+        return [location.id, { unavailable: true } satisfies WeatherValue] as const;
+      }
+    })
+  );
+
+  return Object.fromEntries(entries) as Record<string, WeatherValue>;
+}
+
+function SectionTitle({ title, accent }: { title: string; accent: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/10 p-5">
-      <div className="text-sm font-medium uppercase tracking-[0.18em] text-slate-300">{label}</div>
-      <div className="mt-2 text-4xl font-semibold text-white">{value}</div>
+    <div className="flex items-center gap-3">
+      <span className={`h-2.5 w-2.5 rounded-full ${accent}`} />
+      <h2 className="text-[clamp(1.05rem,1.15vw,1.45rem)] font-semibold tracking-[0.12em] text-slate-100">{title}</h2>
+    </div>
+  );
+}
+
+function WeatherStrip({ weather }: { weather: Record<string, WeatherValue> }) {
+  return (
+    <div className="min-w-[520px] rounded-2xl bg-white/[0.07] px-4 py-3">
+      <div className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-slate-300">
+        <CloudSun className="h-4 w-4 text-sky-200" />
+        WEATHER
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        {weatherLocations.map((location) => {
+          const value = weather[location.id];
+          return (
+            <div key={location.id} className="min-w-0">
+              <div className="text-sm font-semibold text-slate-200">{location.label}</div>
+              <div className="mt-0.5 flex items-baseline gap-2 whitespace-nowrap text-slate-300">
+                <span className="text-2xl font-semibold text-white">{value?.unavailable || value?.temp === undefined ? "--" : value.temp}°</span>
+                <span className="text-sm">{value?.unavailable ? "取得不可" : weatherLabel(value?.code)}</span>
+                <span className="text-sm text-sky-200">降水{value?.precipitation ?? "--"}%</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MusicControl() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [stationId, setStationId] = useState(musicStations[0].id);
+  const [playing, setPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.45);
+  const [error, setError] = useState(false);
+  const station = musicStations.find((item) => item.id === stationId) ?? musicStations[0];
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.src = station.url;
+    audio.volume = volume;
+    audio.load();
+    setPlaying(false);
+    setError(false);
+  }, [station.url]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, [volume]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => {
+      if (!audio) return;
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    };
+  }, []);
+
+  const toggle = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    setError(false);
+    if (playing) {
+      audio.pause();
+      setPlaying(false);
+      return;
+    }
+    try {
+      await audio.play();
+      setPlaying(true);
+    } catch {
+      setError(true);
+      setPlaying(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl bg-white/[0.07] px-4 py-3">
+      <audio ref={audioRef} preload="none" onError={() => setError(true)} onPause={() => setPlaying(false)} onPlay={() => setPlaying(true)} />
+      <div className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-slate-300">
+        <Music2 className="h-4 w-4 text-violet-200" />
+        MUSIC
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={toggle}
+          className="grid h-10 w-10 place-items-center rounded-full bg-violet-300 text-slate-950 transition hover:bg-violet-200"
+          aria-label={playing ? "音楽を停止" : "音楽を再生"}
+        >
+          {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 pl-0.5" />}
+        </button>
+        <select
+          value={stationId}
+          onChange={(event) => setStationId(event.target.value)}
+          className="h-10 rounded-xl border border-white/10 bg-slate-950/75 px-3 text-sm text-white outline-none"
+          aria-label="音楽ステーション"
+        >
+          {musicStations.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+        <Volume2 className="h-4 w-4 text-slate-400" />
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value={volume}
+          onChange={(event) => setVolume(Number(event.target.value))}
+          className="w-20 accent-violet-300"
+          aria-label="音量"
+        />
+      </div>
+      <div className="mt-1 h-4 text-xs text-slate-400">{error ? "再生できません" : playing ? `${station.label} 再生中` : station.label}</div>
     </div>
   );
 }
@@ -71,171 +282,200 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 export default function DisplayPage() {
   const [state, setState] = useState<AppState | null>(null);
   const [now, setNow] = useState(() => new Date());
+  const [weather, setWeather] = useState<Record<string, WeatherValue>>({});
 
   useEffect(() => {
     setState(loadState());
     void refreshCloudStateNow();
+    void fetchWeather().then(setWeather);
 
     const unsubscribe = onStateSynced(setState);
     const syncTimer = window.setInterval(() => {
       void refreshCloudStateNow();
     }, 60_000);
     const clockTimer = window.setInterval(() => setNow(new Date()), 30_000);
+    const weatherTimer = window.setInterval(() => {
+      void fetchWeather().then(setWeather);
+    }, 30 * 60_000);
 
     return () => {
       unsubscribe();
       window.clearInterval(syncTimer);
       window.clearInterval(clockTimer);
+      window.clearInterval(weatherTimer);
     };
   }, []);
 
   const data = useMemo(() => {
-    const events = (state?.events ?? []).filter(isVisibleEvent).sort(sortEvents);
     const today = todayKey(now);
+    const events = (state?.events ?? []).filter(isVisibleEvent).sort(sortEvents);
     const todayEvents = events.filter((event) => event.date === today);
-    const upcomingEvents = events.filter((event) => event.date >= today).slice(0, 7);
-    const notices = events
-      .filter((event) => event.date >= today && (event.need_parent_action || event.parent_task))
-      .slice(0, 4);
-    const completedTasks = (state?.tasks ?? []).filter((task) => task.status === "done").length;
-    const totalTasks = state?.tasks.length ?? 0;
-    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const upcomingEvents = events.filter((event) => event.date >= today).slice(0, 5);
+    const notices = events.filter((event) => event.date >= today && (event.need_parent_action || event.parent_task)).slice(0, 3);
+    const learningTasks = (state?.tasks ?? [])
+      .filter((task) => learningTypes.has(task.task_type))
+      .sort((a, b) => {
+        if (a.status !== b.status) return a.status === "todo" ? -1 : 1;
+        return (a.due_date ?? "9999-12-31").localeCompare(b.due_date ?? "9999-12-31");
+      });
+    const mainTasks = learningTasks.slice(0, 5);
+    const nextTasks = learningTasks.filter((task) => task.status !== "done").slice(0, 2);
     const childEventsToday = todayEvents.filter((event) => event.calendar_type === "school" || event.calendar_type === "child_activity").length;
 
     return {
-      today,
       todayEvents,
       primaryEvent: todayEvents[0],
       upcomingEvents,
       notices,
-      completedTasks,
-      totalTasks,
-      progress,
+      mainTasks,
+      nextTasks,
       childEventsToday
     };
   }, [state, now]);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#08111f] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(56,189,248,0.24),transparent_32%),radial-gradient(circle_at_85%_5%,rgba(167,139,250,0.22),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.95),rgba(8,17,31,1))]" />
-      <section className="relative mx-auto flex min-h-screen w-full max-w-[1920px] flex-col px-6 py-6 sm:px-10 lg:px-14 lg:py-10">
-        <header className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="flex items-center gap-3 text-cyan-200">
-              <Sparkles className="h-7 w-7" />
-              <span className="text-lg font-semibold tracking-[0.22em]">Family Dashboard v2</span>
-            </div>
-            <h1 className="mt-5 text-4xl font-semibold tracking-normal text-white sm:text-5xl lg:text-7xl">{greeting(now)}</h1>
-            <p className="mt-4 text-xl text-slate-300 lg:text-2xl">{formatDate(now)}</p>
+    <main className="h-[100dvh] overflow-hidden bg-[#06101f] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(129,140,248,0.16),transparent_26%),linear-gradient(145deg,#06101f,#0b1729_55%,#07111f)]" />
+      <section className="relative mx-auto grid h-[100dvh] max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-4 lg:px-8">
+        <header className="grid grid-cols-[minmax(260px,1fr)_auto] items-center gap-5 border-b border-white/10 pb-3">
+          <div className="min-w-0">
+            <div className="text-[clamp(1rem,1vw,1.25rem)] font-semibold tracking-[0.18em] text-cyan-200">Family Dashboard v2</div>
+            <div className="mt-1 text-[clamp(1.9rem,2.6vw,3.6rem)] font-semibold leading-none">{greeting(now)}</div>
+            <div className="mt-2 text-[clamp(1rem,1.05vw,1.35rem)] text-slate-300">{formatHeaderDate(now)}</div>
           </div>
-          <div className="flex items-center gap-5 rounded-3xl border border-white/10 bg-white/10 px-6 py-5 shadow-2xl shadow-black/20 backdrop-blur">
-            {now.getHours() >= 6 && now.getHours() < 18 ? <SunMedium className="h-10 w-10 text-amber-200" /> : <Moon className="h-10 w-10 text-indigo-200" />}
-            <div className="text-6xl font-semibold tabular-nums tracking-normal lg:text-8xl">
-              {new Intl.DateTimeFormat("ja-JP", { hour: "2-digit", minute: "2-digit", hour12: false }).format(now)}
-            </div>
+
+          <div className="flex items-center gap-4">
+            <WeatherStrip weather={weather} />
+            <MusicControl />
+            <div className="min-w-[210px] text-right text-[clamp(4rem,5.4vw,6.5rem)] font-semibold leading-none tabular-nums">{formatClock(now)}</div>
           </div>
         </header>
 
-        <div className="grid flex-1 gap-6 py-8 lg:grid-cols-[1.05fr_1.35fr] xl:grid-cols-[1fr_1.45fr]">
-          <section className="grid gap-6">
-            <article className="rounded-3xl border border-white/10 bg-white/[0.09] p-7 shadow-2xl shadow-black/20 backdrop-blur">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 text-cyan-200">
-                  <CalendarDays className="h-7 w-7" />
-                  <h2 className="text-2xl font-semibold">TODAY</h2>
-                </div>
-                <span className="rounded-full bg-cyan-300/15 px-4 py-2 text-lg text-cyan-100">{data.todayEvents.length}件</span>
+        <div className="grid min-h-0 grid-rows-[0.86fr_1.14fr] gap-4">
+          <section className="grid min-h-0 grid-cols-[0.9fr_1.55fr] gap-4">
+            <article className="min-h-0 rounded-3xl bg-cyan-300/[0.08] p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <SectionTitle title="TODAY" accent="bg-cyan-300" />
+                <span className="rounded-full bg-cyan-300/15 px-3 py-1 text-[clamp(0.95rem,0.9vw,1.1rem)] text-cyan-100">{data.todayEvents.length}件</span>
               </div>
 
-              <div className="mt-8 rounded-2xl bg-slate-950/45 p-6">
-                {data.primaryEvent ? (
-                  <>
-                    <div className="text-2xl text-slate-300">{eventTimeRange(data.primaryEvent)}</div>
-                    <div className="mt-3 text-4xl font-semibold leading-tight text-white lg:text-5xl">{data.primaryEvent.title}</div>
+              {data.primaryEvent ? (
+                <div className="grid h-[calc(100%-3.2rem)] content-between">
+                  <div>
+                    <div className="text-[clamp(1.15rem,1.35vw,1.7rem)] text-cyan-100">{eventTimeRange(data.primaryEvent)}</div>
+                    <div className="mt-3 text-[clamp(2rem,2.45vw,3.25rem)] font-semibold leading-tight">{data.primaryEvent.title}</div>
                     {data.primaryEvent.location ? (
-                      <div className="mt-5 flex items-center gap-2 text-xl text-slate-300">
-                        <MapPin className="h-6 w-6 text-cyan-200" />
+                      <div className="mt-4 flex items-center gap-2 text-[clamp(1.05rem,1.1vw,1.4rem)] text-slate-300">
+                        <MapPin className="h-5 w-5 shrink-0 text-cyan-200" />
                         {data.primaryEvent.location}
                       </div>
                     ) : null}
-                  </>
-                ) : (
-                  <div className="py-8 text-3xl text-slate-300">今日の予定はありません</div>
-                )}
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <StatCard label="Today total" value={data.todayEvents.length} />
-                <StatCard label="School / Child" value={data.childEventsToday} />
-              </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-[clamp(1rem,1vw,1.25rem)] text-slate-300">
+                    <div>今日の予定 {data.todayEvents.length}件</div>
+                    <div>学校・子ども関連 {data.childEventsToday}件</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid h-[calc(100%-3.2rem)] place-items-center text-center text-[clamp(1.35rem,1.5vw,1.9rem)] text-slate-300">今日の大きな予定はありません</div>
+              )}
             </article>
 
-            <article className="rounded-3xl border border-white/10 bg-white/[0.09] p-7 shadow-2xl shadow-black/20 backdrop-blur">
-              <div className="flex items-center gap-3 text-emerald-200">
-                <BookOpenCheck className="h-7 w-7" />
-                <h2 className="text-2xl font-semibold">Learning</h2>
+            <article className="min-h-0 rounded-3xl bg-indigo-300/[0.08] p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <SectionTitle title="UPCOMING" accent="bg-indigo-300" />
+                <span className="text-[clamp(0.9rem,0.85vw,1.05rem)] text-slate-400">Next 5</span>
               </div>
-              <div className="mt-7 flex items-end justify-between">
-                <div>
-                  <div className="text-6xl font-semibold">{data.progress}%</div>
-                  <p className="mt-3 text-xl text-slate-300">
-                    {data.completedTasks} / {data.totalTasks} 完了
-                  </p>
-                </div>
-                <div className="text-right text-lg text-slate-400">課題・準備の進捗</div>
-              </div>
-              <div className="mt-8 h-5 overflow-hidden rounded-full bg-slate-900">
-                <div className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-cyan-300" style={{ width: `${data.progress}%` }} />
+              <div className="grid gap-2">
+                {data.upcomingEvents.map((event) => (
+                  <div key={event.id} className="grid grid-cols-[7rem_6.4rem_1rem_minmax(0,1fr)] items-start gap-3 rounded-2xl bg-slate-950/30 px-4 py-2.5">
+                    <div className="text-[clamp(1rem,0.95vw,1.2rem)] font-semibold text-slate-200">{formatShortDate(event.date)}</div>
+                    <div className="text-[clamp(1rem,0.95vw,1.2rem)] text-slate-300">{eventTimeRange(event)}</div>
+                    <span className={`mt-2 h-3 w-3 rounded-full ${categoryColor(event)}`} />
+                    <div className="text-[clamp(1.1rem,1.15vw,1.45rem)] font-medium leading-snug">{event.title}</div>
+                  </div>
+                ))}
+                {data.upcomingEvents.length === 0 ? <div className="rounded-2xl bg-slate-950/30 p-6 text-[clamp(1.25rem,1.25vw,1.6rem)] text-slate-300">今後の予定はありません</div> : null}
               </div>
             </article>
           </section>
 
-          <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <article className="rounded-3xl border border-white/10 bg-white/[0.09] p-7 shadow-2xl shadow-black/20 backdrop-blur">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Family Calendar / Upcoming</h2>
-                <span className="text-lg text-slate-300">Next 7</span>
+          <section className="grid min-h-0 grid-cols-[1.55fr_0.9fr] gap-4">
+            <article className="min-h-0 rounded-3xl bg-emerald-300/[0.08] p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <SectionTitle title="LEARNING ・ 今日やること" accent="bg-emerald-300" />
+                <span className="text-[clamp(0.9rem,0.85vw,1.05rem)] text-slate-400">無理なく次へ</span>
               </div>
-              <div className="mt-6 grid gap-3">
-                {data.upcomingEvents.map((event) => (
-                  <div key={event.id} className="grid grid-cols-[92px_92px_1fr] items-center gap-4 rounded-2xl border border-white/10 bg-slate-950/35 px-5 py-4">
-                    <div className="text-lg font-semibold text-slate-200">{formatEventDate(event.date)}</div>
-                    <div className="flex items-center gap-2 text-lg text-slate-300">
-                      <Clock3 className="h-5 w-5 text-slate-400" />
-                      {eventTimeRange(event)}
-                    </div>
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className={`h-3.5 w-3.5 shrink-0 rounded-full ${categoryColor(event)}`} />
-                      <span className="truncate text-2xl font-medium text-white">{event.title}</span>
+
+              {data.mainTasks.length > 0 ? (
+                <div className="grid h-[calc(100%-3rem)] grid-cols-[1fr_0.58fr] gap-5">
+                  <div className="min-h-0 rounded-2xl bg-slate-950/25 p-4">
+                    <div className="mb-3 text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold tracking-[0.12em] text-emerald-100">主要タスク</div>
+                    <div className="grid gap-2">
+                      {data.mainTasks.map((task) => {
+                        const done = task.status === "done";
+                        return (
+                          <div key={task.id} className={`grid grid-cols-[2rem_1fr_auto] items-start gap-2 rounded-xl px-3 py-2 ${done ? "text-slate-400" : "text-white"}`}>
+                            {done ? <CheckCircle2 className="mt-1 h-6 w-6 text-emerald-300" /> : <Circle className="mt-1 h-6 w-6 text-emerald-200" />}
+                            <div className={done ? "line-through decoration-slate-500/80" : ""}>
+                              <div className="text-[clamp(1.25rem,1.25vw,1.65rem)] leading-snug">{task.title}</div>
+                              {task.note ? <div className="mt-0.5 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-400">{task.note}</div> : null}
+                            </div>
+                            {task.due_date ? <div className="pt-1 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-400">{dueText(task.due_date)}</div> : null}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
-                {data.upcomingEvents.length === 0 ? <div className="rounded-2xl bg-slate-950/35 p-6 text-xl text-slate-300">今後の予定はありません</div> : null}
-              </div>
+
+                  <div className="min-h-0 rounded-2xl bg-slate-950/25 p-4">
+                    <div className="mb-3 text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold tracking-[0.12em] text-emerald-100">NEXT</div>
+                    <div className="grid gap-3">
+                      {data.nextTasks.map((task) => (
+                        <div key={task.id} className="rounded-xl bg-emerald-300/10 px-4 py-3">
+                          <div className="text-[clamp(1.25rem,1.25vw,1.65rem)] font-medium leading-snug">→ {task.title}</div>
+                          {task.due_date ? <div className="mt-1 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-400">{dueText(task.due_date)}</div> : null}
+                        </div>
+                      ))}
+                      {data.nextTasks.length === 0 ? <div className="text-[clamp(1.15rem,1.1vw,1.45rem)] text-slate-300">次の学習タスクはありません</div> : null}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid h-[calc(100%-3rem)] place-items-center rounded-2xl bg-slate-950/25 text-center text-[clamp(1.35rem,1.45vw,1.9rem)] text-slate-300">
+                  学習予定はまだ登録されていません
+                </div>
+              )}
             </article>
 
-            <article className="rounded-3xl border border-white/10 bg-white/[0.09] p-7 shadow-2xl shadow-black/20 backdrop-blur">
-              <div className="flex items-center gap-3 text-amber-200">
-                <Bell className="h-7 w-7" />
-                <h2 className="text-2xl font-semibold">Quick Notice</h2>
+            <article className="min-h-0 rounded-3xl bg-amber-300/[0.08] p-5">
+              <div className="mb-4 flex items-center gap-3">
+                <Bell className="h-6 w-6 text-amber-200" />
+                <SectionTitle title="QUICK NOTICE" accent="bg-amber-300" />
               </div>
-              <div className="mt-6 grid gap-4">
+              <div className="grid gap-3">
                 {data.notices.map((event) => (
-                  <div key={event.id} className="rounded-2xl border border-amber-200/15 bg-amber-200/10 p-5">
-                    <div className="text-lg text-amber-100">
-                      {formatEventDate(event.date)} · {eventTimeRange(event)}
+                  <div key={event.id} className="rounded-2xl bg-amber-200/10 px-4 py-3">
+                    <div className="text-[clamp(0.95rem,0.9vw,1.1rem)] text-amber-100">
+                      {formatShortDate(event.date)} {eventTimeRange(event)}
                     </div>
-                    <div className="mt-2 text-2xl font-semibold leading-snug">{event.parent_task || event.title}</div>
+                    <div className="mt-1 text-[clamp(1.15rem,1.18vw,1.5rem)] font-semibold leading-snug">{event.title}</div>
+                    {event.parent_task ? <div className="mt-1 text-[clamp(1rem,0.95vw,1.18rem)] text-slate-300">{event.parent_task}</div> : null}
                   </div>
                 ))}
-                {data.notices.length === 0 ? <div className="rounded-2xl bg-slate-950/35 p-6 text-xl text-slate-300">確認が必要な予定はありません</div> : null}
+                {data.notices.length === 0 ? (
+                  <div className="flex items-center gap-2 rounded-2xl bg-slate-950/25 p-5 text-[clamp(1.1rem,1.05vw,1.35rem)] text-slate-300">
+                    <AlertCircle className="h-5 w-5 text-amber-200" />
+                    確認が必要な予定はありません
+                  </div>
+                ) : null}
               </div>
             </article>
           </section>
         </div>
 
-        <footer className="flex flex-col gap-2 border-t border-white/10 pt-5 text-base text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>スマホの Family Schedule Hub で予定を編集すると、この画面にも反映されます。</span>
+        <footer className="flex items-center justify-between border-t border-white/10 pt-2 text-xs text-slate-500">
+          <span>スマホで予定を編集すると、この画面にも反映されます。</span>
           <span>Cloud sync · 60 sec refresh</span>
         </footer>
       </section>
