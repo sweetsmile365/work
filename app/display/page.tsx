@@ -33,10 +33,10 @@ const weatherLocations: WeatherPoint[] = [
 ];
 
 const musicStations: MusicStation[] = [
-  { id: "classical", label: "Classical", url: "https://ice1.somafm.com/gsclassic-128-mp3" },
+  { id: "classical", label: "Classical", url: "https://ycradio.stream.publicradio.org/ycradio.aac" },
   { id: "jazz", label: "Jazz", url: "https://ice1.somafm.com/sonicuniverse-128-mp3" },
   { id: "english", label: "English Radio", url: "https://ice1.somafm.com/illstreet-128-mp3" },
-  { id: "study", label: "Study / Relax", url: "https://ice1.somafm.com/dronezone-128-mp3" }
+  { id: "study", label: "Study / Relax", url: "https://relax.stream.publicradio.org/relax.aac" }
 ];
 
 const todayKey = (date = new Date()) => {
