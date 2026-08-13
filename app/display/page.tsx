@@ -10,7 +10,6 @@ import {
   Circle,
   CloudSun,
   Dumbbell,
-  ExternalLink,
   Flame,
   MapPin,
   Music2,
@@ -72,10 +71,11 @@ type BookPick = {
   title: string;
   rank?: number;
   reason: string;
-  linkUrl?: string;
-  amazonUrl?: string;
   source: string;
   market?: "JP" | "CN";
+  author?: string;
+  description: string;
+  coverUrl?: string;
 };
 
 type BookPickResponse = {
@@ -383,6 +383,141 @@ function MobileWeather({
         );
       })}
     </div>
+  );
+}
+
+
+function BookCover({
+  book,
+  compact = false
+}: {
+  book: BookPick;
+  compact?: boolean;
+}) {
+  const sizeClass = compact ? "h-12 w-9" : "h-28 w-20";
+
+  return (
+    <div
+      className={`relative grid shrink-0 place-items-center overflow-hidden rounded-md bg-slate-800 ${sizeClass}`}
+    >
+      <BookOpen
+        className={
+          compact ? "h-4 w-4 text-slate-500" : "h-7 w-7 text-slate-500"
+        }
+      />
+      {book.coverUrl ? (
+        <img
+          src={book.coverUrl}
+          alt={`${book.title} 封面`}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={(event) => {
+            event.currentTarget.style.display = "none";
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function DesktopBookPickCard({ book }: { book: BookPick }) {
+  return (
+    <div className="group relative">
+      <button
+        type="button"
+        className="grid w-full grid-cols-[2.5rem_6rem_minmax(0,1fr)] items-center gap-2 rounded-xl bg-white/[0.04] px-2 py-1 text-left transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/60"
+        aria-label={`${book.title} の紹介を表示`}
+      >
+        <BookCover book={book} compact />
+
+        <div>
+          <div className="text-[9px] font-bold tracking-[0.06em] text-sky-200">
+            {book.categoryLabel}
+          </div>
+          {book.rank ? (
+            <div className="mt-0.5 text-[9px] text-slate-500">
+              #{book.rank}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="min-w-0">
+          <div className="truncate text-[clamp(0.85rem,0.88vw,1.02rem)] font-semibold text-white">
+            {book.title}
+          </div>
+          <div className="mt-0.5 truncate text-[10px] text-slate-400">
+            {book.author ? `${book.author} · ` : ""}
+            {book.reason}
+          </div>
+        </div>
+      </button>
+
+      <div className="pointer-events-none invisible absolute bottom-[calc(100%+0.45rem)] right-0 z-[80] w-[390px] translate-y-1 rounded-2xl border border-white/10 bg-[#0b1729]/[0.98] p-4 opacity-0 shadow-2xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+        <div className="flex gap-4">
+          <BookCover book={book} />
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-bold tracking-[0.08em] text-sky-200">
+              {book.categoryLabel}
+              {book.rank ? ` · Bestseller #${book.rank}` : ""}
+            </div>
+            <div className="mt-1 text-lg font-bold leading-snug text-white">
+              {book.title}
+            </div>
+            {book.author ? (
+              <div className="mt-1 text-xs text-slate-400">
+                {book.author}
+              </div>
+            ) : null}
+            <div className="mt-3 text-sm leading-relaxed text-slate-200">
+              {book.description}
+            </div>
+            <div className="mt-2 text-[10px] text-slate-500">
+              {book.source} · 每周更新
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileBookPickCard({ book }: { book: BookPick }) {
+  return (
+    <details className="group rounded-xl bg-slate-950/20">
+      <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-2.5">
+        <BookCover book={book} compact />
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] font-bold tracking-[0.06em] text-sky-200">
+            {book.categoryLabel}
+            {book.rank ? ` · #${book.rank}` : ""}
+          </div>
+          <div className="mt-0.5 truncate text-sm font-semibold text-white">
+            {book.title}
+          </div>
+          <div className="mt-0.5 truncate text-[11px] text-slate-500">
+            {book.author ? `${book.author} · ` : ""}
+            {book.reason}
+          </div>
+        </div>
+        <span className="text-xs text-slate-500 transition group-open:rotate-180">
+          ▾
+        </span>
+      </summary>
+
+      <div className="border-t border-white/5 px-3 pb-3 pt-3">
+        <div className="flex gap-3">
+          <BookCover book={book} />
+          <div className="min-w-0 flex-1">
+            <div className="text-sm leading-relaxed text-slate-200">
+              {book.description}
+            </div>
+            <div className="mt-2 text-[10px] text-slate-500">
+              {book.source} · 每周更新
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
   );
 }
 
@@ -1002,33 +1137,7 @@ export default function DisplayPage() {
 
             <div className="mt-3 grid gap-2">
               {bookPicks.slice(0, 5).map((book) => (
-                <a
-                  key={book.category}
-                  href={book.linkUrl ?? book.amazonUrl ?? "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="grid grid-cols-[6.8rem_minmax(0,1fr)_1rem] items-center gap-2 rounded-xl bg-slate-950/20 px-3 py-3 active:bg-white/[0.08]"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate text-[10px] font-bold tracking-[0.06em] text-sky-200">
-                      {book.categoryLabel}
-                    </div>
-                    {book.rank ? (
-                      <div className="mt-0.5 text-[10px] text-slate-600">
-                        #{book.rank}
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-white">
-                      {book.title}
-                    </div>
-                    <div className="mt-0.5 truncate text-[11px] text-slate-500">
-                      {book.reason}
-                    </div>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-slate-600" />
-                </a>
+                <MobileBookPickCard key={book.category} book={book} />
               ))}
             </div>
           </section>
@@ -1278,7 +1387,7 @@ export default function DisplayPage() {
               )}
             </article>
 
-            <article className="min-h-0 overflow-hidden rounded-3xl bg-amber-300/[0.08] p-5">
+            <article className="min-h-0 overflow-visible rounded-3xl bg-amber-300/[0.08] p-5">
               <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
                 <section>
                   <div className="mb-2 flex items-center gap-3">
@@ -1331,7 +1440,7 @@ export default function DisplayPage() {
                   </section>
                 )}
 
-                <section className="min-h-0 overflow-hidden rounded-2xl bg-slate-950/25 p-3">
+                <section className="relative min-h-0 overflow-visible rounded-2xl bg-slate-950/25 p-3">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-5 w-5 text-sky-200" />
@@ -1340,41 +1449,16 @@ export default function DisplayPage() {
                       </div>
                     </div>
                     <span className="text-[10px] text-slate-500">
-                      Amazon JP + 京东/当当 · weekly
+                      JP + CN · weekly
                     </span>
                   </div>
 
                   <div className="grid gap-2">
                     {bookPicks.slice(0, 5).map((book) => (
-                      <a
+                      <DesktopBookPickCard
                         key={book.category}
-                        href={book.linkUrl ?? book.amazonUrl ?? "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group grid grid-cols-[6.7rem_minmax(0,1fr)_1rem] items-center gap-2 rounded-xl bg-white/[0.04] px-3 py-1.5 transition active:bg-white/[0.09]"
-                      >
-                        <div>
-                          <div className="text-[10px] font-bold tracking-[0.08em] text-sky-200">
-                            {book.categoryLabel}
-                          </div>
-                          {book.rank ? (
-                            <div className="mt-0.5 text-[10px] text-slate-500">
-                              Bestseller #{book.rank}
-                            </div>
-                          ) : null}
-                        </div>
-
-                        <div className="min-w-0">
-                          <div className="truncate text-[clamp(0.9rem,0.92vw,1.08rem)] font-semibold text-white">
-                            {book.title}
-                          </div>
-                          <div className="mt-0.5 truncate text-[10px] text-slate-400">
-                            {book.reason} · {book.source}
-                          </div>
-                        </div>
-
-                        <ExternalLink className="h-4 w-4 text-slate-500 group-active:text-sky-200" />
-                      </a>
+                        book={book}
+                      />
                     ))}
 
                     {bookPicks.length === 0 ? (

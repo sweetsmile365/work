@@ -22,10 +22,11 @@ type BookPick = {
   title: string;
   rank?: number;
   reason: string;
-  linkUrl: string;
-  amazonUrl?: string;
   source: string;
   market: MarketId;
+  author?: string;
+  description: string;
+  coverUrl?: string;
 };
 
 const WEEK = 60 * 60 * 24 * 7;
@@ -283,14 +284,24 @@ const chineseReadingKeywords = [
   "传记"
 ];
 
-function jdSearchUrl(title: string) {
-  return `https://search.jd.com/Search?keyword=${encodeURIComponent(title)}`;
-}
 
-function amazonSearchUrl(title: string) {
-  return `https://www.amazon.co.jp/s?k=${encodeURIComponent(
-    title
-  )}&i=stripbooks`;
+const fallbackDescriptions: Record<CategoryId, string> = {
+  management:
+    "从经营、组织与决策的角度理解管理，适合希望建立管理框架和工作方法的人阅读。",
+  technology:
+    "围绕AI、科学与技术变化，帮助快速理解科技趋势以及它们对工作和社会的影响。",
+  junior:
+    "适合中学生拓展视野的通识读物，兼顾知识性、可读性和独立思考。",
+  chinaManagement:
+    "来自中国图书榜单的管理与科技候选，重点关注商业、组织、决策和技术变化。",
+  chinaReading:
+    "适合中学生及家庭阅读的中文作品，优先小说、文学、人文、历史和科普。"
+};
+
+function shortText(value: string, max = 150) {
+  const clean = value.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  return `${clean.slice(0, max - 1).trim()}…`;
 }
 
 const fallback: Record<CategoryId, BookPick> = {
@@ -299,48 +310,52 @@ const fallback: Record<CategoryId, BookPick> = {
     categoryLabel: categoryLabels.management,
     title: "リーダーの仮面",
     reason: reasons.management,
-    linkUrl: amazonSearchUrl("リーダーの仮面"),
-    amazonUrl: amazonSearchUrl("リーダーの仮面"),
     source: "fallback",
-    market: "JP"
+    market: "JP",
+    description:
+      "管理者が「何をするか」より「何をしないか」に注目し、チームを動かすための考え方を整理したビジネス書。"
   },
   technology: {
     category: "technology",
     categoryLabel: categoryLabels.technology,
     title: "生成AIで世界はこう変わる",
     reason: reasons.technology,
-    linkUrl: amazonSearchUrl("生成AIで世界はこう変わる"),
-    amazonUrl: amazonSearchUrl("生成AIで世界はこう変わる"),
     source: "fallback",
-    market: "JP"
+    market: "JP",
+    description:
+      "生成AIが仕事、教育、社会にどのような変化をもたらすのかを考えるための入門書。"
   },
   junior: {
     category: "junior",
     categoryLabel: categoryLabels.junior,
     title: "大人も知らないみのまわりの謎大全",
     reason: reasons.junior,
-    linkUrl: amazonSearchUrl("大人も知らないみのまわりの謎大全"),
-    amazonUrl: amazonSearchUrl("大人も知らないみのまわりの謎大全"),
     source: "fallback",
-    market: "JP"
+    market: "JP",
+    description:
+      "身近な疑問を入口に、科学や社会の仕組みを楽しく知ることができる中学生向けの読み物。"
   },
   chinaManagement: {
     category: "chinaManagement",
     categoryLabel: categoryLabels.chinaManagement,
     title: "关键跃升：新任管理者成事的底层逻辑",
     reason: reasons.chinaManagement,
-    linkUrl: jdSearchUrl("关键跃升 新任管理者成事的底层逻辑 刘润"),
     source: "京东 fallback",
-    market: "CN"
+    market: "CN",
+    author: "刘润",
+    description:
+      "面向新任管理者，讨论从个人贡献者转向管理角色时，如何带团队、做决策并推动事情真正落地。"
   },
   chinaReading: {
     category: "chinaReading",
     categoryLabel: categoryLabels.chinaReading,
     title: "布鲁克林有棵树",
     reason: "成长小说 · 中文阅读",
-    linkUrl: jdSearchUrl("布鲁克林有棵树 贝蒂史密斯"),
     source: "京东 fallback",
-    market: "CN"
+    market: "CN",
+    author: "贝蒂·史密斯",
+    description:
+      "一部经典成长小说，讲述女孩弗兰茜在贫困环境中坚持阅读、学习并逐渐形成独立人格的故事。"
   }
 };
 
@@ -549,21 +564,94 @@ function toPick(
   category: CategoryId,
   source: string
 ): BookPick {
-  const market = marketForCategory(category);
-  const linkUrl =
-    market === "CN" ? jdSearchUrl(book.title) : amazonSearchUrl(book.title);
-
   return {
     category,
     categoryLabel: categoryLabels[category],
     title: book.title,
     rank: book.rank,
     reason: reasons[category],
-    linkUrl,
-    amazonUrl: market === "JP" ? linkUrl : undefined,
     source,
-    market
+    market: marketForCategory(category),
+    description: fallbackDescriptions[category]
   };
+}
+
+type OpenLibraryDoc = {
+  key?: string;
+  title?: string;
+  author_name?: string[];
+  cover_i?: number;
+  first_sentence?: string | string[];
+  subtitle?: string;
+};
+
+async function enrichBookMetadata(book: BookPick): Promise<BookPick> {
+  try {
+    const params = new URLSearchParams({
+      title: book.title,
+      limit: "5",
+      fields: "key,title,author_name,cover_i,first_sentence,subtitle"
+    });
+
+    const response = await fetch(
+      `https://openlibrary.org/search.json?${params.toString()}`,
+      {
+        headers: {
+          "User-Agent":
+            "FamilyScheduleHub/1.0 (weekly book metadata lookup)"
+        },
+        next: { revalidate: WEEK },
+        signal: AbortSignal.timeout(6500)
+      }
+    );
+
+    if (!response.ok) return book;
+
+    const payload = (await response.json()) as {
+      docs?: OpenLibraryDoc[];
+    };
+
+    const docs = Array.isArray(payload.docs) ? payload.docs : [];
+    const normalize = (value: string) =>
+      value
+        .replace(/[（(].*?[）)]/g, "")
+        .replace(/\s+/g, "")
+        .toLowerCase();
+
+    const normalizedTitle = normalize(book.title);
+
+    const matched =
+      docs.find((doc) => {
+        const candidate = normalize(doc.title ?? "");
+        return (
+          candidate === normalizedTitle ||
+          (candidate.length > 2 && candidate.includes(normalizedTitle)) ||
+          (normalizedTitle.length > 2 && normalizedTitle.includes(candidate))
+        );
+      }) ??
+      docs.find((doc) => Boolean(doc.cover_i)) ??
+      docs[0];
+
+    if (!matched) return book;
+
+    const sentence = Array.isArray(matched.first_sentence)
+      ? matched.first_sentence[0]
+      : matched.first_sentence;
+
+    return {
+      ...book,
+      author:
+        matched.author_name?.slice(0, 2).join(" / ") || book.author,
+      description: shortText(
+        sentence || matched.subtitle || book.description
+      ),
+      coverUrl: matched.cover_i
+        ? `https://covers.openlibrary.org/b/id/${matched.cover_i}-M.jpg`
+        : book.coverUrl
+    };
+  } catch {
+    return book;
+  }
 }
 
 async function fetchRanked(url: string) {
@@ -633,7 +721,8 @@ export async function GET() {
     "chinaReading"
   ];
 
-  const picks = await Promise.all(categories.map(pickCategory));
+  const selected = await Promise.all(categories.map(pickCategory));
+  const picks = await Promise.all(selected.map(enrichBookMetadata));
 
   return NextResponse.json(
     {
