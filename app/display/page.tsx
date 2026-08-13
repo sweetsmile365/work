@@ -4,9 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   Bell,
+  BookOpen,
   CheckCircle2,
   Circle,
   CloudSun,
+  Dumbbell,
+  ExternalLink,
   MapPin,
   Music2,
   Pause,
@@ -17,9 +20,15 @@ import {
   loadState,
   onStateSynced,
   refreshCloudStateNow,
+  saveState,
   toggleTask,
   type AppState
 } from "@/lib/db";
+import {
+  ensureDailyTasks,
+  isDailyEnglishTask,
+  isDailyFitnessTask
+} from "@/lib/dailyTasks";
 import type { ChildTask } from "@/types/activities";
 import type { FamilyEvent } from "@/types/events";
 
@@ -41,6 +50,21 @@ type MusicStation = {
   id: string;
   label: string;
   url: string;
+};
+
+type BookPick = {
+  category: "management" | "technology" | "junior";
+  categoryLabel: string;
+  title: string;
+  rank?: number;
+  reason: string;
+  amazonUrl: string;
+  source: string;
+};
+
+type BookPickResponse = {
+  picks?: BookPick[];
+  updatedAt?: string;
 };
 
 const weatherLocations: WeatherPoint[] = [
@@ -139,31 +163,8 @@ const isVisibleEvent = (event: FamilyEvent) =>
 const eventSortKey = (event: FamilyEvent) =>
   `${event.date}${event.start_datetime ?? "00:00"}`;
 
-const displayPriority = (event: FamilyEvent) => {
-  if (event.calendar_type === "child_activity") return 0;
-  if (event.calendar_type === "school") return 1;
-  if (event.calendar_type === "family" || event.calendar_type === "personal") return 2;
-  if (event.need_parent_action || event.parent_task) return 3;
-  if (event.event_type === "company_holiday") return 8;
-  if (event.title.includes("OFF")) return 9;
-  return 4;
-};
-
-const sortEvents = (a: FamilyEvent, b: FamilyEvent) => {
-  if (a.date !== b.date) return a.date.localeCompare(b.date);
-  const priority = displayPriority(a) - displayPriority(b);
-  if (priority !== 0) return priority;
-  if (a.all_day !== b.all_day) return a.all_day ? 1 : -1;
-  return eventSortKey(a).localeCompare(eventSortKey(b));
-};
-
-const pickPrimaryEvent = (events: FamilyEvent[]) =>
-  [...events].sort((a, b) => {
-    const priority = displayPriority(a) - displayPriority(b);
-    if (priority !== 0) return priority;
-    if (a.all_day !== b.all_day) return a.all_day ? 1 : -1;
-    return eventSortKey(a).localeCompare(eventSortKey(b));
-  })[0];
+const sortEvents = (a: FamilyEvent, b: FamilyEvent) =>
+  eventSortKey(a).localeCompare(eventSortKey(b));
 
 const categoryColor = (event: FamilyEvent) => {
   if (event.calendar_type === "school") return "bg-sky-300";
@@ -257,6 +258,20 @@ async function fetchWeather() {
   );
 
   return Object.fromEntries(entries) as Record<string, WeatherValue>;
+}
+
+
+async function fetchBookPicks() {
+  try {
+    const response = await fetch("/api/book-picks", {
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error(`Book picks ${response.status}`);
+    const payload = (await response.json()) as BookPickResponse;
+    return Array.isArray(payload.picks) ? payload.picks : [];
+  } catch {
+    return [];
+  }
 }
 
 function SectionTitle({
@@ -458,31 +473,77 @@ export default function DisplayPage() {
   >({});
   const [recentlyCompleted, setRecentlyCompleted] =
     useState<ChildTask | null>(null);
+  const [bookPicks, setBookPicks] = useState<BookPick[]>([]);
+  const activeDayRef = useRef(todayKey(new Date()));
 
   useEffect(() => {
-    setState(loadState());
-    void refreshCloudStateNow();
-    void fetchWeather().then(setWeather);
+    let disposed = false;
 
-    const unsubscribe = onStateSynced(setState);
+    const applyDailyTasks = (baseState: AppState, date = new Date()) => {
+      const ensured = ensureDailyTasks(baseState, date);
+      if (ensured !== baseState) {
+        saveState(ensured);
+      }
+      if (!disposed) setState(ensured);
+      return ensured;
+    };
 
-    const syncTimer = window.setInterval(() => {
-      void refreshCloudStateNow();
+    const initialize = async () => {
+      setState(loadState());
+      await refreshCloudStateNow();
+      if (disposed) return;
+      applyDailyTasks(loadState(), new Date());
+      void fetchBookPicks().then((picks) => {
+        if (!disposed) setBookPicks(picks);
+      });
+    };
+
+    void initialize();
+    void fetchWeather().then((value) => {
+      if (!disposed) setWeather(value);
+    });
+
+    const unsubscribe = onStateSynced((syncedState) => {
+      applyDailyTasks(syncedState, new Date());
+    });
+
+    const syncTimer = window.setInterval(async () => {
+      await refreshCloudStateNow();
+      if (!disposed) {
+        applyDailyTasks(loadState(), new Date());
+      }
     }, 60_000);
 
     const clockTimer = window.setInterval(() => {
-      setNow(new Date());
+      const nextNow = new Date();
+      setNow(nextNow);
+
+      const nextDay = todayKey(nextNow);
+      if (nextDay !== activeDayRef.current) {
+        activeDayRef.current = nextDay;
+        applyDailyTasks(loadState(), nextNow);
+      }
     }, 30_000);
 
     const weatherTimer = window.setInterval(() => {
-      void fetchWeather().then(setWeather);
+      void fetchWeather().then((value) => {
+        if (!disposed) setWeather(value);
+      });
     }, 30 * 60_000);
 
+    const bookTimer = window.setInterval(() => {
+      void fetchBookPicks().then((picks) => {
+        if (!disposed) setBookPicks(picks);
+      });
+    }, 6 * 60 * 60_000);
+
     return () => {
+      disposed = true;
       unsubscribe();
       window.clearInterval(syncTimer);
       window.clearInterval(clockTimer);
       window.clearInterval(weatherTimer);
+      window.clearInterval(bookTimer);
     };
   }, []);
 
@@ -513,7 +574,8 @@ export default function DisplayPage() {
       .filter(
         (task) =>
           learningTypes.has(task.task_type) &&
-          task.status !== "done"
+          task.status !== "done" &&
+          (!isDailyEnglishTask(task) || task.due_date === today)
       )
       .sort((a, b) =>
         (a.due_date ?? "9999-12-31").localeCompare(
@@ -536,6 +598,15 @@ export default function DisplayPage() {
       )
       .slice(0, 2);
 
+    const routineTasks = (state?.tasks ?? [])
+      .filter(
+        (task) =>
+          isDailyFitnessTask(task) &&
+          task.due_date === today &&
+          task.status !== "done"
+      )
+      .sort((a, b) => a.title.localeCompare(b.title));
+
     const childEventsToday = todayEvents.filter(
       (event) =>
         event.calendar_type === "school" ||
@@ -544,11 +615,12 @@ export default function DisplayPage() {
 
     return {
       todayEvents,
-      primaryEvent: pickPrimaryEvent(todayEvents),
+      primaryEvent: todayEvents[0],
       upcomingEvents,
       notices,
       mainTasks,
       nextTasks,
+      routineTasks,
       childEventsToday
     };
   }, [state, now]);
@@ -566,40 +638,9 @@ export default function DisplayPage() {
     setRecentlyCompleted(null);
   };
 
-  const isDayScene = now.getHours() >= 6 && now.getHours() < 18;
-
   return (
-    <main className={`h-[100dvh] overflow-hidden text-white ${isDayScene ? "bg-sky-200" : "bg-[#06101f]"}`}>
-      <div
-        className={`pointer-events-none fixed inset-0 ${
-          isDayScene
-            ? "bg-[linear-gradient(180deg,rgba(125,211,252,0.94)_0%,rgba(186,230,253,0.84)_38%,rgba(134,239,172,0.44)_100%)]"
-            : "bg-[radial-gradient(circle_at_15%_0%,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(129,140,248,0.16),transparent_26%),linear-gradient(145deg,#06101f,#0b1729_55%,#07111f)]"
-        }`}
-      />
-
-      {isDayScene ? (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute right-[8%] top-[7%] h-40 w-40 rounded-full bg-amber-200/90 shadow-[0_0_70px_rgba(253,224,71,0.65)]" />
-          <div className="absolute right-[6%] top-[4%] h-64 w-64 rounded-full bg-amber-100/20 blur-3xl" />
-          <div className="absolute left-[9%] top-[13%] h-16 w-44 rounded-full bg-white/55 blur-sm" />
-          <div className="absolute left-[15%] top-[10%] h-20 w-60 rounded-full bg-white/35 blur-md" />
-          <div className="absolute right-[28%] top-[18%] h-14 w-48 rounded-full bg-white/35 blur-sm" />
-          <div className="absolute bottom-0 left-0 h-40 w-full bg-[linear-gradient(180deg,transparent,rgba(21,128,61,0.32))]" />
-          <div className="absolute bottom-8 left-[7%] h-3 w-3 rounded-full bg-pink-300 shadow-[42px_18px_0_rgba(244,114,182,0.75),96px_-6px_0_rgba(251,191,36,0.75),164px_22px_0_rgba(248,113,113,0.78),230px_4px_0_rgba(236,72,153,0.72),305px_20px_0_rgba(250,204,21,0.7)]" />
-          <div className="absolute left-[6%] top-[26%] text-3xl font-semibold text-slate-700/28">⌒ ⌒</div>
-          <div className="absolute left-[23%] top-[18%] text-2xl font-semibold text-slate-700/22">⌒</div>
-          <div className="absolute right-[18%] top-[30%] text-2xl font-semibold text-slate-700/22">⌒ ⌒</div>
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,17,31,0.16),rgba(7,17,31,0.58))]" />
-        </div>
-      ) : (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute left-[6%] top-[8%] h-1 w-1 rounded-full bg-white/90 shadow-[130px_60px_0_rgba(255,255,255,0.75),260px_22px_0_rgba(255,255,255,0.85),390px_110px_0_rgba(255,255,255,0.65),580px_42px_0_rgba(255,255,255,0.82),780px_92px_0_rgba(255,255,255,0.7),980px_38px_0_rgba(255,255,255,0.9),1180px_132px_0_rgba(255,255,255,0.72),1420px_66px_0_rgba(255,255,255,0.76),1620px_115px_0_rgba(255,255,255,0.7)]" />
-          <div className="absolute left-[22%] top-[-18%] h-[760px] w-[1180px] -rotate-12 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(224,242,254,0.28),rgba(125,211,252,0.11)_28%,rgba(168,85,247,0.10)_45%,transparent_68%)] blur-xl" />
-          <div className="absolute right-[9%] top-[12%] h-24 w-24 rounded-full bg-slate-100/80 shadow-[0_0_45px_rgba(255,255,255,0.35)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.08),rgba(2,6,23,0.42))]" />
-        </div>
-      )}
+    <main className="h-[100dvh] overflow-hidden bg-[#06101f] text-white">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(129,140,248,0.16),transparent_26%),linear-gradient(145deg,#06101f,#0b1729_55%,#07111f)]" />
 
       <section className="relative mx-auto grid h-[100dvh] max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-4 lg:px-8">
         <header className="grid grid-cols-[minmax(260px,1fr)_auto] items-center gap-5 border-b border-white/10 pb-3">
@@ -645,9 +686,10 @@ export default function DisplayPage() {
                       {eventTimeRange(data.primaryEvent)}
                     </div>
 
-                    <div className="mt-3 text-[clamp(1.85rem,2.1vw,2.8rem)] font-semibold leading-tight">
+                    <div className="mt-3 text-[clamp(2rem,2.45vw,3.25rem)] font-semibold leading-tight">
                       {data.primaryEvent.title}
                     </div>
+
                     {data.primaryEvent.location ? (
                       <div className="mt-4 flex items-center gap-2 text-[clamp(1.05rem,1.1vw,1.4rem)] text-slate-300">
                         <MapPin className="h-5 w-5 shrink-0 text-cyan-200" />
@@ -688,13 +730,13 @@ export default function DisplayPage() {
                 {data.upcomingEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="grid grid-cols-[7rem_7.4rem_1rem_minmax(0,1fr)] items-start gap-3 rounded-xl bg-slate-950/28 px-4 py-2.5"
+                    className="grid grid-cols-[7rem_6.4rem_1rem_minmax(0,1fr)] items-start gap-3 rounded-2xl bg-slate-950/30 px-4 py-2.5"
                   >
                     <div className="text-[clamp(1rem,0.95vw,1.2rem)] font-semibold text-slate-200">
                       {formatShortDate(event.date)}
                     </div>
 
-                    <div className="whitespace-nowrap text-[clamp(1rem,0.95vw,1.2rem)] text-slate-300">
+                    <div className="text-[clamp(1rem,0.95vw,1.2rem)] text-slate-300">
                       {eventTimeRange(event)}
                     </div>
 
@@ -843,44 +885,112 @@ export default function DisplayPage() {
               )}
             </article>
 
-            <article className="min-h-0 rounded-3xl bg-amber-300/[0.08] p-5">
-              <div className="mb-4 flex items-center gap-3">
-                <Bell className="h-6 w-6 text-amber-200" />
-                <SectionTitle
-                  title="QUICK NOTICE"
-                  accent="bg-amber-300"
-                />
-              </div>
+            <article className="min-h-0 overflow-hidden rounded-3xl bg-amber-300/[0.08] p-5">
+              <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
+                <section>
+                  <div className="mb-2 flex items-center gap-3">
+                    <Dumbbell className="h-6 w-6 text-emerald-200" />
+                    <SectionTitle
+                      title="DAILY ROUTINE"
+                      accent="bg-emerald-300"
+                    />
+                  </div>
 
-              <div className="grid gap-3">
-                {data.notices.map((event) => (
-                  <div
-                    key={event.id}
-                    className="rounded-2xl bg-amber-200/10 px-4 py-3"
-                  >
-                    <div className="text-[clamp(0.95rem,0.9vw,1.1rem)] text-amber-100">
-                      {formatShortDate(event.date)}{" "}
-                      {eventTimeRange(event)}
-                    </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {data.routineTasks.map((task) => (
+                      <button
+                        key={task.id}
+                        type="button"
+                        onClick={() => completeTaskFromScreen(task)}
+                        className="flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300/10 px-3 text-left text-[clamp(0.95rem,0.95vw,1.15rem)] font-semibold text-emerald-50 transition active:scale-[0.98] active:bg-emerald-300/25"
+                      >
+                        <Circle className="h-5 w-5 shrink-0 text-emerald-200" />
+                        <span className="min-w-0 truncate">
+                          {task.title.replace(" · ", " ")}
+                        </span>
+                      </button>
+                    ))}
 
-                    <div className="mt-1 text-[clamp(1.15rem,1.18vw,1.5rem)] font-semibold leading-snug">
-                      {event.title}
-                    </div>
-
-                    {event.parent_task ? (
-                      <div className="mt-1 text-[clamp(1rem,0.95vw,1.18rem)] text-slate-300">
-                        {event.parent_task}
+                    {data.routineTasks.length === 0 ? (
+                      <div className="col-span-2 flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300/10 px-3 text-sm text-emerald-100">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                        今日のFitnessは完了
                       </div>
                     ) : null}
                   </div>
-                ))}
+                </section>
 
-                {data.notices.length === 0 ? (
-                  <div className="flex items-center gap-2 rounded-2xl bg-slate-950/25 p-5 text-[clamp(1.1rem,1.05vw,1.35rem)] text-slate-300">
-                    <AlertCircle className="h-5 w-5 text-amber-200" />
+                {data.notices.length > 0 ? (
+                  <section className="rounded-xl bg-amber-200/10 px-3 py-2">
+                    <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.1em] text-amber-100">
+                      <Bell className="h-4 w-4" />
+                      QUICK NOTICE
+                    </div>
+                    <div className="mt-1 truncate text-sm font-semibold text-white">
+                      {formatShortDate(data.notices[0].date)}{" "}
+                      {data.notices[0].title}
+                    </div>
+                  </section>
+                ) : (
+                  <section className="flex items-center gap-2 rounded-xl bg-slate-950/20 px-3 py-2 text-xs text-slate-400">
+                    <AlertCircle className="h-4 w-4 text-amber-200" />
                     確認が必要な予定はありません
+                  </section>
+                )}
+
+                <section className="min-h-0 overflow-hidden rounded-2xl bg-slate-950/25 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-5 w-5 text-sky-200" />
+                      <div className="text-sm font-semibold tracking-[0.1em] text-sky-100">
+                        BOOK PICK · 今週のおすすめ
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-slate-500">
+                      Amazon JP · weekly
+                    </span>
                   </div>
-                ) : null}
+
+                  <div className="grid gap-2">
+                    {bookPicks.slice(0, 3).map((book) => (
+                      <a
+                        key={book.category}
+                        href={book.amazonUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group grid grid-cols-[5.7rem_minmax(0,1fr)_1rem] items-center gap-2 rounded-xl bg-white/[0.04] px-3 py-2 transition active:bg-white/[0.09]"
+                      >
+                        <div>
+                          <div className="text-[10px] font-bold tracking-[0.08em] text-sky-200">
+                            {book.categoryLabel}
+                          </div>
+                          {book.rank ? (
+                            <div className="mt-0.5 text-[10px] text-slate-500">
+                              Bestseller #{book.rank}
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="truncate text-[clamp(0.9rem,0.92vw,1.08rem)] font-semibold text-white">
+                            {book.title}
+                          </div>
+                          <div className="mt-0.5 truncate text-[10px] text-slate-400">
+                            {book.reason}
+                          </div>
+                        </div>
+
+                        <ExternalLink className="h-4 w-4 text-slate-500 group-active:text-sky-200" />
+                      </a>
+                    ))}
+
+                    {bookPicks.length === 0 ? (
+                      <div className="rounded-xl bg-white/[0.04] px-3 py-4 text-center text-sm text-slate-400">
+                        今週の本を取得中…
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
               </div>
             </article>
           </section>
