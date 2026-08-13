@@ -139,8 +139,31 @@ const isVisibleEvent = (event: FamilyEvent) =>
 const eventSortKey = (event: FamilyEvent) =>
   `${event.date}${event.start_datetime ?? "00:00"}`;
 
-const sortEvents = (a: FamilyEvent, b: FamilyEvent) =>
-  eventSortKey(a).localeCompare(eventSortKey(b));
+const displayPriority = (event: FamilyEvent) => {
+  if (event.calendar_type === "child_activity") return 0;
+  if (event.calendar_type === "school") return 1;
+  if (event.calendar_type === "family" || event.calendar_type === "personal") return 2;
+  if (event.need_parent_action || event.parent_task) return 3;
+  if (event.event_type === "company_holiday") return 8;
+  if (event.title.includes("OFF")) return 9;
+  return 4;
+};
+
+const sortEvents = (a: FamilyEvent, b: FamilyEvent) => {
+  if (a.date !== b.date) return a.date.localeCompare(b.date);
+  const priority = displayPriority(a) - displayPriority(b);
+  if (priority !== 0) return priority;
+  if (a.all_day !== b.all_day) return a.all_day ? 1 : -1;
+  return eventSortKey(a).localeCompare(eventSortKey(b));
+};
+
+const pickPrimaryEvent = (events: FamilyEvent[]) =>
+  [...events].sort((a, b) => {
+    const priority = displayPriority(a) - displayPriority(b);
+    if (priority !== 0) return priority;
+    if (a.all_day !== b.all_day) return a.all_day ? 1 : -1;
+    return eventSortKey(a).localeCompare(eventSortKey(b));
+  })[0];
 
 const categoryColor = (event: FamilyEvent) => {
   if (event.calendar_type === "school") return "bg-sky-300";
@@ -521,7 +544,7 @@ export default function DisplayPage() {
 
     return {
       todayEvents,
-      primaryEvent: todayEvents[0],
+      primaryEvent: pickPrimaryEvent(todayEvents),
       upcomingEvents,
       notices,
       mainTasks,
@@ -591,10 +614,9 @@ export default function DisplayPage() {
                       {eventTimeRange(data.primaryEvent)}
                     </div>
 
-                    <div className="mt-3 text-[clamp(2rem,2.45vw,3.25rem)] font-semibold leading-tight">
+                    <div className="mt-3 text-[clamp(1.85rem,2.1vw,2.8rem)] font-semibold leading-tight">
                       {data.primaryEvent.title}
                     </div>
-
                     {data.primaryEvent.location ? (
                       <div className="mt-4 flex items-center gap-2 text-[clamp(1.05rem,1.1vw,1.4rem)] text-slate-300">
                         <MapPin className="h-5 w-5 shrink-0 text-cyan-200" />
@@ -635,13 +657,13 @@ export default function DisplayPage() {
                 {data.upcomingEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="grid grid-cols-[7rem_6.4rem_1rem_minmax(0,1fr)] items-start gap-3 rounded-2xl bg-slate-950/30 px-4 py-2.5"
+                    className="grid grid-cols-[7rem_7.4rem_1rem_minmax(0,1fr)] items-start gap-3 rounded-xl bg-slate-950/28 px-4 py-2.5"
                   >
                     <div className="text-[clamp(1rem,0.95vw,1.2rem)] font-semibold text-slate-200">
                       {formatShortDate(event.date)}
                     </div>
 
-                    <div className="text-[clamp(1rem,0.95vw,1.2rem)] text-slate-300">
+                    <div className="whitespace-nowrap text-[clamp(1rem,0.95vw,1.2rem)] text-slate-300">
                       {eventTimeRange(event)}
                     </div>
 
