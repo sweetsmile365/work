@@ -101,7 +101,7 @@ const seasonThemes: Record<SeasonId, SeasonTheme> = {
     label: "SPRING",
     labelJa: "春",
     dayBackground:
-      "linear-gradient(145deg,#eef8fb 0%,#f7eef5 34%,#eef8f1 68%,#e6f0f7 100%)",
+      "linear-gradient(145deg,#10202b 0%,#152735 34%,#17332f 68%,#11232d 100%)",
     nightBackground:
       "linear-gradient(145deg,#101826 0%,#182133 40%,#1b2b30 72%,#121e29 100%)",
     glowA: "rgba(244,114,182,0.18)",
@@ -112,7 +112,7 @@ const seasonThemes: Record<SeasonId, SeasonTheme> = {
     label: "SUMMER",
     labelJa: "夏",
     dayBackground:
-      "linear-gradient(145deg,#e7f7fb 0%,#e4f5f2 34%,#e9f6e8 68%,#dceff6 100%)",
+      "linear-gradient(145deg,#0d2230 0%,#0f2a35 34%,#12352f 68%,#0d2430 100%)",
     nightBackground:
       "linear-gradient(145deg,#06101f 0%,#0a1c2a 42%,#0a2427 70%,#071620 100%)",
     glowA: "rgba(34,211,238,0.18)",
@@ -123,7 +123,7 @@ const seasonThemes: Record<SeasonId, SeasonTheme> = {
     label: "AUTUMN",
     labelJa: "秋",
     dayBackground:
-      "linear-gradient(145deg,#f8f1e8 0%,#f3e8dc 36%,#eee8e4 70%,#e7eef2 100%)",
+      "linear-gradient(145deg,#241a15 0%,#2d2018 36%,#2b241d 70%,#1d2025 100%)",
     nightBackground:
       "linear-gradient(145deg,#16110f 0%,#211713 38%,#271c17 70%,#17141a 100%)",
     glowA: "rgba(251,146,60,0.18)",
@@ -134,7 +134,7 @@ const seasonThemes: Record<SeasonId, SeasonTheme> = {
     label: "WINTER",
     labelJa: "冬",
     dayBackground:
-      "linear-gradient(145deg,#edf4f8 0%,#e8f0f5 35%,#e6edf5 70%,#f1f6f8 100%)",
+      "linear-gradient(145deg,#14202d 0%,#182735 35%,#1b2b3b 70%,#15232f 100%)",
     nightBackground:
       "linear-gradient(145deg,#07101d 0%,#0c1828 42%,#101d30 72%,#0a1421 100%)",
     glowA: "rgba(147,197,253,0.17)",
@@ -179,8 +179,17 @@ function SeasonalBackdrop({ date }: { date: Date }) {
           background: `
             radial-gradient(circle at 14% 2%, ${theme.glowA}, transparent 27%),
             radial-gradient(circle at 88% 9%, ${theme.glowB}, transparent 25%),
-            radial-gradient(circle at 50% 108%, rgba(255,255,255,0.035), transparent 32%)
+            radial-gradient(circle at 50% 108%, rgba(255,255,255,0.025), transparent 32%)
           `
+        }}
+      />
+
+      <div
+        className="pointer-events-none fixed inset-0"
+        style={{
+          background: daytime
+            ? "linear-gradient(180deg,rgba(2,8,18,0.10),rgba(2,8,18,0.18))"
+            : "linear-gradient(180deg,rgba(0,0,0,0.08),rgba(0,0,0,0.16))"
         }}
       />
 
@@ -572,7 +581,7 @@ function MobileWeather({
             key={location.id}
             className="rounded-xl bg-white/[0.055] px-3 py-2"
           >
-            <div className="text-xs font-semibold text-slate-400">
+            <div className="text-xs font-semibold text-slate-300">
               {location.label}
             </div>
             <div className="mt-1 text-lg font-bold text-white">
@@ -581,7 +590,7 @@ function MobileWeather({
                 : value.temp}
               °
             </div>
-            <div className="mt-0.5 truncate text-[11px] text-slate-400">
+            <div className="mt-0.5 truncate text-[11px] text-slate-300">
               {value?.unavailable ? "取得不可" : weatherLabel(value?.code)}
             </div>
           </div>
@@ -607,7 +616,7 @@ function BookCover({
     >
       <BookOpen
         className={
-          compact ? "h-4 w-4 text-slate-500" : "h-7 w-7 text-slate-500"
+          compact ? "h-4 w-4 text-slate-300" : "h-7 w-7 text-slate-300"
         }
       />
       {book.coverUrl ? (
@@ -652,11 +661,11 @@ function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
                 current === book.category ? null : book.category
               )
             }
-            className="grid h-9 min-w-0 grid-cols-[1.6rem_minmax(0,1fr)] items-center gap-2 rounded-lg bg-white/[0.045] px-2 text-left transition hover:bg-white/[0.09] active:bg-white/[0.12]"
+            className="grid h-9 min-w-0 grid-cols-[1.6rem_minmax(0,1fr)] items-center gap-2 rounded-lg bg-slate-950/42 px-2 text-left transition hover:bg-white/[0.09] active:bg-white/[0.12]"
             aria-label={`${book.title} の紹介を表示`}
           >
             <div className="relative grid h-8 w-6 shrink-0 place-items-center overflow-hidden rounded bg-slate-800">
-              <BookOpen className="h-3.5 w-3.5 text-slate-500" />
+              <BookOpen className="h-3.5 w-3.5 text-slate-300" />
               {book.coverUrl ? (
                 <img
                   src={book.coverUrl}
@@ -683,7 +692,7 @@ function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
         ))}
 
         {books.length === 0 ? (
-          <div className="col-span-2 grid min-h-[110px] place-items-center rounded-xl bg-white/[0.04] text-sm text-slate-400">
+          <div className="col-span-2 grid min-h-[110px] place-items-center rounded-xl bg-white/[0.04] text-sm text-slate-300">
             今週の本を取得中…
           </div>
         ) : null}
@@ -725,7 +734,7 @@ function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
               </div>
 
               {activeBook.author ? (
-                <div className="mt-1 truncate text-[10px] text-slate-400">
+                <div className="mt-1 truncate text-[10px] text-slate-300">
                   {activeBook.author}
                 </div>
               ) : null}
@@ -734,7 +743,7 @@ function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
                 {activeBook.description}
               </div>
 
-              <div className="mt-1 truncate text-[8px] text-slate-500">
+              <div className="mt-1 truncate text-[8px] text-slate-300">
                 {activeBook.source} · 每周更新
               </div>
             </div>
@@ -747,7 +756,7 @@ function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
 
 function MobileBookPickCard({ book }: { book: BookPick }) {
   return (
-    <details className="group rounded-xl bg-slate-950/20">
+    <details className="group rounded-xl bg-slate-950/34">
       <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-2.5">
         <BookCover book={book} compact />
         <div className="min-w-0 flex-1">
@@ -758,12 +767,12 @@ function MobileBookPickCard({ book }: { book: BookPick }) {
           <div className="mt-0.5 truncate text-sm font-semibold text-white">
             {book.title}
           </div>
-          <div className="mt-0.5 truncate text-[11px] text-slate-500">
+          <div className="mt-0.5 truncate text-[11px] text-slate-300">
             {book.author ? `${book.author} · ` : ""}
             {book.reason}
           </div>
         </div>
-        <span className="text-xs text-slate-500 transition group-open:rotate-180">
+        <span className="text-xs text-slate-300 transition group-open:rotate-180">
           ▾
         </span>
       </summary>
@@ -775,7 +784,7 @@ function MobileBookPickCard({ book }: { book: BookPick }) {
             <div className="text-sm leading-relaxed text-slate-200">
               {book.description}
             </div>
-            <div className="mt-2 text-[10px] text-slate-500">
+            <div className="mt-2 text-[10px] text-slate-300">
               {book.source} · 每周更新
             </div>
           </div>
@@ -889,7 +898,7 @@ function MusicControl() {
           ))}
         </select>
 
-        <Volume2 className="h-4 w-4 text-slate-400" />
+        <Volume2 className="h-4 w-4 text-slate-300" />
 
         <input
           type="range"
@@ -903,7 +912,7 @@ function MusicControl() {
         />
       </div>
 
-      <div className="mt-1 h-4 text-xs text-slate-400">
+      <div className="mt-1 h-4 text-xs text-slate-300">
         {error
           ? "再生できません"
           : playing
@@ -1126,7 +1135,7 @@ export default function DisplayPage() {
               <div className="mt-1 text-2xl font-bold leading-tight">
                 {greeting(now)}
               </div>
-              <div className="mt-1 text-sm text-slate-400">
+              <div className="mt-1 text-sm text-slate-300">
                 {formatHeaderDate(now)}
               </div>
             </div>
@@ -1147,7 +1156,7 @@ export default function DisplayPage() {
         </header>
 
         <div className="mt-4 grid gap-4">
-          <section className="rounded-2xl bg-cyan-300/[0.08] p-4">
+          <section className="rounded-2xl bg-cyan-300/[0.12] p-4">
             <div className="flex items-center justify-between gap-3">
               <SectionTitle title="TODAY" accent="bg-cyan-300" />
               <span className="rounded-full bg-cyan-300/15 px-2.5 py-1 text-xs text-cyan-100">
@@ -1164,14 +1173,14 @@ export default function DisplayPage() {
                   {data.primaryEvent.title}
                 </div>
                 {data.primaryEvent.location ? (
-                  <div className="mt-2 flex items-center gap-2 text-sm text-slate-400">
+                  <div className="mt-2 flex items-center gap-2 text-sm text-slate-300">
                     <MapPin className="h-4 w-4 shrink-0 text-cyan-200" />
                     <span className="truncate">{data.primaryEvent.location}</span>
                   </div>
                 ) : null}
               </div>
             ) : (
-              <div className="mt-4 rounded-xl bg-slate-950/20 p-4 text-center text-sm text-slate-400">
+              <div className="mt-4 rounded-xl bg-slate-950/34 p-4 text-center text-sm text-slate-300">
                 今日の大きな予定はありません
               </div>
             )}
@@ -1181,11 +1190,11 @@ export default function DisplayPage() {
                 {data.todayEvents.slice(1, 4).map((event) => (
                   <div
                     key={event.id}
-                    className="flex items-start gap-3 rounded-xl bg-slate-950/20 px-3 py-2"
+                    className="flex items-start gap-3 rounded-xl bg-slate-950/34 px-3 py-2"
                   >
                     <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${categoryColor(event)}`} />
                     <div className="min-w-0">
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-slate-300">
                         {eventTimeRange(event)}
                       </div>
                       <div className="truncate text-sm font-semibold text-slate-200">
@@ -1198,7 +1207,7 @@ export default function DisplayPage() {
             ) : null}
           </section>
 
-          <section className="rounded-2xl bg-emerald-300/[0.08] p-4">
+          <section className="rounded-2xl bg-emerald-300/[0.12] p-4">
             <div className="flex items-center justify-between gap-3">
               <SectionTitle
                 title="LEARNING · 今日"
@@ -1230,7 +1239,7 @@ export default function DisplayPage() {
                   key={task.id}
                   type="button"
                   onClick={() => completeTaskFromScreen(task)}
-                  className="flex min-h-14 items-center gap-3 rounded-xl bg-slate-950/25 px-3 text-left active:bg-emerald-300/15"
+                  className="flex min-h-14 items-center gap-3 rounded-xl bg-slate-950/38 px-3 text-left active:bg-emerald-300/15"
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 border-emerald-200/80 text-emerald-100">
                     <Circle className="h-5 w-5" />
@@ -1240,13 +1249,13 @@ export default function DisplayPage() {
                       {task.title}
                     </span>
                     {task.note ? (
-                      <span className="mt-0.5 block truncate text-xs text-slate-500">
+                      <span className="mt-0.5 block truncate text-xs text-slate-300">
                         {task.note}
                       </span>
                     ) : null}
                   </span>
                   {task.due_date ? (
-                    <span className="shrink-0 text-xs text-slate-500">
+                    <span className="shrink-0 text-xs text-slate-300">
                       {dueText(task.due_date)}
                     </span>
                   ) : null}
@@ -1254,14 +1263,14 @@ export default function DisplayPage() {
               ))}
 
               {data.mainTasks.length === 0 ? (
-                <div className="rounded-xl bg-slate-950/20 p-4 text-center text-sm text-slate-400">
+                <div className="rounded-xl bg-slate-950/34 p-4 text-center text-sm text-slate-300">
                   今日の学習タスクはありません
                 </div>
               ) : null}
             </div>
           </section>
 
-          <section className="rounded-2xl bg-white/[0.045] p-4">
+          <section className="rounded-2xl bg-slate-950/42 p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <Dumbbell className="h-5 w-5 text-emerald-200" />
@@ -1328,9 +1337,9 @@ export default function DisplayPage() {
               {data.streaks.map((habit) => (
                 <div
                   key={habit.key}
-                  className="rounded-xl bg-slate-950/20 px-3 py-3 text-center"
+                  className="rounded-xl bg-slate-950/34 px-3 py-3 text-center"
                 >
-                  <div className="truncate text-xs text-slate-400">
+                  <div className="truncate text-xs text-slate-300">
                     {habit.label}
                   </div>
                   <div className="mt-1 text-lg font-bold text-white">
@@ -1349,16 +1358,16 @@ export default function DisplayPage() {
           <section className="rounded-2xl bg-indigo-300/[0.07] p-4">
             <div className="flex items-center justify-between gap-3">
               <SectionTitle title="UPCOMING" accent="bg-indigo-300" />
-              <span className="text-xs text-slate-500">Next 5</span>
+              <span className="text-xs text-slate-300">Next 5</span>
             </div>
 
             <div className="mt-3 grid gap-2">
               {data.upcomingEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="grid grid-cols-[4.8rem_minmax(0,1fr)] gap-3 rounded-xl bg-slate-950/20 px-3 py-2.5"
+                  className="grid grid-cols-[4.8rem_minmax(0,1fr)] gap-3 rounded-xl bg-slate-950/34 px-3 py-2.5"
                 >
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-slate-300">
                     <div className="font-semibold text-slate-300">
                       {formatShortDate(event.date)}
                     </div>
@@ -1369,7 +1378,7 @@ export default function DisplayPage() {
                       {event.title}
                     </div>
                     {event.location ? (
-                      <div className="mt-0.5 truncate text-xs text-slate-500">
+                      <div className="mt-0.5 truncate text-xs text-slate-300">
                         {event.location}
                       </div>
                     ) : null}
@@ -1380,7 +1389,7 @@ export default function DisplayPage() {
           </section>
 
           {data.notices.length > 0 ? (
-            <section className="rounded-2xl bg-amber-300/[0.08] p-4">
+            <section className="rounded-2xl bg-amber-300/[0.12] p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-amber-100">
                 <Bell className="h-5 w-5" />
                 QUICK NOTICE
@@ -1398,7 +1407,7 @@ export default function DisplayPage() {
                       {event.title}
                     </div>
                     {event.parent_task ? (
-                      <div className="mt-1 text-xs text-slate-400">
+                      <div className="mt-1 text-xs text-slate-300">
                         {event.parent_task}
                       </div>
                     ) : null}
@@ -1416,7 +1425,7 @@ export default function DisplayPage() {
                   BOOK PICK
                 </div>
               </div>
-              <span className="text-[10px] text-slate-500">
+              <span className="text-[10px] text-slate-300">
                 weekly
               </span>
             </div>
@@ -1458,7 +1467,7 @@ export default function DisplayPage() {
             <WeatherStrip weather={weather} />
             <MusicControl />
 
-            <div className="min-w-[210px] text-right text-[clamp(4rem,5.4vw,6.5rem)] font-semibold leading-none tabular-nums">
+            <div className="min-w-[210px] text-right text-[clamp(4rem,5.4vw,6.5rem)] font-bold leading-none tabular-nums text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
               {formatClock(now)}
             </div>
           </div>
@@ -1466,7 +1475,7 @@ export default function DisplayPage() {
 
         <div className="grid min-h-0 grid-rows-[0.94fr_1.06fr] gap-4">
           <section className="grid min-h-0 grid-cols-[0.9fr_1.55fr] gap-4">
-            <article className="min-h-0 rounded-3xl bg-cyan-300/[0.08] p-5">
+            <article className="min-h-0 rounded-3xl border border-cyan-200/10 bg-cyan-300/[0.12] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
               <div className="mb-3 flex items-center justify-between">
                 <SectionTitle title="TODAY" accent="bg-cyan-300" />
 
@@ -1510,14 +1519,14 @@ export default function DisplayPage() {
               )}
             </article>
 
-            <article className="min-h-0 overflow-hidden rounded-3xl bg-indigo-300/[0.08] p-5">
+            <article className="min-h-0 overflow-hidden rounded-3xl border border-indigo-200/10 bg-indigo-300/[0.12] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
               <div className="mb-4 flex items-center justify-between">
                 <SectionTitle
                   title="UPCOMING"
                   accent="bg-indigo-300"
                 />
 
-                <span className="text-[clamp(0.9rem,0.85vw,1.05rem)] text-slate-400">
+                <span className="text-[clamp(0.9rem,0.85vw,1.05rem)] text-slate-300">
                   Next 5
                 </span>
               </div>
@@ -1526,7 +1535,7 @@ export default function DisplayPage() {
                 {data.upcomingEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="grid min-h-0 grid-cols-[6.6rem_6rem_1rem_minmax(0,1fr)] items-center gap-3 rounded-xl bg-slate-950/30 px-4 py-1.5"
+                    className="grid min-h-0 grid-cols-[6.6rem_6rem_1rem_minmax(0,1fr)] items-center gap-3 rounded-xl bg-slate-950/44 px-4 py-1.5"
                   >
                     <div className="text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold text-slate-200">
                       {formatShortDate(event.date)}
@@ -1549,7 +1558,7 @@ export default function DisplayPage() {
                 ))}
 
                 {data.upcomingEvents.length === 0 ? (
-                  <div className="rounded-2xl bg-slate-950/30 p-6 text-[clamp(1.25rem,1.25vw,1.6rem)] text-slate-300">
+                  <div className="rounded-2xl bg-slate-950/44 p-6 text-[clamp(1.25rem,1.25vw,1.6rem)] text-slate-300">
                     今後の予定はありません
                   </div>
                 ) : null}
@@ -1558,7 +1567,7 @@ export default function DisplayPage() {
           </section>
 
           <section className="grid min-h-0 grid-cols-[1.55fr_0.9fr] gap-4">
-            <article className="min-h-0 rounded-3xl bg-emerald-300/[0.08] p-5">
+            <article className="min-h-0 rounded-3xl border border-emerald-200/10 bg-emerald-300/[0.12] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
               <div className="mb-4 flex items-center justify-between">
                 <SectionTitle
                   title="LEARNING ・ 今日やること"
@@ -1590,7 +1599,7 @@ export default function DisplayPage() {
 
               {data.mainTasks.length > 0 ? (
                 <div className="grid min-h-0 grid-cols-[1fr_0.58fr] gap-5">
-                  <div className="min-h-0 rounded-2xl bg-slate-950/25 p-4">
+                  <div className="min-h-0 rounded-2xl bg-slate-950/38 p-4">
                     <div className="mb-3 text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold tracking-[0.12em] text-emerald-100">
                       主要タスク
                     </div>
@@ -1619,7 +1628,7 @@ export default function DisplayPage() {
                             </div>
 
                             {task.note ? (
-                              <div className="mt-0.5 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-400">
+                              <div className="mt-0.5 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-300">
                                 {task.note}
                               </div>
                             ) : null}
@@ -1630,7 +1639,7 @@ export default function DisplayPage() {
                               className={`pt-1 text-[clamp(0.9rem,0.85vw,1rem)] ${
                                 task.due_date < todayKey(now)
                                   ? "font-semibold text-amber-200"
-                                  : "text-slate-400"
+                                  : "text-slate-300"
                               }`}
                             >
                               {task.due_date < todayKey(now)
@@ -1643,7 +1652,7 @@ export default function DisplayPage() {
                     </div>
                   </div>
 
-                  <div className="min-h-0 rounded-2xl bg-slate-950/25 p-4">
+                  <div className="min-h-0 rounded-2xl bg-slate-950/38 p-4">
                     <div className="mb-3 text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold tracking-[0.12em] text-emerald-100">
                       NEXT
                     </div>
@@ -1659,7 +1668,7 @@ export default function DisplayPage() {
                           </div>
 
                           {task.due_date ? (
-                            <div className="mt-1 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-400">
+                            <div className="mt-1 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-300">
                               {dueText(task.due_date)}
                             </div>
                           ) : null}
@@ -1675,13 +1684,13 @@ export default function DisplayPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid min-h-[180px] place-items-center rounded-2xl bg-slate-950/25 text-center text-[clamp(1.35rem,1.45vw,1.9rem)] text-slate-300">
+                <div className="grid min-h-[180px] place-items-center rounded-2xl bg-slate-950/38 text-center text-[clamp(1.35rem,1.45vw,1.9rem)] text-slate-300">
                   今日の学習タスクはありません
                 </div>
               )}
             </article>
 
-            <article className="min-h-0 overflow-hidden rounded-3xl bg-amber-300/[0.08] p-5">
+            <article className="min-h-0 overflow-hidden rounded-3xl bg-amber-300/[0.12] p-5">
               <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
                 <section>
                   <div className="mb-2 flex items-center justify-between gap-3">
@@ -1742,13 +1751,13 @@ export default function DisplayPage() {
                     </div>
                   </section>
                 ) : (
-                  <section className="flex items-center gap-2 rounded-xl bg-slate-950/20 px-3 py-2 text-xs text-slate-400">
+                  <section className="flex items-center gap-2 rounded-xl bg-slate-950/34 px-3 py-2 text-xs text-slate-300">
                     <AlertCircle className="h-4 w-4 text-amber-200" />
                     確認が必要な予定はありません
                   </section>
                 )}
 
-                <section className="relative isolate min-h-0 overflow-hidden rounded-2xl bg-slate-950/25 p-3">
+                <section className="relative isolate min-h-0 overflow-hidden rounded-2xl bg-slate-950/38 p-3">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-5 w-5 text-sky-200" />
@@ -1756,7 +1765,7 @@ export default function DisplayPage() {
                         BOOK PICK · 今週のおすすめ
                       </div>
                     </div>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-[10px] text-slate-300">
                       JP + CN · weekly
                     </span>
                   </div>
@@ -1771,7 +1780,7 @@ export default function DisplayPage() {
         <footer className="border-t border-white/10 pt-2">
           <Link
             href="/streak"
-            className="grid grid-cols-[auto_repeat(3,minmax(0,1fr))_auto] items-center gap-3 rounded-xl bg-white/[0.045] px-4 py-2 transition active:bg-white/[0.1]"
+            className="grid grid-cols-[auto_repeat(3,minmax(0,1fr))_auto] items-center gap-3 rounded-xl bg-slate-950/42 px-4 py-2 transition active:bg-white/[0.1]"
             aria-label="坚持记录を開く"
           >
             <div className="flex items-center gap-2 pr-2 text-xs font-semibold tracking-[0.14em] text-orange-200">
