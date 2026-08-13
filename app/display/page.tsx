@@ -7,6 +7,7 @@ import {
   Bell,
   BookOpen,
   CheckCircle2,
+  ChevronRight,
   Circle,
   CloudSun,
   Dumbbell,
@@ -527,7 +528,7 @@ function WeatherStrip({
   weather: Record<string, WeatherValue>;
 }) {
   return (
-    <div className="min-w-[520px] rounded-2xl bg-white/[0.07] px-4 py-3">
+    <div className="h-full min-w-0 rounded-2xl border border-white/[0.06] bg-white/[0.07] px-4 py-3">
       <div className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-slate-300">
         <CloudSun className="h-4 w-4 text-sky-200" />
         WEATHER
@@ -635,121 +636,74 @@ function BookCover({
 }
 
 function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
-  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const activeCategory = selectedCategory ?? hoveredCategory;
   const activeBook =
-    books.find((book) => book.category === activeCategory) ?? null;
-  const pinned = Boolean(selectedCategory);
+    books.find((book) => book.category === selectedCategory) ??
+    books[0] ??
+    null;
+
+  if (!activeBook) {
+    return (
+      <div className="grid min-h-[150px] place-items-center rounded-xl bg-slate-950/30 text-sm text-slate-300">
+        今週の本を取得中…
+      </div>
+    );
+  }
 
   return (
-    <div className="relative min-h-[116px]">
-      <div className="grid grid-cols-2 gap-1.5">
-        {books.map((book) => (
-          <button
-            key={book.category}
-            type="button"
-            onMouseEnter={() => {
-              if (!selectedCategory) setHoveredCategory(book.category);
-            }}
-            onMouseLeave={() => {
-              if (!selectedCategory) setHoveredCategory(null);
-            }}
-            onClick={() =>
-              setSelectedCategory((current) =>
-                current === book.category ? null : book.category
-              )
-            }
-            className="grid h-9 min-w-0 grid-cols-[1.6rem_minmax(0,1fr)] items-center gap-2 rounded-lg bg-slate-950/42 px-2 text-left transition hover:bg-white/[0.09] active:bg-white/[0.12]"
-            aria-label={`${book.title} の紹介を表示`}
-          >
-            <div className="relative grid h-8 w-6 shrink-0 place-items-center overflow-hidden rounded bg-slate-800">
-              <BookOpen className="h-3.5 w-3.5 text-slate-300" />
-              {book.coverUrl ? (
-                <img
-                  src={book.coverUrl}
-                  alt=""
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  onError={(event) => {
-                    event.currentTarget.style.display = "none";
-                  }}
-                />
-              ) : null}
-            </div>
+    <div className="grid min-h-0 gap-2">
+      <div className="grid min-h-0 grid-cols-[4.6rem_minmax(0,1fr)] gap-3 rounded-xl border border-white/[0.06] bg-slate-950/34 p-3">
+        <BookCover book={activeBook} />
 
-            <div className="min-w-0">
-              <div className="truncate text-[8px] font-bold tracking-[0.04em] text-sky-200">
-                {book.categoryLabel}
-                {book.rank ? ` · #${book.rank}` : ""}
-              </div>
-              <div className="truncate text-[11px] font-semibold leading-tight text-white">
-                {book.title}
-              </div>
-            </div>
-          </button>
-        ))}
-
-        {books.length === 0 ? (
-          <div className="col-span-2 grid min-h-[110px] place-items-center rounded-xl bg-white/[0.04] text-sm text-slate-300">
-            今週の本を取得中…
+        <div className="min-w-0">
+          <div className="text-[9px] font-bold tracking-[0.08em] text-sky-200">
+            {activeBook.categoryLabel}
+            {activeBook.rank ? ` · #${activeBook.rank}` : ""}
           </div>
-        ) : null}
-      </div>
 
-      {activeBook ? (
-        <div
-          className={`absolute inset-0 z-30 rounded-xl border border-sky-300/15 bg-[#0b1729]/[0.99] p-3 shadow-xl ${
-            pinned ? "pointer-events-auto" : "pointer-events-none"
-          }`}
-        >
-          <div className="flex h-full gap-3">
-            <BookCover book={activeBook} />
+          <div className="mt-1 line-clamp-2 text-[clamp(1rem,1vw,1.2rem)] font-bold leading-snug text-white">
+            {activeBook.title}
+          </div>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-[9px] font-bold tracking-[0.06em] text-sky-200">
-                    {activeBook.categoryLabel}
-                    {activeBook.rank ? ` · #${activeBook.rank}` : ""}
-                  </div>
-                  <div className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug text-white">
-                    {activeBook.title}
-                  </div>
-                </div>
-
-                {pinned ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedCategory(null);
-                      setHoveredCategory(null);
-                    }}
-                    className="pointer-events-auto shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-slate-200 active:bg-white/20"
-                  >
-                    戻る
-                  </button>
-                ) : null}
-              </div>
-
-              {activeBook.author ? (
-                <div className="mt-1 truncate text-[10px] text-slate-300">
-                  {activeBook.author}
-                </div>
-              ) : null}
-
-              <div className="mt-2 line-clamp-3 text-[11px] leading-relaxed text-slate-200">
-                {activeBook.description}
-              </div>
-
-              <div className="mt-1 truncate text-[8px] text-slate-300">
-                {activeBook.source} · 每周更新
-              </div>
+          {activeBook.author ? (
+            <div className="mt-1 truncate text-[10px] text-slate-300">
+              {activeBook.author}
             </div>
+          ) : null}
+
+          <div className="mt-2 line-clamp-3 text-[10px] leading-relaxed text-slate-300">
+            {activeBook.description}
           </div>
         </div>
-      ) : null}
+      </div>
+
+      <div className="grid grid-cols-5 gap-1.5">
+        {books.slice(0, 5).map((book, index) => {
+          const active = book.category === activeBook.category;
+          return (
+            <button
+              key={book.category}
+              type="button"
+              onClick={() => setSelectedCategory(book.category)}
+              className={`min-w-0 rounded-lg border px-1.5 py-1.5 text-center transition active:scale-[0.97] ${
+                active
+                  ? "border-sky-300/35 bg-sky-300/15"
+                  : "border-white/[0.05] bg-white/[0.035]"
+              }`}
+              aria-label={`${book.title} を表示`}
+              title={book.title}
+            >
+              <div className="text-[8px] font-bold text-sky-200">
+                {index + 1}
+              </div>
+              <div className="mt-0.5 truncate text-[8px] text-slate-300">
+                {book.market ?? "JP"}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -1443,123 +1397,125 @@ export default function DisplayPage() {
         </div>
       </section>
 
-      <section className="relative mx-auto hidden h-[100dvh] lg:grid max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-4 lg:px-8">
-        <header className="grid grid-cols-[minmax(260px,1fr)_auto] items-center gap-5 border-b border-white/10 pb-3">
-          <div className="min-w-0">
+      <section className="relative mx-auto hidden h-[100dvh] max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-3 px-6 py-4 lg:grid lg:px-8">
+        <header className="grid min-h-[132px] grid-cols-[minmax(250px,0.9fr)_minmax(0,1.35fr)_minmax(0,1fr)_minmax(170px,0.7fr)] items-stretch gap-4 border-b border-white/10 pb-3">
+          <div className="flex min-w-0 flex-col justify-center">
             <div className="flex items-center gap-3">
-              <div className="text-[clamp(1rem,1vw,1.25rem)] font-semibold tracking-[0.18em] text-cyan-200">
-                Family Dashboard v2
+              <div className="text-[clamp(0.95rem,1vw,1.2rem)] font-semibold tracking-[0.16em] text-cyan-200">
+                Family Dashboard
               </div>
               <span
-                className="rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold tracking-[0.12em] text-slate-300"
+                className="rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold tracking-[0.1em] text-slate-300"
                 title="季節テーマ"
               >
                 {seasonThemes[seasonForDate(now)].label} · {seasonThemes[seasonForDate(now)].labelJa}
               </span>
             </div>
 
-            <div className="mt-1 text-[clamp(1.9rem,2.6vw,3.6rem)] font-semibold leading-none">
+            <div className="mt-4 whitespace-nowrap text-[clamp(2rem,2.5vw,3.25rem)] font-semibold leading-none text-white">
               {greeting(now)}
             </div>
 
-            <div className="mt-2 text-[clamp(1rem,1.05vw,1.35rem)] font-semibold text-slate-200">
+            <div className="mt-3 text-[clamp(0.95rem,1vw,1.2rem)] font-semibold text-slate-200">
               {formatHeaderDate(now)}
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <WeatherStrip weather={weather} />
-            <MusicControl />
+          <WeatherStrip weather={weather} />
 
-            <div className="min-w-[230px] text-right">
-              <div className="mb-1 text-[clamp(1rem,1.05vw,1.3rem)] font-bold tracking-[0.03em] text-slate-100">
-                {formatShortDate(todayKey(now))}
-              </div>
-              <div className="text-[clamp(4rem,5.4vw,6.5rem)] font-bold leading-none tabular-nums text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
+          <div className="min-w-0">
+            <MusicControl />
+          </div>
+
+          <div className="grid min-w-0 place-items-center rounded-2xl border border-white/[0.06] bg-white/[0.055] px-4 py-3 text-center">
+            <div>
+              <div className="text-[clamp(3.8rem,5vw,6rem)] font-bold leading-none tabular-nums text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
                 {formatClock(now)}
+              </div>
+              <div className="mt-3 text-[clamp(1rem,1.05vw,1.25rem)] font-bold tracking-[0.03em] text-slate-100">
+                {formatShortDate(todayKey(now))}
               </div>
             </div>
           </div>
         </header>
 
-        <div className="grid min-h-0 grid-rows-[0.94fr_1.06fr] gap-4">
-          <section className="grid min-h-0 grid-cols-[0.9fr_1.55fr] gap-4">
-            <article className="min-h-0 rounded-3xl border border-cyan-200/10 bg-cyan-300/[0.12] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
-              <div className="mb-3 flex items-center justify-between">
+        <div className="grid min-h-0 grid-rows-[1.02fr_0.98fr] gap-4">
+          <section className="grid min-h-0 grid-cols-[0.95fr_1.25fr] gap-4">
+            <article className="relative min-h-0 overflow-hidden rounded-3xl border border-cyan-200/15 bg-[radial-gradient(circle_at_76%_82%,rgba(34,211,238,0.16),transparent_28%),linear-gradient(145deg,rgba(8,56,78,0.88),rgba(7,42,64,0.94))] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+              <div className="relative z-10 mb-4">
                 <SectionTitle title="TODAY" accent="bg-cyan-300" />
               </div>
 
               {data.primaryEvent ? (
-                <div className="grid h-[calc(100%-3.2rem)] content-between">
+                <div className="relative z-10 grid h-[calc(100%-3rem)] content-between">
                   <div>
-                    <div className="text-[clamp(1.15rem,1.35vw,1.7rem)] text-cyan-100">
+                    <div className="text-[clamp(1.15rem,1.25vw,1.55rem)] text-cyan-100">
                       {eventTimeRange(data.primaryEvent)}
                     </div>
 
-                    <div className="mt-3 text-[clamp(2rem,2.45vw,3.25rem)] font-semibold leading-tight">
+                    <div className="mt-3 text-[clamp(2.2rem,2.55vw,3.35rem)] font-semibold leading-tight text-white">
                       {data.primaryEvent.title}
                     </div>
 
                     {data.primaryEvent.location ? (
-                      <div className="mt-4 flex items-center gap-2 text-[clamp(1.05rem,1.1vw,1.4rem)] text-slate-300">
+                      <div className="mt-4 flex items-center gap-2 text-[clamp(1rem,1.05vw,1.25rem)] text-slate-200">
                         <MapPin className="h-5 w-5 shrink-0 text-cyan-200" />
                         {data.primaryEvent.location}
                       </div>
                     ) : null}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 text-[clamp(1rem,1vw,1.25rem)] text-slate-300">
-                    <div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/25 px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
+                      <span className="text-cyan-200">▣</span>
                       今日の予定 {data.todayEvents.length}件
                     </div>
-                    <div>
+                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/25 px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
+                      <span className="text-cyan-200">◎</span>
                       学校・子ども関連 {data.childEventsToday}件
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="grid h-[calc(100%-3.2rem)] place-items-center text-center text-[clamp(1.35rem,1.5vw,1.9rem)] text-slate-300">
+                <div className="relative z-10 grid h-[calc(100%-3rem)] place-items-center text-center text-[clamp(1.3rem,1.4vw,1.8rem)] text-slate-300">
                   今日の大きな予定はありません
                 </div>
               )}
             </article>
 
-            <article className="min-h-0 overflow-hidden rounded-3xl border border-indigo-200/10 bg-indigo-300/[0.12] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
-              <div className="mb-4 flex items-center justify-between">
-                <SectionTitle
-                  title="UPCOMING"
-                  accent="bg-indigo-300"
-                />
+            <article className="min-h-0 overflow-hidden rounded-3xl border border-indigo-200/15 bg-[linear-gradient(145deg,rgba(18,43,70,0.92),rgba(14,34,57,0.96))] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+              <div className="mb-3">
+                <SectionTitle title="UPCOMING" accent="bg-indigo-300" />
               </div>
 
-              <div className="grid min-h-0 gap-1.5">
+              <div className="grid min-h-0">
                 {data.upcomingEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="grid min-h-0 grid-cols-[6.6rem_6rem_1rem_minmax(0,1fr)] items-center gap-3 rounded-xl bg-slate-950/44 px-4 py-1.5"
+                    className="grid min-h-0 grid-cols-[6.6rem_7.2rem_1rem_minmax(0,1fr)_1.2rem] items-center gap-3 border-b border-white/[0.07] px-2 py-2 last:border-b-0"
                   >
-                    <div className="text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold text-slate-200">
+                    <div className="text-[clamp(0.9rem,0.9vw,1.05rem)] font-semibold text-slate-200">
                       {formatShortDate(event.date)}
                     </div>
 
-                    <div className="text-[clamp(0.95rem,0.9vw,1.1rem)] text-slate-300">
+                    <div className="text-[clamp(0.9rem,0.9vw,1.05rem)] text-slate-300">
                       {eventTimeRange(event)}
                     </div>
 
                     <span
-                      className={`h-3 w-3 rounded-full ${categoryColor(
-                        event
-                      )}`}
+                      className={`h-3 w-3 rounded-full ${categoryColor(event)}`}
                     />
 
-                    <div className="truncate text-[clamp(1rem,1.05vw,1.3rem)] font-medium leading-tight">
+                    <div className="truncate text-[clamp(1rem,1.05vw,1.25rem)] font-medium leading-tight text-white">
                       {event.title}
                     </div>
+
+                    <ChevronRight className="h-4 w-4 text-slate-500" />
                   </div>
                 ))}
 
                 {data.upcomingEvents.length === 0 ? (
-                  <div className="rounded-2xl bg-slate-950/44 p-6 text-[clamp(1.25rem,1.25vw,1.6rem)] text-slate-300">
+                  <div className="rounded-2xl bg-slate-950/30 p-6 text-[clamp(1.2rem,1.2vw,1.5rem)] text-slate-300">
                     今後の予定はありません
                   </div>
                 ) : null}
@@ -1567,21 +1523,21 @@ export default function DisplayPage() {
             </article>
           </section>
 
-          <section className="grid min-h-0 grid-cols-[1.55fr_0.9fr] gap-4">
-            <article className="min-h-0 rounded-3xl border border-emerald-200/10 bg-emerald-300/[0.12] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
-              <div className="mb-4 flex items-center justify-between">
+          <section className="grid min-h-0 grid-cols-[1.5fr_0.82fr_0.72fr] gap-4">
+            <article className="min-h-0 overflow-hidden rounded-3xl border border-emerald-200/15 bg-[linear-gradient(145deg,rgba(4,74,71,0.88),rgba(5,50,61,0.94))] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+              <div className="mb-3 flex items-center justify-between gap-3">
                 <SectionTitle
                   title="LEARNING ・ 今日やること"
                   accent="bg-emerald-300"
                 />
 
-                <span className="text-[clamp(0.9rem,0.85vw,1.05rem)] text-emerald-100/80">
+                <span className="text-[clamp(0.85rem,0.8vw,1rem)] text-emerald-100/80">
                   ○ をタップして完了
                 </span>
               </div>
 
               {recentlyCompleted ? (
-                <div className="mb-3 flex items-center justify-between rounded-xl bg-emerald-300/15 px-4 py-2 text-sm text-emerald-50">
+                <div className="mb-2 flex items-center justify-between rounded-xl bg-emerald-300/15 px-3 py-2 text-sm text-emerald-50">
                   <div className="flex min-w-0 items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-300" />
                     <span className="truncate">
@@ -1591,7 +1547,7 @@ export default function DisplayPage() {
                   <button
                     type="button"
                     onClick={undoCompletedTask}
-                    className="ml-3 min-h-10 shrink-0 rounded-lg bg-white/10 px-4 font-semibold text-white transition active:scale-95 active:bg-white/20"
+                    className="ml-3 min-h-9 shrink-0 rounded-lg bg-white/10 px-3 font-semibold text-white transition active:scale-95 active:bg-white/20"
                   >
                     取消
                   </button>
@@ -1599,77 +1555,75 @@ export default function DisplayPage() {
               ) : null}
 
               {data.mainTasks.length > 0 ? (
-                <div className="grid min-h-0 grid-cols-[1fr_0.58fr] gap-5">
-                  <div className="min-h-0 rounded-2xl bg-slate-950/38 p-4">
-                    <div className="mb-3 text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold tracking-[0.12em] text-emerald-100">
-                      主要タスク
-                    </div>
-
-                    <div className="grid gap-2">
-                      {data.mainTasks.map((task) => (
-                        <div
-                          key={task.id}
-                          className="grid grid-cols-[3.25rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-2 py-2 text-white transition hover:bg-emerald-300/[0.06]"
+                <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_0.34fr] gap-4">
+                  <div className="grid min-h-0 content-start gap-2">
+                    {data.mainTasks.slice(0, 3).map((task) => (
+                      <div
+                        key={task.id}
+                        className="grid min-h-14 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/[0.05] bg-slate-950/24 px-3 py-2"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => completeTaskFromScreen(task)}
+                          className="grid h-10 w-10 place-items-center rounded-full border-2 border-emerald-200/90 bg-emerald-300/[0.05] text-emerald-100 transition active:scale-95 active:bg-emerald-300/25"
+                          aria-label={`${task.title} を完了にする`}
+                          title="タップして完了"
                         >
-                          <button
-                            type="button"
-                            onClick={() =>
-                              completeTaskFromScreen(task)
-                            }
-                            className="grid h-11 w-11 place-items-center rounded-full border-2 border-emerald-200/90 bg-emerald-300/[0.05] text-emerald-100 transition active:scale-95 active:bg-emerald-300/25"
-                            aria-label={`${task.title} を完了にする`}
-                            title="タップして完了"
-                          >
-                            <Circle className="h-6 w-6" />
-                          </button>
+                          <Circle className="h-5 w-5" />
+                        </button>
 
-                          <div className="min-w-0">
-                            <div className="text-[clamp(1.25rem,1.25vw,1.65rem)] leading-snug">
-                              {task.title}
-                            </div>
-
-                            {task.note ? (
-                              <div className="mt-0.5 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-300">
-                                {task.note}
-                              </div>
-                            ) : null}
+                        <div className="min-w-0">
+                          <div className="line-clamp-2 text-[clamp(1.05rem,1.05vw,1.3rem)] font-medium leading-snug text-white">
+                            {task.title}
                           </div>
-
-                          {task.due_date ? (
-                            <div
-                              className={`pt-1 text-[clamp(0.9rem,0.85vw,1rem)] ${
-                                task.due_date < todayKey(now)
-                                  ? "font-semibold text-amber-200"
-                                  : "text-slate-300"
-                              }`}
-                            >
-                              {task.due_date < todayKey(now)
-                                ? `期限超過 ${dueText(task.due_date)}`
-                                : dueText(task.due_date)}
+                          {task.note ? (
+                            <div className="mt-0.5 truncate text-[clamp(0.8rem,0.75vw,0.9rem)] text-slate-300">
+                              {task.note}
                             </div>
                           ) : null}
                         </div>
-                      ))}
-                    </div>
+
+                        {task.due_date ? (
+                          <div
+                            className={`text-[clamp(0.8rem,0.78vw,0.95rem)] ${
+                              task.due_date < todayKey(now)
+                                ? "font-semibold text-amber-200"
+                                : "text-slate-300"
+                            }`}
+                          >
+                            {task.due_date < todayKey(now)
+                              ? `期限超過 ${dueText(task.due_date)}`
+                              : dueText(task.due_date)}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+
+                    <Link
+                      href="/learning"
+                      className="flex min-h-10 items-center rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 text-sm font-semibold text-slate-300 transition active:bg-white/[0.08]"
+                    >
+                      ＋ 学習ページを開く
+                    </Link>
                   </div>
 
-                  <div className="min-h-0 rounded-2xl bg-slate-950/38 p-4">
-                    <div className="mb-3 text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold tracking-[0.12em] text-emerald-100">
+                  <div className="min-h-0">
+                    <div className="mb-2 text-xs font-semibold tracking-[0.12em] text-emerald-100">
                       NEXT
                     </div>
 
-                    <div className="grid gap-3">
-                      {data.nextTasks.map((task) => (
+                    <div className="grid gap-2">
+                      {data.nextTasks.slice(0, 1).map((task) => (
                         <div
                           key={task.id}
-                          className="rounded-xl bg-emerald-300/10 px-4 py-3"
+                          className="rounded-xl border border-emerald-200/[0.08] bg-emerald-300/10 px-3 py-3"
                         >
-                          <div className="text-[clamp(1.25rem,1.25vw,1.65rem)] font-medium leading-snug">
+                          <div className="line-clamp-3 text-[clamp(1rem,1vw,1.2rem)] font-medium leading-snug text-white">
                             → {task.title}
                           </div>
 
                           {task.due_date ? (
-                            <div className="mt-1 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-300">
+                            <div className="mt-2 text-sm text-slate-300">
                               {dueText(task.due_date)}
                             </div>
                           ) : null}
@@ -1677,7 +1631,7 @@ export default function DisplayPage() {
                       ))}
 
                       {data.nextTasks.length === 0 ? (
-                        <div className="text-[clamp(1.15rem,1.1vw,1.45rem)] text-slate-300">
+                        <div className="text-sm text-slate-300">
                           次の学習タスクはありません
                         </div>
                       ) : null}
@@ -1685,111 +1639,111 @@ export default function DisplayPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid min-h-[180px] place-items-center rounded-2xl bg-slate-950/38 text-center text-[clamp(1.35rem,1.45vw,1.9rem)] text-slate-300">
+                <div className="grid min-h-[160px] place-items-center rounded-2xl bg-slate-950/30 text-center text-[clamp(1.25rem,1.3vw,1.65rem)] text-slate-300">
                   今日の学習タスクはありません
                 </div>
               )}
             </article>
 
-            <article className="min-h-0 overflow-hidden rounded-3xl bg-amber-300/[0.12] p-5">
-              <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
-                <section>
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <Dumbbell className="h-6 w-6 text-emerald-200" />
-                      <SectionTitle
-                        title="DAILY ROUTINE"
-                        accent="bg-emerald-300"
-                      />
+            <div className="grid min-h-0 grid-rows-[1fr_auto] gap-3">
+              <article className="min-h-0 rounded-3xl border border-emerald-200/15 bg-[linear-gradient(145deg,rgba(15,78,66,0.9),rgba(10,58,55,0.95))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Dumbbell className="h-5 w-5 shrink-0 text-emerald-200" />
+                    <div className="truncate text-[clamp(1rem,1vw,1.2rem)] font-semibold tracking-[0.08em] text-emerald-50">
+                      DAILY ROUTINE
                     </div>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-1.5">
                     <Link
                       href="/fitness"
-                      className="shrink-0 rounded-full bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100 transition active:bg-emerald-300/20"
+                      className="rounded-full bg-emerald-300/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-100 active:bg-emerald-300/20"
                     >
-                      FITNESS →
+                      FITNESS
                     </Link>
                     <Link
                       href="/recipes"
-                      className="shrink-0 rounded-full bg-amber-300/10 px-3 py-1.5 text-xs font-semibold text-amber-100 transition active:bg-amber-300/20"
+                      className="rounded-full bg-amber-300/10 px-2.5 py-1 text-[10px] font-semibold text-amber-100 active:bg-amber-300/20"
                     >
-                      MEALS →
+                      MEALS
                     </Link>
                     <Link
                       href="/badminton"
-                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sky-300/10 text-base transition active:bg-sky-300/20"
+                      className="grid h-7 w-7 place-items-center rounded-full bg-sky-300/10 text-sm active:bg-sky-300/20"
                       aria-label="バドミントン素振り練習"
                       title="Badminton · 素振り練習"
                     >
                       🏸
                     </Link>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    {data.routineTasks.map((task) => (
-                      <button
-                        key={task.id}
-                        type="button"
-                        onClick={() => completeTaskFromScreen(task)}
-                        className="flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300/10 px-3 text-left text-[clamp(0.95rem,0.95vw,1.15rem)] font-semibold text-emerald-50 transition active:scale-[0.98] active:bg-emerald-300/25"
-                      >
-                        <Circle className="h-5 w-5 shrink-0 text-emerald-200" />
-                        <span className="min-w-0 truncate">
-                          {task.title.replace(" · ", " ")}
-                        </span>
-                      </button>
-                    ))}
+                <div className="grid grid-cols-2 gap-2">
+                  {data.routineTasks.map((task) => (
+                    <button
+                      key={task.id}
+                      type="button"
+                      onClick={() => completeTaskFromScreen(task)}
+                      className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.05] bg-emerald-300/10 px-3 text-left text-[clamp(0.85rem,0.82vw,1rem)] font-semibold text-emerald-50 transition active:scale-[0.98] active:bg-emerald-300/25"
+                    >
+                      <Circle className="h-5 w-5 shrink-0 text-emerald-200" />
+                      <span className="min-w-0 truncate">
+                        {task.title.replace(" · ", " ")}
+                      </span>
+                    </button>
+                  ))}
 
-                    {data.routineTasks.length === 0 ? (
-                      <div className="col-span-2 flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300/10 px-3 text-sm text-emerald-100">
-                        <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-                        今日のFitnessは完了
-                      </div>
-                    ) : null}
+                  {data.routineTasks.length === 0 ? (
+                    <div className="col-span-2 flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300/10 px-3 text-sm text-emerald-100">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                      今日のFitnessは完了
+                    </div>
+                  ) : null}
+                </div>
+              </article>
+
+              {data.notices.length > 0 ? (
+                <article className="rounded-2xl border border-amber-200/10 bg-amber-200/[0.09] px-4 py-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.1em] text-amber-100">
+                    <Bell className="h-4 w-4" />
+                    QUICK NOTICE
                   </div>
-                </section>
-
-                {data.notices.length > 0 ? (
-                  <section className="rounded-xl bg-amber-200/10 px-3 py-2">
-                    <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.1em] text-amber-100">
-                      <Bell className="h-4 w-4" />
-                      QUICK NOTICE
-                    </div>
-                    <div className="mt-1 truncate text-sm font-semibold text-white">
-                      {formatShortDate(data.notices[0].date)}{" "}
-                      {data.notices[0].title}
-                    </div>
-                  </section>
-                ) : (
-                  <section className="flex items-center gap-2 rounded-xl bg-slate-950/34 px-3 py-2 text-xs text-slate-300">
-                    <AlertCircle className="h-4 w-4 text-amber-200" />
-                    確認が必要な予定はありません
-                  </section>
-                )}
-
-                <section className="relative isolate min-h-0 overflow-hidden rounded-2xl bg-slate-950/38 p-3">
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="h-5 w-5 text-sky-200" />
-                      <div className="text-sm font-semibold tracking-[0.1em] text-sky-100">
-                        BOOK PICK · 今週のおすすめ
-                      </div>
-                    </div>
-                    <span className="text-[10px] text-slate-300">
-                      JP + CN · weekly
-                    </span>
+                  <div className="mt-1 truncate text-[clamp(0.9rem,0.9vw,1.05rem)] font-semibold text-white">
+                    {formatShortDate(data.notices[0].date)}{" "}
+                    {data.notices[0].title}
                   </div>
+                </article>
+              ) : (
+                <article className="flex items-center gap-2 rounded-2xl border border-white/[0.05] bg-slate-950/30 px-4 py-3 text-xs text-slate-300">
+                  <AlertCircle className="h-4 w-4 text-amber-200" />
+                  確認が必要な予定はありません
+                </article>
+              )}
+            </div>
 
-                  <DesktopBookPickPanel books={bookPicks.slice(0, 5)} />
-                </section>
+            <article className="min-h-0 overflow-hidden rounded-3xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <BookOpen className="h-5 w-5 shrink-0 text-sky-200" />
+                  <div className="truncate text-[clamp(0.95rem,0.95vw,1.15rem)] font-semibold tracking-[0.08em] text-sky-100">
+                    BOOK PICK · 今週のおすすめ
+                  </div>
+                </div>
+                <span className="shrink-0 text-[9px] text-slate-400">
+                  JP + CN
+                </span>
               </div>
+
+              <DesktopBookPickPanel books={bookPicks.slice(0, 5)} />
             </article>
           </section>
         </div>
 
-        <footer className="border-t border-white/10 pt-2">
+        <footer>
           <Link
             href="/streak"
-            className="grid grid-cols-[auto_repeat(3,minmax(0,1fr))_auto] items-center gap-3 rounded-xl bg-slate-950/42 px-4 py-2 transition active:bg-white/[0.1]"
+            className="grid min-h-12 grid-cols-[auto_repeat(3,minmax(0,1fr))_auto] items-center gap-3 rounded-2xl border border-white/[0.06] bg-slate-950/42 px-4 py-2 transition active:bg-white/[0.1]"
             aria-label="坚持记录を開く"
           >
             <div className="flex items-center gap-2 pr-2 text-xs font-semibold tracking-[0.14em] text-orange-200">
