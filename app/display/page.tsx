@@ -352,6 +352,40 @@ function WeatherStrip({
   );
 }
 
+
+function MobileWeather({
+  weather
+}: {
+  weather: Record<string, WeatherValue>;
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {weatherLocations.map((location) => {
+        const value = weather[location.id];
+        return (
+          <div
+            key={location.id}
+            className="rounded-xl bg-white/[0.055] px-3 py-2"
+          >
+            <div className="text-xs font-semibold text-slate-400">
+              {location.label}
+            </div>
+            <div className="mt-1 text-lg font-bold text-white">
+              {value?.unavailable || value?.temp === undefined
+                ? "--"
+                : value.temp}
+              °
+            </div>
+            <div className="mt-0.5 truncate text-[11px] text-slate-400">
+              {value?.unavailable ? "取得不可" : weatherLabel(value?.code)}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function MusicControl() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [stationId, setStationId] = useState(musicStations[0].id);
@@ -672,10 +706,336 @@ export default function DisplayPage() {
   };
 
   return (
-    <main className="h-[100dvh] overflow-hidden bg-[#06101f] text-white">
+    <main className="min-h-[100dvh] bg-[#06101f] text-white lg:h-[100dvh] lg:overflow-hidden">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(129,140,248,0.16),transparent_26%),linear-gradient(145deg,#06101f,#0b1729_55%,#07111f)]" />
 
-      <section className="relative mx-auto grid h-[100dvh] max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-4 lg:px-8">
+      <section className="relative mx-auto min-h-[100dvh] max-w-xl px-4 pb-8 pt-4 lg:hidden">
+        <header className="border-b border-white/10 pb-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-xs font-semibold tracking-[0.16em] text-cyan-200">
+                FAMILY DASHBOARD
+              </div>
+              <div className="mt-1 text-2xl font-bold leading-tight">
+                {greeting(now)}
+              </div>
+              <div className="mt-1 text-sm text-slate-400">
+                {formatHeaderDate(now)}
+              </div>
+            </div>
+            <div className="shrink-0 text-4xl font-bold tabular-nums">
+              {formatClock(now)}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <MobileWeather weather={weather} />
+          </div>
+
+          <div className="mt-3 overflow-x-auto pb-1">
+            <div className="min-w-[330px]">
+              <MusicControl />
+            </div>
+          </div>
+        </header>
+
+        <div className="mt-4 grid gap-4">
+          <section className="rounded-2xl bg-cyan-300/[0.08] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <SectionTitle title="TODAY" accent="bg-cyan-300" />
+              <span className="rounded-full bg-cyan-300/15 px-2.5 py-1 text-xs text-cyan-100">
+                {data.todayEvents.length}件
+              </span>
+            </div>
+
+            {data.primaryEvent ? (
+              <div className="mt-4">
+                <div className="text-sm text-cyan-100">
+                  {eventTimeRange(data.primaryEvent)}
+                </div>
+                <div className="mt-1 text-xl font-bold leading-snug">
+                  {data.primaryEvent.title}
+                </div>
+                {data.primaryEvent.location ? (
+                  <div className="mt-2 flex items-center gap-2 text-sm text-slate-400">
+                    <MapPin className="h-4 w-4 shrink-0 text-cyan-200" />
+                    <span className="truncate">{data.primaryEvent.location}</span>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-xl bg-slate-950/20 p-4 text-center text-sm text-slate-400">
+                今日の大きな予定はありません
+              </div>
+            )}
+
+            {data.todayEvents.length > 1 ? (
+              <div className="mt-3 grid gap-2">
+                {data.todayEvents.slice(1, 4).map((event) => (
+                  <div
+                    key={event.id}
+                    className="flex items-start gap-3 rounded-xl bg-slate-950/20 px-3 py-2"
+                  >
+                    <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${categoryColor(event)}`} />
+                    <div className="min-w-0">
+                      <div className="text-xs text-slate-500">
+                        {eventTimeRange(event)}
+                      </div>
+                      <div className="truncate text-sm font-semibold text-slate-200">
+                        {event.title}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </section>
+
+          <section className="rounded-2xl bg-emerald-300/[0.08] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <SectionTitle
+                title="LEARNING · 今日"
+                accent="bg-emerald-300"
+              />
+              <span className="text-xs text-emerald-100/80">
+                タップで完了
+              </span>
+            </div>
+
+            {recentlyCompleted ? (
+              <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-emerald-300/15 px-3 py-2 text-sm text-emerald-50">
+                <div className="min-w-0 truncate">
+                  完了: {recentlyCompleted.title}
+                </div>
+                <button
+                  type="button"
+                  onClick={undoCompletedTask}
+                  className="shrink-0 rounded-lg bg-white/10 px-3 py-2 font-semibold text-white"
+                >
+                  取消
+                </button>
+              </div>
+            ) : null}
+
+            <div className="mt-3 grid gap-2">
+              {data.mainTasks.map((task) => (
+                <button
+                  key={task.id}
+                  type="button"
+                  onClick={() => completeTaskFromScreen(task)}
+                  className="flex min-h-14 items-center gap-3 rounded-xl bg-slate-950/25 px-3 text-left active:bg-emerald-300/15"
+                >
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 border-emerald-200/80 text-emerald-100">
+                    <Circle className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-base font-semibold text-white">
+                      {task.title}
+                    </span>
+                    {task.note ? (
+                      <span className="mt-0.5 block truncate text-xs text-slate-500">
+                        {task.note}
+                      </span>
+                    ) : null}
+                  </span>
+                  {task.due_date ? (
+                    <span className="shrink-0 text-xs text-slate-500">
+                      {dueText(task.due_date)}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+
+              {data.mainTasks.length === 0 ? (
+                <div className="rounded-xl bg-slate-950/20 p-4 text-center text-sm text-slate-400">
+                  今日の学習タスクはありません
+                </div>
+              ) : null}
+            </div>
+          </section>
+
+          <section className="rounded-2xl bg-white/[0.045] p-4">
+            <div className="flex items-center gap-3">
+              <Dumbbell className="h-5 w-5 text-emerald-200" />
+              <SectionTitle
+                title="DAILY ROUTINE"
+                accent="bg-emerald-300"
+              />
+            </div>
+
+            <div className="mt-3 grid gap-2">
+              {data.routineTasks.map((task) => (
+                <button
+                  key={task.id}
+                  type="button"
+                  onClick={() => completeTaskFromScreen(task)}
+                  className="flex min-h-12 items-center gap-3 rounded-xl bg-emerald-300/10 px-3 text-left active:bg-emerald-300/25"
+                >
+                  <Circle className="h-5 w-5 shrink-0 text-emerald-200" />
+                  <span className="font-semibold text-emerald-50">
+                    {task.title.replace(" · ", " ")}
+                  </span>
+                </button>
+              ))}
+
+              {data.routineTasks.length === 0 ? (
+                <div className="flex items-center gap-2 rounded-xl bg-emerald-300/10 px-3 py-3 text-sm text-emerald-100">
+                  <CheckCircle2 className="h-5 w-5" />
+                  今日のFitnessは完了
+                </div>
+              ) : null}
+            </div>
+          </section>
+
+          <Link
+            href="/streak"
+            className="rounded-2xl bg-orange-300/[0.08] p-4 active:bg-orange-300/[0.13]"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Flame className="h-5 w-5 text-orange-200" />
+                <div className="font-semibold tracking-[0.1em] text-orange-100">
+                  STREAK · 坚持记录
+                </div>
+              </div>
+              <div className="rounded-full bg-emerald-300/10 px-3 py-1 text-sm font-semibold text-emerald-100">
+                Today {data.habitsDoneToday}/{habits.length}
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {data.streaks.map((habit) => (
+                <div
+                  key={habit.key}
+                  className="rounded-xl bg-slate-950/20 px-3 py-3 text-center"
+                >
+                  <div className="truncate text-xs text-slate-400">
+                    {habit.label}
+                  </div>
+                  <div className="mt-1 text-lg font-bold text-white">
+                    🔥 {habit.streak}日
+                  </div>
+                  <div
+                    className={`mx-auto mt-2 h-2 w-2 rounded-full ${
+                      habit.done ? "bg-emerald-300" : "bg-slate-600"
+                    }`}
+                  />
+                </div>
+              ))}
+            </div>
+          </Link>
+
+          <section className="rounded-2xl bg-indigo-300/[0.07] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <SectionTitle title="UPCOMING" accent="bg-indigo-300" />
+              <span className="text-xs text-slate-500">Next 5</span>
+            </div>
+
+            <div className="mt-3 grid gap-2">
+              {data.upcomingEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="grid grid-cols-[4.8rem_minmax(0,1fr)] gap-3 rounded-xl bg-slate-950/20 px-3 py-2.5"
+                >
+                  <div className="text-xs text-slate-400">
+                    <div className="font-semibold text-slate-300">
+                      {formatShortDate(event.date)}
+                    </div>
+                    <div className="mt-0.5">{eventTimeRange(event)}</div>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-white">
+                      {event.title}
+                    </div>
+                    {event.location ? (
+                      <div className="mt-0.5 truncate text-xs text-slate-500">
+                        {event.location}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {data.notices.length > 0 ? (
+            <section className="rounded-2xl bg-amber-300/[0.08] p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-amber-100">
+                <Bell className="h-5 w-5" />
+                QUICK NOTICE
+              </div>
+              <div className="mt-3 grid gap-2">
+                {data.notices.slice(0, 2).map((event) => (
+                  <div
+                    key={event.id}
+                    className="rounded-xl bg-amber-200/10 px-3 py-2.5"
+                  >
+                    <div className="text-xs text-amber-100">
+                      {formatShortDate(event.date)} {eventTimeRange(event)}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-white">
+                      {event.title}
+                    </div>
+                    {event.parent_task ? (
+                      <div className="mt-1 text-xs text-slate-400">
+                        {event.parent_task}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <section className="rounded-2xl bg-sky-300/[0.06] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-sky-200" />
+                <div className="font-semibold tracking-[0.08em] text-sky-100">
+                  BOOK PICK
+                </div>
+              </div>
+              <span className="text-[10px] text-slate-500">
+                weekly
+              </span>
+            </div>
+
+            <div className="mt-3 grid gap-2">
+              {bookPicks.slice(0, 5).map((book) => (
+                <a
+                  key={book.category}
+                  href={book.linkUrl ?? book.amazonUrl ?? "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="grid grid-cols-[6.8rem_minmax(0,1fr)_1rem] items-center gap-2 rounded-xl bg-slate-950/20 px-3 py-3 active:bg-white/[0.08]"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate text-[10px] font-bold tracking-[0.06em] text-sky-200">
+                      {book.categoryLabel}
+                    </div>
+                    {book.rank ? (
+                      <div className="mt-0.5 text-[10px] text-slate-600">
+                        #{book.rank}
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-white">
+                      {book.title}
+                    </div>
+                    <div className="mt-0.5 truncate text-[11px] text-slate-500">
+                      {book.reason}
+                    </div>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-slate-600" />
+                </a>
+              ))}
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section className="relative mx-auto hidden h-[100dvh] lg:grid max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-4 lg:px-8">
         <header className="grid grid-cols-[minmax(260px,1fr)_auto] items-center gap-5 border-b border-white/10 pb-3">
           <div className="min-w-0">
             <div className="text-[clamp(1rem,1vw,1.25rem)] font-semibold tracking-[0.18em] text-cyan-200">
