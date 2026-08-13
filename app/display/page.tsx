@@ -452,26 +452,26 @@ function DesktopBookPickCard({ book }: { book: BookPick }) {
         </div>
       </button>
 
-      <div className="pointer-events-none invisible absolute bottom-[calc(100%+0.45rem)] right-0 z-[80] w-[390px] translate-y-1 rounded-2xl border border-white/10 bg-[#0b1729]/[0.98] p-4 opacity-0 shadow-2xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-        <div className="flex gap-4">
+      <div className="pointer-events-none invisible absolute inset-x-0 top-0 z-40 min-h-[150px] rounded-xl border border-sky-300/15 bg-[#0b1729]/[0.99] p-3 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+        <div className="flex gap-3">
           <BookCover book={book} />
           <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-bold tracking-[0.08em] text-sky-200">
+            <div className="text-[9px] font-bold tracking-[0.08em] text-sky-200">
               {book.categoryLabel}
-              {book.rank ? ` · Bestseller #${book.rank}` : ""}
+              {book.rank ? ` · #${book.rank}` : ""}
             </div>
-            <div className="mt-1 text-lg font-bold leading-snug text-white">
+            <div className="mt-1 text-base font-bold leading-snug text-white">
               {book.title}
             </div>
             {book.author ? (
-              <div className="mt-1 text-xs text-slate-400">
+              <div className="mt-1 text-[11px] text-slate-400">
                 {book.author}
               </div>
             ) : null}
-            <div className="mt-3 text-sm leading-relaxed text-slate-200">
+            <div className="mt-2 line-clamp-4 text-[12px] leading-relaxed text-slate-200">
               {book.description}
             </div>
-            <div className="mt-2 text-[10px] text-slate-500">
+            <div className="mt-1 text-[9px] text-slate-500">
               {book.source} · 每周更新
             </div>
           </div>
@@ -1387,7 +1387,7 @@ export default function DisplayPage() {
               )}
             </article>
 
-            <article className="min-h-0 overflow-visible rounded-3xl bg-amber-300/[0.08] p-5">
+            <article className="min-h-0 overflow-hidden rounded-3xl bg-amber-300/[0.08] p-5">
               <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
                 <section>
                   <div className="mb-2 flex items-center gap-3">
@@ -1440,7 +1440,7 @@ export default function DisplayPage() {
                   </section>
                 )}
 
-                <section className="relative min-h-0 overflow-visible rounded-2xl bg-slate-950/25 p-3">
+                <section className="relative isolate min-h-0 overflow-hidden rounded-2xl bg-slate-950/25 p-3">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-5 w-5 text-sky-200" />
