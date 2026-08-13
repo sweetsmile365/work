@@ -83,6 +83,211 @@ type BookPickResponse = {
   updatedAt?: string;
 };
 
+type SeasonId = "spring" | "summer" | "autumn" | "winter";
+
+type SeasonTheme = {
+  id: SeasonId;
+  label: string;
+  labelJa: string;
+  dayBackground: string;
+  nightBackground: string;
+  glowA: string;
+  glowB: string;
+};
+
+const seasonThemes: Record<SeasonId, SeasonTheme> = {
+  spring: {
+    id: "spring",
+    label: "SPRING",
+    labelJa: "春",
+    dayBackground:
+      "linear-gradient(145deg,#eef8fb 0%,#f7eef5 34%,#eef8f1 68%,#e6f0f7 100%)",
+    nightBackground:
+      "linear-gradient(145deg,#101826 0%,#182133 40%,#1b2b30 72%,#121e29 100%)",
+    glowA: "rgba(244,114,182,0.18)",
+    glowB: "rgba(110,231,183,0.13)"
+  },
+  summer: {
+    id: "summer",
+    label: "SUMMER",
+    labelJa: "夏",
+    dayBackground:
+      "linear-gradient(145deg,#e7f7fb 0%,#e4f5f2 34%,#e9f6e8 68%,#dceff6 100%)",
+    nightBackground:
+      "linear-gradient(145deg,#06101f 0%,#0a1c2a 42%,#0a2427 70%,#071620 100%)",
+    glowA: "rgba(34,211,238,0.18)",
+    glowB: "rgba(52,211,153,0.14)"
+  },
+  autumn: {
+    id: "autumn",
+    label: "AUTUMN",
+    labelJa: "秋",
+    dayBackground:
+      "linear-gradient(145deg,#f8f1e8 0%,#f3e8dc 36%,#eee8e4 70%,#e7eef2 100%)",
+    nightBackground:
+      "linear-gradient(145deg,#16110f 0%,#211713 38%,#271c17 70%,#17141a 100%)",
+    glowA: "rgba(251,146,60,0.18)",
+    glowB: "rgba(245,158,11,0.12)"
+  },
+  winter: {
+    id: "winter",
+    label: "WINTER",
+    labelJa: "冬",
+    dayBackground:
+      "linear-gradient(145deg,#edf4f8 0%,#e8f0f5 35%,#e6edf5 70%,#f1f6f8 100%)",
+    nightBackground:
+      "linear-gradient(145deg,#07101d 0%,#0c1828 42%,#101d30 72%,#0a1421 100%)",
+    glowA: "rgba(147,197,253,0.17)",
+    glowB: "rgba(226,232,240,0.13)"
+  }
+};
+
+function seasonForDate(date: Date): SeasonId {
+  const month = date.getMonth() + 1;
+  if (month >= 3 && month <= 5) return "spring";
+  if (month >= 6 && month <= 8) return "summer";
+  if (month >= 9 && month <= 11) return "autumn";
+  return "winter";
+}
+
+function isDaytime(date: Date) {
+  const hour = date.getHours();
+  return hour >= 6 && hour < 18;
+}
+
+function SeasonalBackdrop({ date }: { date: Date }) {
+  const season = seasonForDate(date);
+  const theme = seasonThemes[season];
+  const daytime = isDaytime(date);
+  const particleCount =
+    season === "winter" ? 22 : season === "spring" ? 15 : 12;
+
+  return (
+    <>
+      <div
+        className="pointer-events-none fixed inset-0"
+        style={{
+          background: daytime
+            ? theme.dayBackground
+            : theme.nightBackground
+        }}
+      />
+
+      <div
+        className="pointer-events-none fixed inset-0 opacity-90"
+        style={{
+          background: `
+            radial-gradient(circle at 14% 2%, ${theme.glowA}, transparent 27%),
+            radial-gradient(circle at 88% 9%, ${theme.glowB}, transparent 25%),
+            radial-gradient(circle at 50% 108%, rgba(255,255,255,0.035), transparent 32%)
+          `
+        }}
+      />
+
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <style jsx>{`
+          @keyframes seasonalDrift {
+            0% {
+              transform: translate3d(0, -8vh, 0) rotate(0deg);
+              opacity: 0;
+            }
+            12% {
+              opacity: 0.55;
+            }
+            88% {
+              opacity: 0.38;
+            }
+            100% {
+              transform: translate3d(var(--season-x, 28px), 110vh, 0)
+                rotate(300deg);
+              opacity: 0;
+            }
+          }
+
+          @keyframes summerGlow {
+            0%,
+            100% {
+              opacity: 0.16;
+              transform: scale(0.75);
+            }
+            45% {
+              opacity: 0.72;
+              transform: scale(1.1);
+            }
+          }
+        `}</style>
+
+        {Array.from({ length: particleCount }).map((_, index) => {
+          const left = (index * 37 + 11) % 100;
+          const delay = (index * 1.7) % 11;
+          const duration = 13 + (index % 7) * 2.2;
+          const size =
+            season === "winter"
+              ? 3 + (index % 4)
+              : season === "spring"
+                ? 5 + (index % 4)
+                : 4 + (index % 3);
+
+          if (season === "summer") {
+            return (
+              <span
+                key={`${season}-${index}`}
+                className="absolute rounded-full"
+                style={{
+                  left: `${left}%`,
+                  top: `${14 + ((index * 29) % 72)}%`,
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  background: "rgba(167,243,208,0.8)",
+                  boxShadow: "0 0 12px rgba(110,231,183,0.75)",
+                  animation: `summerGlow ${3.8 + (index % 5)}s ease-in-out ${delay}s infinite`
+                }}
+              />
+            );
+          }
+
+          return (
+            <span
+              key={`${season}-${index}`}
+              className={
+                season === "spring"
+                  ? "absolute rounded-[65%_35%_70%_30%]"
+                  : season === "autumn"
+                    ? "absolute rounded-[70%_30%_65%_35%]"
+                    : "absolute rounded-full"
+              }
+              style={{
+                left: `${left}%`,
+                top: "-4vh",
+                width: `${size}px`,
+                height:
+                  season === "autumn"
+                    ? `${Math.max(3, size - 1)}px`
+                    : `${size}px`,
+                background:
+                  season === "spring"
+                    ? "rgba(251,207,232,0.72)"
+                    : season === "autumn"
+                      ? index % 2 === 0
+                        ? "rgba(251,146,60,0.62)"
+                        : "rgba(245,158,11,0.58)"
+                      : "rgba(226,232,240,0.72)",
+                boxShadow:
+                  season === "winter"
+                    ? "0 0 7px rgba(219,234,254,0.3)"
+                    : "none",
+                ["--season-x" as string]: `${-36 + ((index * 19) % 78)}px`,
+                animation: `seasonalDrift ${duration}s linear ${delay}s infinite`
+              }}
+            />
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+
 const weatherLocations: WeatherPoint[] = [
   { id: "hitachi", label: "日立", latitude: 36.599, longitude: 140.651 },
   { id: "tsukuba", label: "つくば", latitude: 36.083, longitude: 140.076 },
@@ -901,14 +1106,22 @@ export default function DisplayPage() {
 
   return (
     <main className="min-h-[100dvh] bg-[#06101f] text-white lg:h-[100dvh] lg:overflow-hidden">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(129,140,248,0.16),transparent_26%),linear-gradient(145deg,#06101f,#0b1729_55%,#07111f)]" />
+      <SeasonalBackdrop date={now} />
 
       <section className="relative mx-auto min-h-[100dvh] max-w-xl px-4 pb-8 pt-4 lg:hidden">
         <header className="border-b border-white/10 pb-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="text-xs font-semibold tracking-[0.16em] text-cyan-200">
-                FAMILY DASHBOARD
+              <div className="flex items-center gap-2">
+                <div className="text-xs font-semibold tracking-[0.16em] text-cyan-200">
+                  FAMILY DASHBOARD
+                </div>
+                <span
+                  className="rounded-full border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[9px] font-semibold tracking-[0.12em] text-slate-300"
+                  title="季節テーマ"
+                >
+                  {seasonThemes[seasonForDate(now)].label} · {seasonThemes[seasonForDate(now)].labelJa}
+                </span>
               </div>
               <div className="mt-1 text-2xl font-bold leading-tight">
                 {greeting(now)}
@@ -1214,8 +1427,16 @@ export default function DisplayPage() {
       <section className="relative mx-auto hidden h-[100dvh] lg:grid max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-4 lg:px-8">
         <header className="grid grid-cols-[minmax(260px,1fr)_auto] items-center gap-5 border-b border-white/10 pb-3">
           <div className="min-w-0">
-            <div className="text-[clamp(1rem,1vw,1.25rem)] font-semibold tracking-[0.18em] text-cyan-200">
-              Family Dashboard v2
+            <div className="flex items-center gap-3">
+              <div className="text-[clamp(1rem,1vw,1.25rem)] font-semibold tracking-[0.18em] text-cyan-200">
+                Family Dashboard v2
+              </div>
+              <span
+                className="rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold tracking-[0.12em] text-slate-300"
+                title="季節テーマ"
+              >
+                {seasonThemes[seasonForDate(now)].label} · {seasonThemes[seasonForDate(now)].labelJa}
+              </span>
             </div>
 
             <div className="mt-1 text-[clamp(1.9rem,2.6vw,3.6rem)] font-semibold leading-none">
