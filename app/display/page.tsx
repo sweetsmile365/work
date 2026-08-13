@@ -1291,6 +1291,14 @@ export default function DisplayPage() {
               >
                 MEALS →
               </Link>
+              <Link
+                href="/badminton"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sky-300/10 text-base active:bg-sky-300/20"
+                aria-label="バドミントン素振り練習"
+                title="Badminton · 素振り練習"
+              >
+                🏸
+              </Link>
             </div>
 
             <div className="mt-3 grid gap-2">
@@ -1712,6 +1720,14 @@ export default function DisplayPage() {
                       className="shrink-0 rounded-full bg-amber-300/10 px-3 py-1.5 text-xs font-semibold text-amber-100 transition active:bg-amber-300/20"
                     >
                       MEALS →
+                    </Link>
+                    <Link
+                      href="/badminton"
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sky-300/10 text-base transition active:bg-sky-300/20"
+                      aria-label="バドミントン素振り練習"
+                      title="Badminton · 素振り練習"
+                    >
+                      🏸
                     </Link>
                   </div>
 
