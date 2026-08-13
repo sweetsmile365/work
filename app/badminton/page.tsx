@@ -28,7 +28,7 @@ type Step = {
 const routine: Step[] = [
   {
     id: "warmup",
-    videoId: "HXVrl_jZ10E",
+    videoId: "DrobFettOFc",
     videoLabel: "L15V1 Mobility Exercises",
     title: "Warm-up · 肩・肘・手首",
     duration: 60,
@@ -38,7 +38,7 @@ const routine: Step[] = [
   },
   {
     id: "forehand",
-    videoId: "MV-47nMpsgw",
+    videoId: "PpEuZmHTVsM",
     videoLabel: "L13V3 Forehand Clear",
     title: "Forehand Clear · フォアハンドクリア",
     duration: 120,
@@ -48,7 +48,7 @@ const routine: Step[] = [
   },
   {
     id: "backhand",
-    videoId: "rNG5JKeCfMw",
+    videoId: "UXhneWqy0Zw",
     videoLabel: "L8V3 Backhand Lift",
     title: "Backhand · バックハンド",
     duration: 120,
@@ -58,7 +58,7 @@ const routine: Step[] = [
   },
   {
     id: "overhead",
-    videoId: "6qs3ZBIHxi4",
+    videoId: "6whrMThtZEE",
     videoLabel: "L15V3 Overhead Drop Shot",
     title: "Overhead · オーバーヘッド",
     duration: 120,
@@ -68,7 +68,7 @@ const routine: Step[] = [
   },
   {
     id: "drive",
-    videoId: "_bKfpWcnVAs",
+    videoId: "SrHbGSWEU54",
     videoLabel: "L11V4 Flat Play",
     title: "Drive · ドライブ",
     duration: 90,
@@ -78,7 +78,7 @@ const routine: Step[] = [
   },
   {
     id: "form",
-    videoId: "NRhG35yfstA",
+    videoId: "ypqHLPEioRg",
     videoLabel: "L14V3 Forehand Clear Practice",
     title: "Form Review · ゆっくりフォーム確認",
     duration: 90,
@@ -105,7 +105,9 @@ function RealPlayerGuide({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [soundOn, setSoundOn] = useState(false);
 
-  const youtubeWatchUrl = `https://www.youtube.com/watch?v=${step.videoId}`;
+  const youtubeWatchUrl =
+    `https://www.youtube.com/watch?v=${step.videoId}` +
+    "&list=PLYqPBxMmvqpLGSmMr4a7GZTmxBLlV78B1";
   const embedUrl =
     `https://www.youtube.com/embed/${step.videoId}` +
     "?rel=0&playsinline=1&enablejsapi=1&mute=1";
@@ -200,7 +202,7 @@ function RealPlayerGuide({
       </div>
 
       <div className="border-t border-white/5 px-4 py-3 text-[11px] leading-relaxed text-slate-500">
-        STEPごとに別の実演動画を表示します。画面内で再生できない場合は
+        2025年更新のBWF Shuttle Time公開動画をSTEPごとに表示します。画面内で再生できない場合は
         「YouTubeで見る」を押してください。音声は初期状態でOFFです。
       </div>
     </div>
