@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -9,7 +9,9 @@ import {
   Pause,
   Play,
   RotateCcw,
-  ShieldCheck
+  ShieldCheck,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 
 type Step = {
@@ -81,106 +83,93 @@ function formatTime(seconds: number) {
   return `${String(minutes).padStart(2, "0")}:${String(remain).padStart(2, "0")}`;
 }
 
-function SwingAnimation({
-  kind
+function RealPlayerGuide({
+  step
 }: {
-  kind: Step["side"];
+  step: Step;
 }) {
-  const animation =
-    kind === "backhand"
-      ? "backhandSwing"
-      : kind === "drive"
-        ? "driveSwing"
-        : kind === "overhead"
-          ? "overheadSwing"
-          : kind === "relax"
-            ? "slowSwing"
-            : "forehandSwing";
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [soundOn, setSoundOn] = useState(false);
+
+  function sendPlayerCommand(command: "mute" | "unMute") {
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({
+        event: "command",
+        func: command,
+        args: []
+      }),
+      "*"
+    );
+  }
+
+  function toggleSound() {
+    setSoundOn((current) => {
+      const next = !current;
+      sendPlayerCommand(next ? "unMute" : "mute");
+      return next;
+    });
+  }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-sky-300/10 bg-slate-950/35">
-      <style jsx>{`
-        @keyframes forehandSwing {
-          0%, 100% { transform: rotate(-55deg); }
-          45% { transform: rotate(42deg); }
-          60% { transform: rotate(58deg); }
-        }
-        @keyframes backhandSwing {
-          0%, 100% { transform: rotate(50deg); }
-          50% { transform: rotate(-42deg); }
-        }
-        @keyframes overheadSwing {
-          0%, 100% { transform: rotate(-72deg); }
-          52% { transform: rotate(26deg); }
-        }
-        @keyframes driveSwing {
-          0%, 100% { transform: rotate(-25deg); }
-          50% { transform: rotate(24deg); }
-        }
-        @keyframes slowSwing {
-          0%, 100% { transform: rotate(-32deg); }
-          50% { transform: rotate(28deg); }
-        }
-        @keyframes shuttlePath {
-          0% { transform: translate(0, 0); opacity: 0.25; }
-          45% { transform: translate(44px, -34px); opacity: 0.85; }
-          100% { transform: translate(92px, -54px); opacity: 0; }
-        }
-      `}</style>
+    <div className="overflow-hidden rounded-3xl border border-sky-300/10 bg-slate-950/35">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-4 py-3">
+        <div>
+          <div className="text-[10px] font-bold tracking-[0.14em] text-sky-200">
+            実演動画 · REAL PLAYER
+          </div>
+          <div className="mt-0.5 text-sm font-semibold text-white">
+            {step.title}
+          </div>
+        </div>
 
-      <div className="absolute left-4 top-3 z-10 rounded-full bg-white/[0.07] px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-sky-200">
-        素振りガイド
+        <div className="flex items-center gap-2">
+          <div className="rounded-full bg-white/[0.07] px-3 py-1 text-[10px] font-semibold text-slate-300">
+            BWF Shuttle Time
+          </div>
+
+          <button
+            type="button"
+            onClick={toggleSound}
+            className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[10px] font-bold transition active:scale-95 ${
+              soundOn
+                ? "bg-emerald-300 text-slate-950"
+                : "bg-slate-800 text-slate-200"
+            }`}
+            aria-pressed={soundOn}
+            aria-label={soundOn ? "動画の音をオフ" : "動画の音をオン"}
+          >
+            {soundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
+            {soundOn ? "SOUND ON" : "SOUND OFF"}
+          </button>
+        </div>
       </div>
 
-      <svg viewBox="0 0 460 280" className="h-[250px] w-full sm:h-[300px]">
-        <line
-          x1="55"
-          y1="238"
-          x2="405"
-          y2="238"
-          stroke="rgba(148,163,184,0.18)"
-          strokeWidth="2"
+      <div className="relative aspect-video w-full bg-black">
+        <iframe
+          ref={iframeRef}
+          className="absolute inset-0 h-full w-full"
+          src="https://www.youtube-nocookie.com/embed/videoseries?list=PL6B8041550579DA0A&rel=0&enablejsapi=1&mute=1"
+          title="BWF Shuttle Time badminton training"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
         />
+      </div>
 
-        <circle cx="210" cy="80" r="16" fill="rgba(226,232,240,0.94)" />
-        <line x1="210" y1="98" x2="210" y2="165" stroke="rgba(226,232,240,0.92)" strokeWidth="10" strokeLinecap="round" />
-        <line x1="210" y1="165" x2="182" y2="232" stroke="rgba(226,232,240,0.9)" strokeWidth="9" strokeLinecap="round" />
-        <line x1="210" y1="165" x2="242" y2="232" stroke="rgba(226,232,240,0.9)" strokeWidth="9" strokeLinecap="round" />
+      <div className="grid gap-2 px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+        <div className="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+          今見るポイント
+        </div>
+        <div className="text-sm leading-relaxed text-slate-300">
+          {step.cue}
+        </div>
+      </div>
 
-        <line x1="210" y1="116" x2="182" y2="150" stroke="rgba(226,232,240,0.8)" strokeWidth="8" strokeLinecap="round" />
-
-        <g
-          style={{
-            transformOrigin: "210px 116px",
-            animation: `${animation} ${kind === "drive" ? "1.25s" : "2.1s"} ease-in-out infinite`
-          }}
-        >
-          <line x1="210" y1="116" x2="257" y2="146" stroke="rgba(226,232,240,0.86)" strokeWidth="8" strokeLinecap="round" />
-          <line x1="257" y1="146" x2="301" y2="105" stroke="rgba(125,211,252,0.95)" strokeWidth="6" strokeLinecap="round" />
-          <ellipse cx="320" cy="87" rx="19" ry="29" fill="none" stroke="rgba(125,211,252,0.95)" strokeWidth="5" />
-          <line x1="305" y1="70" x2="335" y2="104" stroke="rgba(125,211,252,0.45)" strokeWidth="2" />
-          <line x1="335" y1="70" x2="305" y2="104" stroke="rgba(125,211,252,0.45)" strokeWidth="2" />
-        </g>
-
-        {kind !== "relax" ? (
-          <g style={{ animation: "shuttlePath 2.1s ease-out infinite" }}>
-            <circle cx="330" cy="82" r="5" fill="rgba(253,224,71,0.95)" />
-            <path d="M325 76 L318 67 M330 76 L328 64 M335 77 L340 67" stroke="rgba(253,224,71,0.9)" strokeWidth="2" />
-          </g>
-        ) : null}
-
-        <path
-          d="M285 168 C330 150 352 120 360 92"
-          fill="none"
-          stroke="rgba(110,231,183,0.55)"
-          strokeWidth="3"
-          strokeDasharray="7 7"
-        />
-
-        <text x="230" y="263" textAnchor="middle" fill="rgba(148,163,184,0.78)" fontSize="11">
-          軽いグリップ · 打点は前 · 自然なフォロースルー
-        </text>
-      </svg>
+      <div className="border-t border-white/5 px-4 py-3 text-[11px] leading-relaxed text-slate-500">
+        動画はBWF Shuttle Timeの公式教材です。現在のSTEPに合う動きを選んで確認し、
+        その後このページのタイマーで素振りを行います。
+        音声は初期状態でOFFです。必要なときだけ「SOUND ON」を押してください。
+      </div>
     </div>
   );
 }
@@ -282,7 +271,7 @@ export default function BadmintonPage() {
             </div>
 
             <div className="mt-5">
-              <SwingAnimation kind={current.side} />
+              <RealPlayerGuide step={current} />
             </div>
 
             <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/[0.07]">
