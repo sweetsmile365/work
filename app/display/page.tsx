@@ -337,6 +337,47 @@ const musicStations: MusicStation[] = [
   }
 ];
 
+const TODAY_CARD_BACKGROUNDS = [
+  {
+    id: "sun",
+    label: "Sun",
+    image: "/dashboard/today-bg/01-sunrise-bay.png"
+  },
+  {
+    id: "mon",
+    label: "Mon",
+    image: "/dashboard/today-bg/02-misty-mountain-lake.png"
+  },
+  {
+    id: "tue",
+    label: "Tue",
+    image: "/dashboard/today-bg/03-calm-lake-morning.png"
+  },
+  {
+    id: "wed",
+    label: "Wed",
+    image: "/dashboard/today-bg/04-golden-river-evening.png"
+  },
+  {
+    id: "thu",
+    label: "Thu",
+    image: "/dashboard/today-bg/05-twilight-lotus-pond.png"
+  },
+  {
+    id: "fri",
+    label: "Fri",
+    image: "/dashboard/today-bg/06-coastal-dusk.png"
+  },
+  {
+    id: "sat",
+    label: "Sat",
+    image: "/dashboard/today-bg/07-moonlit-water-town.png"
+  }
+] as const;
+
+const todayCardBackgroundForDate = (date = new Date()) =>
+  TODAY_CARD_BACKGROUNDS[date.getDay() % TODAY_CARD_BACKGROUNDS.length];
+
 const todayKey = (date = new Date()) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -887,6 +928,7 @@ export default function DisplayPage() {
     useState<ChildTask | null>(null);
   const [bookPicks, setBookPicks] = useState<BookPick[]>([]);
   const activeDayRef = useRef(todayKey(new Date()));
+  const currentTodayBackground = todayCardBackgroundForDate(now);
 
   useEffect(() => {
     let disposed = false;
@@ -1441,9 +1483,22 @@ export default function DisplayPage() {
 
         <div className="grid min-h-0 grid-rows-[1.02fr_0.98fr] gap-4">
           <section className="grid min-h-0 grid-cols-[0.95fr_1.25fr] gap-4">
-            <article className="relative min-h-0 overflow-hidden rounded-3xl border border-cyan-200/15 bg-[radial-gradient(circle_at_76%_82%,rgba(34,211,238,0.16),transparent_28%),linear-gradient(145deg,rgba(8,56,78,0.88),rgba(7,42,64,0.94))] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
-              <div className="relative z-10 mb-4">
+            <article
+              className="relative min-h-0 overflow-hidden rounded-3xl border border-cyan-200/20 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.24)]"
+              style={{
+                backgroundImage: `linear-gradient(180deg, rgba(7, 22, 40, 0.18) 0%, rgba(8, 25, 49, 0.45) 42%, rgba(7, 20, 36, 0.72) 72%, rgba(5, 15, 28, 0.84) 100%), url(${currentTodayBackground.image})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center"
+              }}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_78%,rgba(255,255,255,0.18),transparent_18%),linear-gradient(120deg,rgba(56,189,248,0.08),transparent_30%)]" />
+              <div className="absolute inset-0 backdrop-[blur(0.5px)]" />
+
+              <div className="relative z-10 mb-4 flex items-start justify-between gap-3">
                 <SectionTitle title="TODAY" accent="bg-cyan-300" />
+                <div className="rounded-full border border-white/15 bg-slate-950/25 px-2.5 py-1 text-[10px] font-semibold tracking-[0.08em] text-cyan-100">
+                  WEEKLY FLOW
+                </div>
               </div>
 
               {data.primaryEvent ? (
@@ -1466,11 +1521,11 @@ export default function DisplayPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/25 px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
+                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
                       <span className="text-cyan-200">▣</span>
                       今日の予定 {data.todayEvents.length}件
                     </div>
-                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/25 px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
+                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
                       <span className="text-cyan-200">◎</span>
                       学校・子ども関連 {data.childEventsToday}件
                     </div>
