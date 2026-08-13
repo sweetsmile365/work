@@ -21,11 +21,15 @@ type Step = {
   cue: string;
   detail: string;
   side?: "forehand" | "backhand" | "overhead" | "drive" | "relax";
+  videoId: string;
+  videoLabel: string;
 };
 
 const routine: Step[] = [
   {
     id: "warmup",
+    videoId: "HXVrl_jZ10E",
+    videoLabel: "L15V1 Mobility Exercises",
     title: "Warm-up · 肩・肘・手首",
     duration: 60,
     cue: "力を抜く",
@@ -34,6 +38,8 @@ const routine: Step[] = [
   },
   {
     id: "forehand",
+    videoId: "MV-47nMpsgw",
+    videoLabel: "L13V3 Forehand Clear",
     title: "Forehand Clear · フォアハンドクリア",
     duration: 120,
     cue: "グリップは軽く · 打点は身体の前上方",
@@ -42,6 +48,8 @@ const routine: Step[] = [
   },
   {
     id: "backhand",
+    videoId: "rNG5JKeCfMw",
+    videoLabel: "L8V3 Backhand Lift",
     title: "Backhand · バックハンド",
     duration: 120,
     cue: "親指で支える · 前腕を回旋",
@@ -50,6 +58,8 @@ const routine: Step[] = [
   },
   {
     id: "overhead",
+    videoId: "6qs3ZBIHxi4",
+    videoLabel: "L15V3 Overhead Drop Shot",
     title: "Overhead · オーバーヘッド",
     duration: 120,
     cue: "半身で構える · 高い打点を前でとる",
@@ -58,6 +68,8 @@ const routine: Step[] = [
   },
   {
     id: "drive",
+    videoId: "_bKfpWcnVAs",
+    videoLabel: "L11V4 Flat Play",
     title: "Drive · ドライブ",
     duration: 90,
     cue: "コンパクトに · ラケットヘッドを速く",
@@ -66,6 +78,8 @@ const routine: Step[] = [
   },
   {
     id: "form",
+    videoId: "NRhG35yfstA",
+    videoLabel: "L14V3 Forehand Clear Practice",
     title: "Form Review · ゆっくりフォーム確認",
     duration: 90,
     cue: "回数よりフォーム",
@@ -91,6 +105,11 @@ function RealPlayerGuide({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [soundOn, setSoundOn] = useState(false);
 
+  const youtubeWatchUrl = `https://www.youtube.com/watch?v=${step.videoId}`;
+  const embedUrl =
+    `https://www.youtube.com/embed/${step.videoId}` +
+    "?rel=0&playsinline=1&enablejsapi=1&mute=1";
+
   function sendPlayerCommand(command: "mute" | "unMute") {
     iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({
@@ -110,6 +129,10 @@ function RealPlayerGuide({
     });
   }
 
+  useEffect(() => {
+    setSoundOn(false);
+  }, [step.videoId]);
+
   return (
     <div className="overflow-hidden rounded-3xl border border-sky-300/10 bg-slate-950/35">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-4 py-3">
@@ -118,11 +141,11 @@ function RealPlayerGuide({
             実演動画 · REAL PLAYER
           </div>
           <div className="mt-0.5 text-sm font-semibold text-white">
-            {step.title}
+            {step.videoLabel}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="rounded-full bg-white/[0.07] px-3 py-1 text-[10px] font-semibold text-slate-300">
             BWF Shuttle Time
           </div>
@@ -146,29 +169,39 @@ function RealPlayerGuide({
 
       <div className="relative aspect-video w-full bg-black">
         <iframe
+          key={step.videoId}
           ref={iframeRef}
           className="absolute inset-0 h-full w-full"
-          src="https://www.youtube-nocookie.com/embed/videoseries?list=PL6B8041550579DA0A&rel=0&enablejsapi=1&mute=1"
-          title="BWF Shuttle Time badminton training"
+          src={embedUrl}
+          title={`${step.videoLabel} badminton training`}
           loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
         />
       </div>
 
-      <div className="grid gap-2 px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+      <div className="grid gap-3 px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
         <div className="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
           今見るポイント
         </div>
+
         <div className="text-sm leading-relaxed text-slate-300">
           {step.cue}
         </div>
+
+        <a
+          href={youtubeWatchUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-red-500/15 px-4 text-xs font-bold text-red-100 active:bg-red-500/25"
+        >
+          YouTubeで見る ↗
+        </a>
       </div>
 
       <div className="border-t border-white/5 px-4 py-3 text-[11px] leading-relaxed text-slate-500">
-        動画はBWF Shuttle Timeの公式教材です。現在のSTEPに合う動きを選んで確認し、
-        その後このページのタイマーで素振りを行います。
-        音声は初期状態でOFFです。必要なときだけ「SOUND ON」を押してください。
+        STEPごとに別の実演動画を表示します。画面内で再生できない場合は
+        「YouTubeで見る」を押してください。音声は初期状態でOFFです。
       </div>
     </div>
   );
