@@ -1276,6 +1276,12 @@ export default function DisplayPage() {
               >
                 FITNESS →
               </Link>
+              <Link
+                href="/recipes"
+                className="shrink-0 rounded-full bg-amber-300/10 px-3 py-1.5 text-xs font-semibold text-amber-100 active:bg-amber-300/20"
+              >
+                MEALS →
+              </Link>
             </div>
 
             <div className="mt-3 grid gap-2">
@@ -1691,6 +1697,12 @@ export default function DisplayPage() {
                       className="shrink-0 rounded-full bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100 transition active:bg-emerald-300/20"
                     >
                       FITNESS →
+                    </Link>
+                    <Link
+                      href="/recipes"
+                      className="shrink-0 rounded-full bg-amber-300/10 px-3 py-1.5 text-xs font-semibold text-amber-100 transition active:bg-amber-300/20"
+                    >
+                      MEALS →
                     </Link>
                   </div>
 
