@@ -17,6 +17,7 @@ import {
   loadState,
   onStateSynced,
   refreshCloudStateNow,
+  toggleTask,
   type AppState
 } from "@/lib/db";
 import type { ChildTask } from "@/types/activities";
@@ -432,6 +433,8 @@ export default function DisplayPage() {
   const [weather, setWeather] = useState<
     Record<string, WeatherValue>
   >({});
+  const [recentlyCompleted, setRecentlyCompleted] =
+    useState<ChildTask | null>(null);
 
   useEffect(() => {
     setState(loadState());
@@ -484,20 +487,30 @@ export default function DisplayPage() {
       .slice(0, 3);
 
     const learningTasks = (state?.tasks ?? [])
-      .filter((task) => learningTypes.has(task.task_type))
-      .sort((a, b) => {
-        if (a.status !== b.status) {
-          return a.status === "todo" ? -1 : 1;
-        }
-
-        return (a.due_date ?? "9999-12-31").localeCompare(
+      .filter(
+        (task) =>
+          learningTypes.has(task.task_type) &&
+          task.status !== "done"
+      )
+      .sort((a, b) =>
+        (a.due_date ?? "9999-12-31").localeCompare(
           b.due_date ?? "9999-12-31"
-        );
-      });
+        )
+      );
 
-    const mainTasks = learningTasks.slice(0, 5);
+    const mainTasks = learningTasks
+      .filter(
+        (task) =>
+          !task.due_date || task.due_date <= today
+      )
+      .slice(0, 5);
+
     const nextTasks = learningTasks
-      .filter((task) => task.status !== "done")
+      .filter(
+        (task) =>
+          Boolean(task.due_date) &&
+          (task.due_date ?? "") > today
+      )
       .slice(0, 2);
 
     const childEventsToday = todayEvents.filter(
@@ -516,6 +529,19 @@ export default function DisplayPage() {
       childEventsToday
     };
   }, [state, now]);
+
+  const completeTaskFromScreen = (task: ChildTask) => {
+    const next = toggleTask(task.id);
+    setState(next);
+    setRecentlyCompleted(task);
+  };
+
+  const undoCompletedTask = () => {
+    if (!recentlyCompleted) return;
+    const next = toggleTask(recentlyCompleted.id);
+    setState(next);
+    setRecentlyCompleted(null);
+  };
 
   return (
     <main className="h-[100dvh] overflow-hidden bg-[#06101f] text-white">
@@ -648,63 +674,81 @@ export default function DisplayPage() {
                   accent="bg-emerald-300"
                 />
 
-                <span className="text-[clamp(0.9rem,0.85vw,1.05rem)] text-slate-400">
-                  無理なく次へ
+                <span className="text-[clamp(0.9rem,0.85vw,1.05rem)] text-emerald-100/80">
+                  ○ をタップして完了
                 </span>
               </div>
 
+              {recentlyCompleted ? (
+                <div className="mb-3 flex items-center justify-between rounded-xl bg-emerald-300/15 px-4 py-2 text-sm text-emerald-50">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-300" />
+                    <span className="truncate">
+                      完了: {recentlyCompleted.title}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={undoCompletedTask}
+                    className="ml-3 min-h-10 shrink-0 rounded-lg bg-white/10 px-4 font-semibold text-white transition active:scale-95 active:bg-white/20"
+                  >
+                    取消
+                  </button>
+                </div>
+              ) : null}
+
               {data.mainTasks.length > 0 ? (
-                <div className="grid h-[calc(100%-3rem)] grid-cols-[1fr_0.58fr] gap-5">
+                <div className="grid min-h-0 grid-cols-[1fr_0.58fr] gap-5">
                   <div className="min-h-0 rounded-2xl bg-slate-950/25 p-4">
                     <div className="mb-3 text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold tracking-[0.12em] text-emerald-100">
                       主要タスク
                     </div>
 
                     <div className="grid gap-2">
-                      {data.mainTasks.map((task) => {
-                        const done = task.status === "done";
-
-                        return (
-                          <div
-                            key={task.id}
-                            className={`grid grid-cols-[2rem_1fr_auto] items-start gap-2 rounded-xl px-3 py-2 ${
-                              done
-                                ? "text-slate-400"
-                                : "text-white"
-                            }`}
+                      {data.mainTasks.map((task) => (
+                        <div
+                          key={task.id}
+                          className="grid grid-cols-[3.25rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-2 py-2 text-white transition hover:bg-emerald-300/[0.06]"
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              completeTaskFromScreen(task)
+                            }
+                            className="grid h-11 w-11 place-items-center rounded-full border-2 border-emerald-200/90 bg-emerald-300/[0.05] text-emerald-100 transition active:scale-95 active:bg-emerald-300/25"
+                            aria-label={`${task.title} を完了にする`}
+                            title="タップして完了"
                           >
-                            {done ? (
-                              <CheckCircle2 className="mt-1 h-6 w-6 text-emerald-300" />
-                            ) : (
-                              <Circle className="mt-1 h-6 w-6 text-emerald-200" />
-                            )}
+                            <Circle className="h-6 w-6" />
+                          </button>
 
-                            <div
-                              className={
-                                done
-                                  ? "line-through decoration-slate-500/80"
-                                  : ""
-                              }
-                            >
-                              <div className="text-[clamp(1.25rem,1.25vw,1.65rem)] leading-snug">
-                                {task.title}
-                              </div>
-
-                              {task.note ? (
-                                <div className="mt-0.5 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-400">
-                                  {task.note}
-                                </div>
-                              ) : null}
+                          <div className="min-w-0">
+                            <div className="text-[clamp(1.25rem,1.25vw,1.65rem)] leading-snug">
+                              {task.title}
                             </div>
 
-                            {task.due_date ? (
-                              <div className="pt-1 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-400">
-                                {dueText(task.due_date)}
+                            {task.note ? (
+                              <div className="mt-0.5 text-[clamp(0.9rem,0.85vw,1rem)] text-slate-400">
+                                {task.note}
                               </div>
                             ) : null}
                           </div>
-                        );
-                      })}
+
+                          {task.due_date ? (
+                            <div
+                              className={`pt-1 text-[clamp(0.9rem,0.85vw,1rem)] ${
+                                task.due_date < todayKey(now)
+                                  ? "font-semibold text-amber-200"
+                                  : "text-slate-400"
+                              }`}
+                            >
+                              {task.due_date < todayKey(now)
+                                ? `期限超過 ${dueText(task.due_date)}`
+                                : dueText(task.due_date)}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -740,8 +784,8 @@ export default function DisplayPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid h-[calc(100%-3rem)] place-items-center rounded-2xl bg-slate-950/25 text-center text-[clamp(1.35rem,1.45vw,1.9rem)] text-slate-300">
-                  学習予定はまだ登録されていません
+                <div className="grid min-h-[180px] place-items-center rounded-2xl bg-slate-950/25 text-center text-[clamp(1.35rem,1.45vw,1.9rem)] text-slate-300">
+                  今日の学習タスクはありません
                 </div>
               )}
             </article>
