@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  一時停止,
+  Pause,
   Play,
   RotateCcw,
   ShieldCheck
@@ -78,7 +78,7 @@ function formatTime(seconds: number) {
   const safe = Math.max(0, Math.floor(seconds));
   const minutes = Math.floor(safe / 60);
   const remain = safe % 60;
-  return `${String(minutes).padスタート(2, "0")}:${String(remain).padスタート(2, "0")}`;
+  return `${String(minutes).padStart(2, "0")}:${String(remain).padStart(2, "0")}`;
 }
 
 function SwingAnimation({
@@ -311,7 +311,7 @@ export default function BadmintonPage() {
                 onClick={() => setRunning((value) => !value)}
                 className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-sky-300 font-bold text-slate-950 active:scale-[0.99]"
               >
-                {running ? <一時停止 size={22} /> : <Play size={22} />}
+                {running ? <Pause size={22} /> : <Play size={22} />}
                 {running ? "一時停止" : "スタート"}
               </button>
 
