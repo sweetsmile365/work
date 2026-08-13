@@ -194,6 +194,386 @@ const momNormalRoutine: RoutineStep[] = [
   }
 ];
 
+
+type AnimationKind =
+  | "warmup"
+  | "deadlift"
+  | "goblet"
+  | "row"
+  | "carry"
+  | "halo"
+  | "cooldown"
+  | "breathing"
+  | "shoulders"
+  | "ankles"
+  | "walk1"
+  | "walk2"
+  | "relax"
+  | "catcow"
+  | "child"
+  | "lunge"
+  | "downward"
+  | "figure4"
+  | "twist";
+
+function ExerciseAnimation({
+  kind,
+  person
+}: {
+  kind: AnimationKind;
+  person: Person;
+}) {
+  const isDad = person === "dad";
+
+  const label =
+    kind === "deadlift"
+      ? "HIP HINGE"
+      : kind === "goblet"
+        ? "SQUAT"
+        : kind === "row"
+          ? "ROW"
+          : kind === "carry"
+            ? "CARRY"
+            : kind === "halo"
+              ? "HALO"
+              : kind === "catcow"
+                ? "CAT ↔ COW"
+                : kind === "child"
+                  ? "CHILD'S POSE"
+                  : kind === "lunge"
+                    ? "LOW LUNGE"
+                    : kind === "downward"
+                      ? "DOWNWARD DOG"
+                      : kind === "figure4"
+                        ? "FIGURE-4"
+                        : kind === "twist"
+                          ? "TWIST"
+                          : kind === "breathing"
+                            ? "BREATHE"
+                            : kind.startsWith("walk")
+                              ? "GENTLE WALK"
+                              : kind === "shoulders"
+                                ? "SHOULDERS"
+                                : kind === "ankles"
+                                  ? "ANKLES"
+                                  : kind === "relax"
+                                    ? "RELAX"
+                                    : kind === "warmup"
+                                      ? "WARM-UP"
+                                      : "COOL-DOWN";
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-slate-950/30">
+      <style jsx>{`
+        @keyframes breathe {
+          0%, 100% { transform: scale(0.88); opacity: 0.45; }
+          50% { transform: scale(1.15); opacity: 0.9; }
+        }
+        @keyframes deadliftBody {
+          0%, 100% { transform: rotate(0deg) translate(0, 0); }
+          50% { transform: rotate(26deg) translate(10px, 7px); }
+        }
+        @keyframes deadliftBell {
+          0%, 100% { transform: translateY(-34px); }
+          50% { transform: translateY(0); }
+        }
+        @keyframes squatBody {
+          0%, 100% { transform: translateY(-26px); }
+          50% { transform: translateY(8px); }
+        }
+        @keyframes squatKnees {
+          0%, 100% { transform: scaleX(0.85); }
+          50% { transform: scaleX(1.18); }
+        }
+        @keyframes rowArm {
+          0%, 100% { transform: rotate(27deg); }
+          50% { transform: rotate(-22deg); }
+        }
+        @keyframes carryWalk {
+          0%, 100% { transform: translateX(-16px); }
+          50% { transform: translateX(16px); }
+        }
+        @keyframes carryLegA {
+          0%, 100% { transform: rotate(18deg); }
+          50% { transform: rotate(-18deg); }
+        }
+        @keyframes carryLegB {
+          0%, 100% { transform: rotate(-18deg); }
+          50% { transform: rotate(18deg); }
+        }
+        @keyframes halo {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes shoulder {
+          0%, 100% { transform: rotate(-10deg); }
+          50% { transform: rotate(16deg); }
+        }
+        @keyframes ankle {
+          0%, 100% { transform: rotate(-16deg); }
+          50% { transform: rotate(16deg); }
+        }
+        @keyframes catcow {
+          0%, 100% { transform: translateY(0) scaleY(0.9); }
+          50% { transform: translateY(-7px) scaleY(1.12); }
+        }
+        @keyframes childpose {
+          0%, 100% { transform: translateX(2px); }
+          50% { transform: translateX(-8px); }
+        }
+        @keyframes lunge {
+          0%, 100% { transform: translateY(-4px); }
+          50% { transform: translateY(8px); }
+        }
+        @keyframes downward {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes figure4 {
+          0%, 100% { transform: rotate(-4deg); }
+          50% { transform: rotate(7deg); }
+        }
+        @keyframes twist {
+          0%, 100% { transform: rotate(-11deg); }
+          50% { transform: rotate(11deg); }
+        }
+        @keyframes warmup {
+          0%, 100% { transform: rotate(-13deg); }
+          50% { transform: rotate(13deg); }
+        }
+      `}</style>
+
+      <div className="absolute left-4 top-3 z-10 rounded-full bg-white/[0.07] px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-slate-300">
+        MOTION GUIDE · {label}
+      </div>
+
+      <svg
+        viewBox="0 0 420 250"
+        className="h-[230px] w-full sm:h-[270px]"
+        role="img"
+        aria-label={`${label} 动作示意`}
+      >
+        <defs>
+          <radialGradient id="floorGlow" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stopColor="rgba(52,211,153,0.18)" />
+            <stop offset="100%" stopColor="rgba(52,211,153,0)" />
+          </radialGradient>
+        </defs>
+
+        <ellipse cx="210" cy="220" rx="150" ry="20" fill="url(#floorGlow)" />
+        <line x1="55" y1="219" x2="365" y2="219" stroke="rgba(148,163,184,0.22)" strokeWidth="2" />
+
+        {(kind === "breathing" || kind === "relax") && (
+          <>
+            <circle
+              cx="210"
+              cy="120"
+              r="58"
+              fill="rgba(52,211,153,0.13)"
+              stroke="rgba(110,231,183,0.55)"
+              strokeWidth="2"
+              style={{ transformOrigin: "210px 120px", animation: "breathe 5s ease-in-out infinite" }}
+            />
+            <circle cx="210" cy="88" r="15" fill="rgba(226,232,240,0.9)" />
+            <line x1="210" y1="104" x2="210" y2="164" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="126" x2="178" y2="148" stroke="rgba(226,232,240,0.8)" strokeWidth="7" strokeLinecap="round" />
+            <line x1="210" y1="126" x2="242" y2="148" stroke="rgba(226,232,240,0.8)" strokeWidth="7" strokeLinecap="round" />
+            <text x="210" y="198" textAnchor="middle" fill="rgba(167,243,208,0.9)" fontSize="13">
+              INHALE 4 sec · EXHALE 5 sec
+            </text>
+          </>
+        )}
+
+        {(kind === "walk1" || kind === "walk2" || kind === "carry") && (
+          <g style={{ animation: "carryWalk 2.3s ease-in-out infinite" }}>
+            <circle cx="210" cy="72" r="14" fill="rgba(226,232,240,0.95)" />
+            <line x1="210" y1="88" x2="210" y2="148" stroke="rgba(226,232,240,0.92)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="105" x2="182" y2="142" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+            <line x1="210" y1="105" x2="238" y2="142" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+            <g style={{ transformOrigin: "210px 148px", animation: "carryLegA 1.15s ease-in-out infinite" }}>
+              <line x1="210" y1="148" x2="187" y2="207" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            </g>
+            <g style={{ transformOrigin: "210px 148px", animation: "carryLegB 1.15s ease-in-out infinite" }}>
+              <line x1="210" y1="148" x2="233" y2="207" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            </g>
+            {kind === "carry" ? (
+              <>
+                <line x1="238" y1="142" x2="245" y2="171" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+                <circle cx="246" cy="184" r="12" fill="rgba(96,165,250,0.9)" />
+                <path d="M238 178 Q246 166 254 178" fill="none" stroke="rgba(147,197,253,1)" strokeWidth="5" />
+              </>
+            ) : null}
+          </g>
+        )}
+
+        {kind === "deadlift" && (
+          <>
+            <g style={{ transformOrigin: "210px 150px", animation: "deadliftBody 3s ease-in-out infinite" }}>
+              <circle cx="210" cy="68" r="14" fill="rgba(226,232,240,0.95)" />
+              <line x1="210" y1="84" x2="210" y2="148" stroke="rgba(226,232,240,0.92)" strokeWidth="8" strokeLinecap="round" />
+              <line x1="210" y1="105" x2="185" y2="160" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+              <line x1="210" y1="105" x2="235" y2="160" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+              <line x1="210" y1="148" x2="190" y2="207" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+              <line x1="210" y1="148" x2="232" y2="207" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            </g>
+            <g style={{ animation: "deadliftBell 3s ease-in-out infinite" }}>
+              <circle cx="210" cy="190" r="15" fill="rgba(96,165,250,0.92)" />
+              <path d="M199 181 Q210 165 221 181" fill="none" stroke="rgba(147,197,253,1)" strokeWidth="6" />
+            </g>
+            <path d="M276 151 C304 163 305 187 280 199" fill="none" stroke="rgba(110,231,183,0.75)" strokeWidth="3" strokeDasharray="6 6" />
+            <text x="292" y="141" textAnchor="middle" fill="rgba(167,243,208,0.9)" fontSize="12">HIP BACK</text>
+          </>
+        )}
+
+        {kind === "goblet" && (
+          <g style={{ animation: "squatBody 3s ease-in-out infinite" }}>
+            <circle cx="210" cy="66" r="14" fill="rgba(226,232,240,0.95)" />
+            <line x1="210" y1="82" x2="210" y2="142" stroke="rgba(226,232,240,0.92)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="104" x2="191" y2="118" stroke="rgba(226,232,240,0.86)" strokeWidth="7" strokeLinecap="round" />
+            <line x1="210" y1="104" x2="229" y2="118" stroke="rgba(226,232,240,0.86)" strokeWidth="7" strokeLinecap="round" />
+            <circle cx="210" cy="121" r="13" fill="rgba(96,165,250,0.92)" />
+            <path d="M200 113 Q210 99 220 113" fill="none" stroke="rgba(147,197,253,1)" strokeWidth="5" />
+            <g style={{ transformOrigin: "210px 142px", animation: "squatKnees 3s ease-in-out infinite" }}>
+              <line x1="210" y1="142" x2="178" y2="176" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+              <line x1="178" y1="176" x2="168" y2="211" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+              <line x1="210" y1="142" x2="242" y2="176" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+              <line x1="242" y1="176" x2="252" y2="211" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            </g>
+          </g>
+        )}
+
+        {kind === "row" && (
+          <>
+            <circle cx="180" cy="80" r="14" fill="rgba(226,232,240,0.95)" />
+            <line x1="190" y1="94" x2="232" y2="137" stroke="rgba(226,232,240,0.92)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="232" y1="137" x2="214" y2="207" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="232" y1="137" x2="260" y2="207" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <g style={{ transformOrigin: "217px 118px", animation: "rowArm 2s ease-in-out infinite" }}>
+              <line x1="217" y1="118" x2="248" y2="157" stroke="rgba(226,232,240,0.86)" strokeWidth="7" strokeLinecap="round" />
+              <circle cx="253" cy="168" r="12" fill="rgba(96,165,250,0.92)" />
+            </g>
+            <path d="M276 172 L276 122" stroke="rgba(110,231,183,0.8)" strokeWidth="3" strokeDasharray="5 5" />
+            <path d="M270 129 L276 119 L282 129" fill="none" stroke="rgba(110,231,183,0.8)" strokeWidth="3" />
+          </>
+        )}
+
+        {kind === "halo" && (
+          <>
+            <circle cx="210" cy="95" r="15" fill="rgba(226,232,240,0.95)" />
+            <line x1="210" y1="111" x2="210" y2="177" stroke="rgba(226,232,240,0.92)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="177" x2="190" y2="215" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="177" x2="230" y2="215" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <circle cx="210" cy="95" r="48" fill="none" stroke="rgba(110,231,183,0.35)" strokeWidth="2" strokeDasharray="5 5" />
+            <g style={{ transformOrigin: "210px 95px", animation: "halo 5s linear infinite" }}>
+              <line x1="210" y1="133" x2="210" y2="56" stroke="rgba(226,232,240,0.82)" strokeWidth="6" strokeLinecap="round" />
+              <circle cx="210" cy="46" r="12" fill="rgba(96,165,250,0.92)" />
+            </g>
+          </>
+        )}
+
+        {(kind === "warmup" || kind === "cooldown" || kind === "shoulders") && (
+          <>
+            <circle cx="210" cy="78" r="14" fill="rgba(226,232,240,0.95)" />
+            <line x1="210" y1="94" x2="210" y2="161" stroke="rgba(226,232,240,0.92)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="161" x2="188" y2="211" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="161" x2="232" y2="211" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <g style={{ transformOrigin: "210px 111px", animation: "warmup 2.4s ease-in-out infinite" }}>
+              <line x1="210" y1="111" x2="165" y2="123" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+              <line x1="210" y1="111" x2="255" y2="123" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+            </g>
+          </>
+        )}
+
+        {kind === "ankles" && (
+          <>
+            <circle cx="210" cy="72" r="14" fill="rgba(226,232,240,0.95)" />
+            <line x1="210" y1="88" x2="210" y2="150" stroke="rgba(226,232,240,0.92)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="150" x2="190" y2="202" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="150" x2="235" y2="185" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <g style={{ transformOrigin: "235px 185px", animation: "ankle 1.8s ease-in-out infinite" }}>
+              <line x1="235" y1="185" x2="260" y2="196" stroke="rgba(110,231,183,0.95)" strokeWidth="8" strokeLinecap="round" />
+            </g>
+          </>
+        )}
+
+        {kind === "catcow" && (
+          <g style={{ animation: "catcow 4s ease-in-out infinite", transformOrigin: "210px 140px" }}>
+            <circle cx="145" cy="130" r="12" fill="rgba(226,232,240,0.95)" />
+            <path d="M158 140 Q210 112 260 142" fill="none" stroke="rgba(226,232,240,0.92)" strokeWidth="10" strokeLinecap="round" />
+            <line x1="175" y1="143" x2="165" y2="194" stroke="rgba(226,232,240,0.88)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="245" y1="143" x2="254" y2="194" stroke="rgba(226,232,240,0.88)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="164" y1="194" x2="138" y2="204" stroke="rgba(226,232,240,0.88)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="254" y1="194" x2="280" y2="204" stroke="rgba(226,232,240,0.88)" strokeWidth="8" strokeLinecap="round" />
+          </g>
+        )}
+
+        {kind === "child" && (
+          <g style={{ animation: "childpose 4s ease-in-out infinite" }}>
+            <circle cx="150" cy="175" r="12" fill="rgba(226,232,240,0.95)" />
+            <path d="M163 174 Q215 145 270 172" fill="none" stroke="rgba(226,232,240,0.92)" strokeWidth="10" strokeLinecap="round" />
+            <line x1="270" y1="172" x2="310" y2="201" stroke="rgba(226,232,240,0.88)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="163" y1="180" x2="104" y2="198" stroke="rgba(110,231,183,0.9)" strokeWidth="7" strokeLinecap="round" />
+          </g>
+        )}
+
+        {kind === "lunge" && (
+          <g style={{ animation: "lunge 3.6s ease-in-out infinite" }}>
+            <circle cx="206" cy="66" r="14" fill="rgba(226,232,240,0.95)" />
+            <line x1="206" y1="82" x2="206" y2="143" stroke="rgba(226,232,240,0.92)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="206" y1="104" x2="178" y2="130" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+            <line x1="206" y1="104" x2="234" y2="130" stroke="rgba(226,232,240,0.85)" strokeWidth="7" strokeLinecap="round" />
+            <line x1="206" y1="143" x2="166" y2="176" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="166" y1="176" x2="135" y2="211" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="206" y1="143" x2="250" y2="180" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="250" y1="180" x2="288" y2="211" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+          </g>
+        )}
+
+        {kind === "downward" && (
+          <g style={{ animation: "downward 3.8s ease-in-out infinite" }}>
+            <circle cx="118" cy="181" r="11" fill="rgba(226,232,240,0.95)" />
+            <line x1="130" y1="177" x2="210" y2="105" stroke="rgba(226,232,240,0.92)" strokeWidth="9" strokeLinecap="round" />
+            <line x1="210" y1="105" x2="290" y2="207" stroke="rgba(226,232,240,0.9)" strokeWidth="9" strokeLinecap="round" />
+            <line x1="130" y1="180" x2="86" y2="210" stroke="rgba(226,232,240,0.88)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="210" y1="105" x2="238" y2="207" stroke="rgba(226,232,240,0.88)" strokeWidth="8" strokeLinecap="round" />
+          </g>
+        )}
+
+        {kind === "figure4" && (
+          <g style={{ animation: "figure4 4s ease-in-out infinite", transformOrigin: "210px 160px" }}>
+            <circle cx="120" cy="158" r="12" fill="rgba(226,232,240,0.95)" />
+            <line x1="133" y1="158" x2="225" y2="158" stroke="rgba(226,232,240,0.92)" strokeWidth="9" strokeLinecap="round" />
+            <line x1="225" y1="158" x2="282" y2="198" stroke="rgba(226,232,240,0.9)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="225" y1="158" x2="258" y2="124" stroke="rgba(110,231,183,0.95)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="258" y1="124" x2="293" y2="160" stroke="rgba(110,231,183,0.95)" strokeWidth="8" strokeLinecap="round" />
+          </g>
+        )}
+
+        {kind === "twist" && (
+          <g style={{ animation: "twist 5s ease-in-out infinite", transformOrigin: "210px 160px" }}>
+            <circle cx="118" cy="159" r="12" fill="rgba(226,232,240,0.95)" />
+            <line x1="131" y1="159" x2="226" y2="159" stroke="rgba(226,232,240,0.92)" strokeWidth="9" strokeLinecap="round" />
+            <line x1="180" y1="159" x2="155" y2="130" stroke="rgba(226,232,240,0.82)" strokeWidth="7" strokeLinecap="round" />
+            <line x1="180" y1="159" x2="155" y2="188" stroke="rgba(226,232,240,0.82)" strokeWidth="7" strokeLinecap="round" />
+            <line x1="226" y1="159" x2="267" y2="132" stroke="rgba(110,231,183,0.95)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="267" y1="132" x2="310" y2="159" stroke="rgba(110,231,183,0.95)" strokeWidth="8" strokeLinecap="round" />
+          </g>
+        )}
+
+        {isDad && kind !== "warmup" && kind !== "cooldown" ? (
+          <text x="24" y="234" fill="rgba(148,163,184,0.75)" fontSize="10">
+            Kettlebell: use a controllable weight · form first
+          </text>
+        ) : (
+          <text x="24" y="234" fill="rgba(148,163,184,0.75)" fontSize="10">
+            Move slowly · no bouncing · breathe naturally
+          </text>
+        )}
+      </svg>
+    </div>
+  );
+}
+
 function formatSeconds(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
@@ -449,7 +829,14 @@ export default function FitnessPage() {
               </div>
             </div>
 
-            <div className="mt-7 text-center">
+            <div className="mt-5">
+              <ExerciseAnimation
+                kind={current.id as AnimationKind}
+                person={person}
+              />
+            </div>
+
+            <div className="mt-5 text-center">
               <div className="text-[clamp(4.5rem,11vw,9rem)] font-bold leading-none tabular-nums">
                 {formatSeconds(secondsLeft)}
               </div>
@@ -514,6 +901,9 @@ export default function FitnessPage() {
               </div>
               <div className="mt-2 text-base leading-relaxed text-slate-200">
                 {current.detail}
+              </div>
+              <div className="mt-3 rounded-xl bg-white/[0.04] px-3 py-2 text-xs leading-relaxed text-slate-500">
+                动画是动作方向示意，不是精确人体姿势判定。重量、幅度和速度仍以安全和舒适为优先。
               </div>
             </div>
 

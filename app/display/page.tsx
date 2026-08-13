@@ -420,63 +420,122 @@ function BookCover({
   );
 }
 
-function DesktopBookPickCard({ book }: { book: BookPick }) {
+function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const activeCategory = selectedCategory ?? hoveredCategory;
+  const activeBook =
+    books.find((book) => book.category === activeCategory) ?? null;
+  const pinned = Boolean(selectedCategory);
+
   return (
-    <div className="group relative">
-      <button
-        type="button"
-        className="grid w-full grid-cols-[2.5rem_6rem_minmax(0,1fr)] items-center gap-2 rounded-xl bg-white/[0.04] px-2 py-1 text-left transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/60"
-        aria-label={`${book.title} の紹介を表示`}
-      >
-        <BookCover book={book} compact />
-
-        <div>
-          <div className="text-[9px] font-bold tracking-[0.06em] text-sky-200">
-            {book.categoryLabel}
-          </div>
-          {book.rank ? (
-            <div className="mt-0.5 text-[9px] text-slate-500">
-              #{book.rank}
+    <div className="relative min-h-[116px]">
+      <div className="grid grid-cols-2 gap-1.5">
+        {books.map((book) => (
+          <button
+            key={book.category}
+            type="button"
+            onMouseEnter={() => {
+              if (!selectedCategory) setHoveredCategory(book.category);
+            }}
+            onMouseLeave={() => {
+              if (!selectedCategory) setHoveredCategory(null);
+            }}
+            onClick={() =>
+              setSelectedCategory((current) =>
+                current === book.category ? null : book.category
+              )
+            }
+            className="grid h-9 min-w-0 grid-cols-[1.6rem_minmax(0,1fr)] items-center gap-2 rounded-lg bg-white/[0.045] px-2 text-left transition hover:bg-white/[0.09] active:bg-white/[0.12]"
+            aria-label={`${book.title} の紹介を表示`}
+          >
+            <div className="relative grid h-8 w-6 shrink-0 place-items-center overflow-hidden rounded bg-slate-800">
+              <BookOpen className="h-3.5 w-3.5 text-slate-500" />
+              {book.coverUrl ? (
+                <img
+                  src={book.coverUrl}
+                  alt=""
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : null}
             </div>
-          ) : null}
-        </div>
 
-        <div className="min-w-0">
-          <div className="truncate text-[clamp(0.85rem,0.88vw,1.02rem)] font-semibold text-white">
-            {book.title}
-          </div>
-          <div className="mt-0.5 truncate text-[10px] text-slate-400">
-            {book.author ? `${book.author} · ` : ""}
-            {book.reason}
-          </div>
-        </div>
-      </button>
-
-      <div className="pointer-events-none invisible absolute inset-x-0 top-0 z-40 min-h-[150px] rounded-xl border border-sky-300/15 bg-[#0b1729]/[0.99] p-3 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-        <div className="flex gap-3">
-          <BookCover book={book} />
-          <div className="min-w-0 flex-1">
-            <div className="text-[9px] font-bold tracking-[0.08em] text-sky-200">
-              {book.categoryLabel}
-              {book.rank ? ` · #${book.rank}` : ""}
-            </div>
-            <div className="mt-1 text-base font-bold leading-snug text-white">
-              {book.title}
-            </div>
-            {book.author ? (
-              <div className="mt-1 text-[11px] text-slate-400">
-                {book.author}
+            <div className="min-w-0">
+              <div className="truncate text-[8px] font-bold tracking-[0.04em] text-sky-200">
+                {book.categoryLabel}
+                {book.rank ? ` · #${book.rank}` : ""}
               </div>
-            ) : null}
-            <div className="mt-2 line-clamp-4 text-[12px] leading-relaxed text-slate-200">
-              {book.description}
+              <div className="truncate text-[11px] font-semibold leading-tight text-white">
+                {book.title}
+              </div>
             </div>
-            <div className="mt-1 text-[9px] text-slate-500">
-              {book.source} · 每周更新
+          </button>
+        ))}
+
+        {books.length === 0 ? (
+          <div className="col-span-2 grid min-h-[110px] place-items-center rounded-xl bg-white/[0.04] text-sm text-slate-400">
+            今週の本を取得中…
+          </div>
+        ) : null}
+      </div>
+
+      {activeBook ? (
+        <div
+          className={`absolute inset-0 z-30 rounded-xl border border-sky-300/15 bg-[#0b1729]/[0.99] p-3 shadow-xl ${
+            pinned ? "pointer-events-auto" : "pointer-events-none"
+          }`}
+        >
+          <div className="flex h-full gap-3">
+            <BookCover book={activeBook} />
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-[9px] font-bold tracking-[0.06em] text-sky-200">
+                    {activeBook.categoryLabel}
+                    {activeBook.rank ? ` · #${activeBook.rank}` : ""}
+                  </div>
+                  <div className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug text-white">
+                    {activeBook.title}
+                  </div>
+                </div>
+
+                {pinned ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      setHoveredCategory(null);
+                    }}
+                    className="pointer-events-auto shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-slate-200 active:bg-white/20"
+                  >
+                    戻る
+                  </button>
+                ) : null}
+              </div>
+
+              {activeBook.author ? (
+                <div className="mt-1 truncate text-[10px] text-slate-400">
+                  {activeBook.author}
+                </div>
+              ) : null}
+
+              <div className="mt-2 line-clamp-3 text-[11px] leading-relaxed text-slate-200">
+                {activeBook.description}
+              </div>
+
+              <div className="mt-1 truncate text-[8px] text-slate-500">
+                {activeBook.source} · 每周更新
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
@@ -1469,20 +1528,7 @@ export default function DisplayPage() {
                     </span>
                   </div>
 
-                  <div className="grid gap-2">
-                    {bookPicks.slice(0, 5).map((book) => (
-                      <DesktopBookPickCard
-                        key={book.category}
-                        book={book}
-                      />
-                    ))}
-
-                    {bookPicks.length === 0 ? (
-                      <div className="rounded-xl bg-white/[0.04] px-3 py-4 text-center text-sm text-slate-400">
-                        今週の本を取得中…
-                      </div>
-                    ) : null}
-                  </div>
+                  <DesktopBookPickPanel books={bookPicks.slice(0, 5)} />
                 </section>
               </div>
             </article>
