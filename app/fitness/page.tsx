@@ -9,12 +9,14 @@ import {
   ChevronRight,
   Circle,
   Dumbbell,
+  ExternalLink,
   HeartPulse,
   Home,
   Music2,
   Pause,
   Play,
   RotateCcw,
+  ShieldCheck,
   Timer,
   Volume2,
   Wind
@@ -50,6 +52,36 @@ type FitnessMusicStation = {
   description: string;
   urls: string[];
 };
+
+type MediaHealthItem = {
+  id: string;
+  healthy: boolean;
+  activeUrlIndex: number;
+};
+
+type MediaHealthResponse = {
+  stations?: MediaHealthItem[];
+  checkedAt?: string;
+  refresh?: "daily";
+};
+
+type FitnessReferenceItem = {
+  id: string;
+  audience: "dad" | "mom";
+  label: string;
+  url: string;
+  healthy: boolean;
+  title: string;
+  description: string;
+};
+
+type FitnessReferenceResponse = {
+  items?: FitnessReferenceItem[];
+  updatedAt?: string;
+  refresh?: "monthly";
+  policy?: string;
+};
+
 
 const fitnessMusicStations: FitnessMusicStation[] = [
   {
@@ -650,10 +682,63 @@ function FitnessMusic({
   const [volume, setVolume] = useState(0.42);
   const [sourceIndex, setSourceIndex] = useState(0);
   const [error, setError] = useState(false);
+  const [health, setHealth] = useState<Record<string, MediaHealthItem>>({});
+  const [healthCheckedAt, setHealthCheckedAt] = useState<string | undefined>();
 
   const station =
     fitnessMusicStations.find((item) => item.id === stationId) ??
     fitnessMusicStations[0];
+
+  useEffect(() => {
+    let disposed = false;
+
+    async function loadHealth() {
+      try {
+        const response = await fetch("/api/media-health", {
+          cache: "no-store"
+        });
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as MediaHealthResponse;
+        if (disposed) return;
+
+        const next: Record<string, MediaHealthItem> = {};
+        (payload.stations ?? []).forEach((item) => {
+          next[item.id] = item;
+        });
+
+        setHealth(next);
+        setHealthCheckedAt(payload.checkedAt);
+      } catch {
+        // Playback still has its own source fallback.
+      }
+    }
+
+    void loadHealth();
+
+    const timer = window.setInterval(() => {
+      void loadHealth();
+    }, 6 * 60 * 60_000);
+
+    return () => {
+      disposed = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    const status = health[station.id];
+    if (!status?.healthy || playing) return;
+
+    const preferred = Math.max(
+      0,
+      Math.min(status.activeUrlIndex, station.urls.length - 1)
+    );
+
+    if (preferred !== sourceIndex) {
+      setSourceIndex(preferred);
+    }
+  }, [health, station.id, station.urls.length, sourceIndex, playing]);
 
   useEffect(() => {
     const nextStation =
@@ -721,7 +806,7 @@ function FitnessMusic({
 
   function selectStation(nextId: string) {
     setStationId(nextId);
-    setSourceIndex(0);
+    setSourceIndex(health[nextId]?.activeUrlIndex ?? 0);
     setError(false);
   }
 
@@ -804,8 +889,24 @@ function FitnessMusic({
                     : "bg-slate-950/20 active:bg-white/[0.08]"
                 }`}
               >
-                <div className="text-xs font-bold text-white">
-                  {item.shortLabel}
+                <div className="flex items-center justify-between gap-2 text-xs font-bold text-white">
+                  <span>{item.shortLabel}</span>
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      health[item.id]?.healthy === true
+                        ? "bg-emerald-300"
+                        : health[item.id]?.healthy === false
+                          ? "bg-red-300"
+                          : "bg-slate-600"
+                    }`}
+                    title={
+                      health[item.id]?.healthy === true
+                        ? "每日检查：可用"
+                        : health[item.id]?.healthy === false
+                          ? "每日检查：当前不可用"
+                          : "检查中"
+                    }
+                  />
                 </div>
                 <div className="mt-0.5 truncate text-[10px] text-slate-500">
                   {item.label}
@@ -831,8 +932,24 @@ function FitnessMusic({
                     : "bg-slate-950/20 active:bg-white/[0.08]"
                 }`}
               >
-                <div className="text-xs font-bold text-white">
-                  {item.shortLabel}
+                <div className="flex items-center justify-between gap-2 text-xs font-bold text-white">
+                  <span>{item.shortLabel}</span>
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      health[item.id]?.healthy === true
+                        ? "bg-emerald-300"
+                        : health[item.id]?.healthy === false
+                          ? "bg-red-300"
+                          : "bg-slate-600"
+                    }`}
+                    title={
+                      health[item.id]?.healthy === true
+                        ? "每日检查：可用"
+                        : health[item.id]?.healthy === false
+                          ? "每日检查：当前不可用"
+                          : "检查中"
+                    }
+                  />
                 </div>
                 <div className="mt-0.5 truncate text-[10px] text-slate-500">
                   {item.label}
@@ -851,7 +968,101 @@ function FitnessMusic({
               ? "音乐连接失败，请换一个频道"
               : `${station.label} · 点 Play 开始`}
         </span>
-        <span className="shrink-0">SomaFM</span>
+        <span className="shrink-0">
+          SomaFM · 每日源检查
+          {healthCheckedAt
+            ? ` · ${new Date(healthCheckedAt).toLocaleDateString("ja-JP")}`
+            : ""}
+        </span>
+      </div>
+    </section>
+  );
+}
+
+
+function FitnessReferencePanel({
+  person
+}: {
+  person: Person;
+}) {
+  const [items, setItems] = useState<FitnessReferenceItem[]>([]);
+  const [updatedAt, setUpdatedAt] = useState<string | undefined>();
+
+  useEffect(() => {
+    let disposed = false;
+
+    async function load() {
+      try {
+        const response = await fetch("/api/fitness-reference", {
+          cache: "no-store"
+        });
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as FitnessReferenceResponse;
+        if (disposed) return;
+
+        setItems(payload.items ?? []);
+        setUpdatedAt(payload.updatedAt);
+      } catch {
+        // The approved routine itself never depends on these references.
+      }
+    }
+
+    void load();
+
+    return () => {
+      disposed = true;
+    };
+  }, []);
+
+  const visible = items.filter((item) => item.audience === person);
+
+  if (visible.length === 0) return null;
+
+  return (
+    <section className="mt-4 rounded-2xl border border-sky-300/10 bg-sky-300/[0.05] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-sky-200">
+          <ShieldCheck size={17} />
+          NEW / 参考 · 月次更新
+        </div>
+
+        <span className="text-[10px] text-slate-500">
+          正式15分钟 Routine 不会自动被替换
+          {updatedAt
+            ? ` · ${new Date(updatedAt).toLocaleDateString("ja-JP")}`
+            : ""}
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-2 md:grid-cols-2">
+        {visible.map((item) => (
+          <a
+            key={item.id}
+            href={item.url}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-xl bg-slate-950/20 p-3 transition active:bg-white/[0.08]"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-sm font-semibold text-white">
+                {item.label}
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    item.healthy ? "bg-emerald-300" : "bg-amber-300"
+                  }`}
+                />
+                <ExternalLink size={14} className="text-slate-500" />
+              </div>
+            </div>
+
+            <div className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-slate-400">
+              {item.description || item.title}
+            </div>
+          </a>
+        ))}
       </div>
     </section>
   );
@@ -1087,6 +1298,7 @@ export default function FitnessPage() {
         ) : null}
 
         <FitnessMusic person={person} />
+        <FitnessReferencePanel person={person} />
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <article className="rounded-3xl bg-white/[0.055] p-5 sm:p-6">

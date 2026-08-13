@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   CalendarDays,
   ChefHat,
   Clock3,
+  ExternalLink,
   Fish,
   Home,
   Leaf,
+  RefreshCw,
   Salad,
   ShoppingBasket
 } from "lucide-react";
@@ -27,6 +29,44 @@ type Meal = {
   pantry: string[];
   steps: string[];
   health: string;
+  live?: boolean;
+  imageUrl?: string;
+  sourceUrl?: string;
+  source?: string;
+};
+
+type LiveRecipe = {
+  id: string;
+  title: string;
+  description: string;
+  materials: string[];
+  indication?: string;
+  imageUrl?: string;
+  sourceUrl?: string;
+  rank?: number;
+  source: "Rakuten Recipe";
+  score: number;
+};
+
+type RecipeApiResponse = {
+  season?: SeasonId;
+  seasonalProduce?: string[];
+  liveRecipes?: LiveRecipe[];
+  updatedAt?: string;
+  refresh?: "weekly";
+  mode?: "live" | "maff_plus_fallback" | "fallback";
+  sourceStatus?: {
+    maff?: {
+      configured?: boolean;
+      reached?: boolean;
+      label?: string;
+    };
+    rakutenRecipe?: {
+      configured?: boolean;
+      reached?: boolean;
+      label?: string;
+    };
+  };
 };
 
 const seasonMeta: Record<
@@ -587,17 +627,153 @@ const meals: Record<SeasonId, Meal[]> = {
 
 const weekdayZh = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
+function minutesFromIndication(value?: string) {
+  if (!value) return 30;
+  const match = value.match(/(\d+)/);
+  if (!match) return value.includes("1時間") ? 60 : 30;
+  return Number(match[1]) || 30;
+}
+
+function inferProtein(materials: string[]) {
+  const text = materials.join(" ");
+  const candidates: Array<[string, string]> = [
+    ["鮭", "鮭 / サーモン"],
+    ["サーモン", "鮭 / サーモン"],
+    ["鯖", "鯖"],
+    ["さば", "鯖"],
+    ["アジ", "アジ"],
+    ["あじ", "アジ"],
+    ["ぶり", "ぶり"],
+    ["鱈", "鱈"],
+    ["たら", "鱈"],
+    ["鶏", "鶏肉"],
+    ["チキン", "鶏肉"],
+    ["豆腐", "豆腐"],
+    ["ひよこ豆", "ひよこ豆"],
+    ["レンズ豆", "レンズ豆"],
+    ["納豆", "納豆"],
+    ["えび", "えび"],
+    ["エビ", "えび"],
+    ["卵", "卵"],
+    ["たまご", "卵"]
+  ];
+
+  for (const [keyword, label] of candidates) {
+    if (text.includes(keyword)) return label;
+  }
+
+  if (text.includes("豆")) return "豆类";
+  return "鱼 / 豆 / 鸡肉候选";
+}
+
+function liveRecipeToMeal(
+  recipe: LiveRecipe,
+  seasonal: string[]
+): Meal {
+  const combined = `${recipe.title} ${recipe.materials.join(" ")}`;
+  const vegetables = seasonal
+    .filter((item) => {
+      const normalized = item.replace(/^春/, "").replace(/^新/, "");
+      return normalized.length >= 2 && combined.includes(normalized);
+    })
+    .slice(0, 5);
+
+  const protein = inferProtein(recipe.materials);
+  const pantry = recipe.materials
+    .filter((item) => !vegetables.some((veg) => item.includes(veg)))
+    .slice(0, 7);
+
+  return {
+    id: `live-${recipe.id}`,
+    title: recipe.title,
+    subtitle: recipe.description || "本周在线食谱候选",
+    style: "FUSION",
+    time: minutesFromIndication(recipe.indication),
+    protein,
+    vegetables:
+      vegetables.length > 0 ? vegetables : ["旬食材と組み合わせ"],
+    pantry,
+    steps: [
+      recipe.materials.length > 0
+        ? `主要材料：${recipe.materials.slice(0, 7).join("、")}`
+        : "主要材料请参考原食谱。",
+      "具体烹饪步骤以原食谱为准，本页不自动改写关键步骤。",
+      "家庭健康调整：控制盐、糖和油量；适合时优先橄榄油，并增加蔬菜比例。"
+    ],
+    health:
+      "来自本周 Rakuten Recipe 排名候选，并按旬食材、鱼/豆/鸡肉、蔬菜比例和少油少加工食品方向进行筛选。",
+    live: true,
+    imageUrl: recipe.imageUrl,
+    sourceUrl: recipe.sourceUrl,
+    source: recipe.source
+  };
+}
+
+
 export default function RecipesPage() {
   const now = new Date();
   const season = seasonForDate(now);
   const meta = seasonMeta[season];
   const rotation = weekIndex(now) % 7;
   const [openMeal, setOpenMeal] = useState<string | null>(null);
+  const [remote, setRemote] = useState<RecipeApiResponse | null>(null);
+  const [remoteLoading, setRemoteLoading] = useState(true);
+
+  useEffect(() => {
+    let disposed = false;
+
+    async function loadRemote() {
+      try {
+        const response = await fetch("/api/recipes", {
+          cache: "no-store"
+        });
+        if (!response.ok) return;
+        const payload = (await response.json()) as RecipeApiResponse;
+        if (!disposed) setRemote(payload);
+      } catch {
+        // Keep the local seasonal fallback.
+      } finally {
+        if (!disposed) setRemoteLoading(false);
+      }
+    }
+
+    void loadRemote();
+
+    const timer = window.setInterval(() => {
+      void loadRemote();
+    }, 6 * 60 * 60_000);
+
+    return () => {
+      disposed = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const seasonalDisplay =
+    remote?.seasonalProduce && remote.seasonalProduce.length > 0
+      ? remote.seasonalProduce
+      : meta.produce;
+
+  const liveMeals = useMemo(
+    () =>
+      (remote?.liveRecipes ?? []).map((recipe) =>
+        liveRecipeToMeal(recipe, seasonalDisplay)
+      ),
+    [remote, seasonalDisplay]
+  );
 
   const weekMeals = useMemo(() => {
-    const source = meals[season];
-    return Array.from({ length: 7 }, (_, index) => source[(index + rotation) % source.length]);
-  }, [season, rotation]);
+    const fallback = meals[season];
+    const candidates =
+      liveMeals.length >= 4
+        ? liveMeals
+        : [...liveMeals, ...fallback.filter((meal) => !liveMeals.some((live) => live.title === meal.title))];
+
+    return Array.from(
+      { length: 7 },
+      (_, index) => candidates[(index + rotation) % candidates.length]
+    );
+  }, [season, rotation, liveMeals]);
 
   const todayMeal = weekMeals[now.getDay()];
 
@@ -608,7 +784,7 @@ export default function RecipesPage() {
     );
     const pantry = Array.from(
       new Set(weekMeals.flatMap((meal) => meal.pantry))
-    );
+    ).slice(0, 24);
     return { proteins, vegetables, pantry };
   }, [weekMeals]);
 
@@ -626,8 +802,25 @@ export default function RecipesPage() {
             <h1 className="mt-1 text-2xl font-bold sm:text-3xl">
               関東旬食材 × 中国家常 × 地中海饮食
             </h1>
-            <div className="mt-1 text-sm text-slate-400">
-              {meta.label} · {meta.ja} · {meta.zh}　{meta.note}
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-400">
+              <span>
+                {meta.label} · {meta.ja} · {meta.zh}　{meta.note}
+              </span>
+              <span
+                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                  remote?.mode === "live"
+                    ? "bg-emerald-300/15 text-emerald-100"
+                    : "bg-amber-300/10 text-amber-100"
+                }`}
+              >
+                {remoteLoading
+                  ? "更新確認中…"
+                  : remote?.mode === "live"
+                    ? "MAFF + Rakuten LIVE"
+                    : remote?.sourceStatus?.rakutenRecipe?.configured
+                      ? "MAFF + fallback"
+                      : "MAFF + fallback · Rakuten Key未設定"}
+              </span>
             </div>
           </div>
 
@@ -645,7 +838,7 @@ export default function RecipesPage() {
             今の旬 · 当前时令
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {meta.produce.map((item) => (
+            {seasonalDisplay.map((item) => (
               <span
                 key={item}
                 className="rounded-full bg-emerald-300/10 px-3 py-1.5 text-sm text-emerald-100"
@@ -653,6 +846,29 @@ export default function RecipesPage() {
                 {item}
               </span>
             ))}
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-slate-500">
+            <span className="inline-flex items-center gap-1">
+              <RefreshCw size={12} />
+              每周自动更新
+            </span>
+            <span>
+              MAFF: {remote?.sourceStatus?.maff?.reached ? "LIVE" : "fallback"}
+            </span>
+            <span>
+              Rakuten Recipe:{" "}
+              {remote?.sourceStatus?.rakutenRecipe?.reached
+                ? "LIVE"
+                : remote?.sourceStatus?.rakutenRecipe?.configured
+                  ? "暂不可用"
+                  : "未配置"}
+            </span>
+            {remote?.updatedAt ? (
+              <span>
+                {new Date(remote.updatedAt).toLocaleDateString("ja-JP")}
+              </span>
+            ) : null}
           </div>
         </section>
 
@@ -662,7 +878,21 @@ export default function RecipesPage() {
               TODAY'S MEAL · 今日推荐
             </div>
 
-            <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+            {todayMeal.imageUrl ? (
+              <div className="mt-3 overflow-hidden rounded-2xl bg-slate-950/25">
+                <img
+                  src={todayMeal.imageUrl}
+                  alt=""
+                  className="h-36 w-full object-cover sm:h-44"
+                  loading="lazy"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            ) : null}
+
+            <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="text-2xl font-bold sm:text-4xl">
                   {todayMeal.title}
@@ -673,7 +903,7 @@ export default function RecipesPage() {
               </div>
 
               <div className="rounded-full bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-slate-200">
-                {styleLabel(todayMeal.style)}
+                {todayMeal.live ? "LIVE · Rakuten" : styleLabel(todayMeal.style)}
               </div>
             </div>
 
@@ -726,6 +956,18 @@ export default function RecipesPage() {
             <div className="mt-4 rounded-2xl border border-emerald-300/10 bg-emerald-300/[0.05] p-4 text-sm leading-relaxed text-emerald-50">
               {todayMeal.health}
             </div>
+
+            {todayMeal.sourceUrl ? (
+              <a
+                href={todayMeal.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white/[0.07] px-4 text-sm font-semibold text-slate-200 active:bg-white/[0.12]"
+              >
+                原食谱
+                <ExternalLink size={16} />
+              </a>
+            ) : null}
           </article>
 
           <article className="rounded-3xl bg-white/[0.045] p-5">
@@ -761,7 +1003,7 @@ export default function RecipesPage() {
                         {meal.title}
                       </div>
                       <div className="mt-0.5 truncate text-[11px] text-slate-500">
-                        {styleLabel(meal.style)} · {meal.protein}
+                        {meal.live ? "LIVE" : styleLabel(meal.style)} · {meal.protein}
                       </div>
                     </div>
                     <div className="text-xs text-slate-500">
