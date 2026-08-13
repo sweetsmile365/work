@@ -990,12 +990,20 @@ export default function DisplayPage() {
           </section>
 
           <section className="rounded-2xl bg-white/[0.045] p-4">
-            <div className="flex items-center gap-3">
-              <Dumbbell className="h-5 w-5 text-emerald-200" />
-              <SectionTitle
-                title="DAILY ROUTINE"
-                accent="bg-emerald-300"
-              />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Dumbbell className="h-5 w-5 text-emerald-200" />
+                <SectionTitle
+                  title="DAILY ROUTINE"
+                  accent="bg-emerald-300"
+                />
+              </div>
+              <Link
+                href="/fitness"
+                className="shrink-0 rounded-full bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100 active:bg-emerald-300/20"
+              >
+                FITNESS →
+              </Link>
             </div>
 
             <div className="mt-3 grid gap-2">
@@ -1390,12 +1398,20 @@ export default function DisplayPage() {
             <article className="min-h-0 overflow-hidden rounded-3xl bg-amber-300/[0.08] p-5">
               <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
                 <section>
-                  <div className="mb-2 flex items-center gap-3">
-                    <Dumbbell className="h-6 w-6 text-emerald-200" />
-                    <SectionTitle
-                      title="DAILY ROUTINE"
-                      accent="bg-emerald-300"
-                    />
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <Dumbbell className="h-6 w-6 text-emerald-200" />
+                      <SectionTitle
+                        title="DAILY ROUTINE"
+                        accent="bg-emerald-300"
+                      />
+                    </div>
+                    <Link
+                      href="/fitness"
+                      className="shrink-0 rounded-full bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100 transition active:bg-emerald-300/20"
+                    >
+                      FITNESS →
+                    </Link>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">

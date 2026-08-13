@@ -20,16 +20,17 @@ export function CloudRefreshButton() {
   const { isMobile } = useResponsiveLayout();
   const [status, setStatus] = useState<RefreshStatus>("idle");
 
-  // /display already performs automatic cloud refresh every 60 seconds.
-  // Hiding the floating manual sync button here avoids covering the
-  // STREAK "Today x/3" summary on the LG dashboard.
-  if (pathname === "/display" || pathname.startsWith("/display/")) {
+  if (
+    pathname === "/display" ||
+    pathname.startsWith("/display/") ||
+    pathname === "/fitness" ||
+    pathname.startsWith("/fitness/")
+  ) {
     return null;
   }
 
   async function handleRefresh() {
     if (status === "loading") return;
-
     setStatus("loading");
 
     try {
