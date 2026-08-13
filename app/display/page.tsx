@@ -1464,10 +1464,10 @@ export default function DisplayPage() {
           </div>
         </header>
 
-        <div className="grid min-h-0 grid-rows-[0.86fr_1.14fr] gap-4">
+        <div className="grid min-h-0 grid-rows-[0.94fr_1.06fr] gap-4">
           <section className="grid min-h-0 grid-cols-[0.9fr_1.55fr] gap-4">
             <article className="min-h-0 rounded-3xl bg-cyan-300/[0.08] p-5">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between">
                 <SectionTitle title="TODAY" accent="bg-cyan-300" />
 
                 <span className="rounded-full bg-cyan-300/15 px-3 py-1 text-[clamp(0.95rem,0.9vw,1.1rem)] text-cyan-100">
@@ -1510,7 +1510,7 @@ export default function DisplayPage() {
               )}
             </article>
 
-            <article className="min-h-0 rounded-3xl bg-indigo-300/[0.08] p-5">
+            <article className="min-h-0 overflow-hidden rounded-3xl bg-indigo-300/[0.08] p-5">
               <div className="mb-4 flex items-center justify-between">
                 <SectionTitle
                   title="UPCOMING"
@@ -1522,27 +1522,27 @@ export default function DisplayPage() {
                 </span>
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid min-h-0 gap-1.5">
                 {data.upcomingEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="grid grid-cols-[7rem_6.4rem_1rem_minmax(0,1fr)] items-start gap-3 rounded-2xl bg-slate-950/30 px-4 py-2.5"
+                    className="grid min-h-0 grid-cols-[6.6rem_6rem_1rem_minmax(0,1fr)] items-center gap-3 rounded-xl bg-slate-950/30 px-4 py-1.5"
                   >
-                    <div className="text-[clamp(1rem,0.95vw,1.2rem)] font-semibold text-slate-200">
+                    <div className="text-[clamp(0.95rem,0.9vw,1.1rem)] font-semibold text-slate-200">
                       {formatShortDate(event.date)}
                     </div>
 
-                    <div className="text-[clamp(1rem,0.95vw,1.2rem)] text-slate-300">
+                    <div className="text-[clamp(0.95rem,0.9vw,1.1rem)] text-slate-300">
                       {eventTimeRange(event)}
                     </div>
 
                     <span
-                      className={`mt-2 h-3 w-3 rounded-full ${categoryColor(
+                      className={`h-3 w-3 rounded-full ${categoryColor(
                         event
                       )}`}
                     />
 
-                    <div className="text-[clamp(1.1rem,1.15vw,1.45rem)] font-medium leading-snug">
+                    <div className="truncate text-[clamp(1rem,1.05vw,1.3rem)] font-medium leading-tight">
                       {event.title}
                     </div>
                   </div>

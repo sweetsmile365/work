@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -11,10 +11,12 @@ import {
   Dumbbell,
   HeartPulse,
   Home,
+  Music2,
   Pause,
   Play,
   RotateCcw,
   Timer,
+  Volume2,
   Wind
 } from "lucide-react";
 import {
@@ -37,6 +39,65 @@ type RoutineStep = {
   cue: string;
   detail: string;
 };
+
+type FitnessMusicCategory = "workout" | "yoga";
+
+type FitnessMusicStation = {
+  id: string;
+  label: string;
+  shortLabel: string;
+  category: FitnessMusicCategory;
+  description: string;
+  urls: string[];
+};
+
+const fitnessMusicStations: FitnessMusicStation[] = [
+  {
+    id: "workout-energy",
+    label: "Workout Energy",
+    shortLabel: "ENERGY",
+    category: "workout",
+    description: "Progressive house / trance · 壶铃训练",
+    urls: [
+      "https://ice5.somafm.com/thetrip-128-mp3",
+      "https://ice2.somafm.com/thetrip-128-mp3"
+    ]
+  },
+  {
+    id: "workout-groove",
+    label: "Workout Groove",
+    shortLabel: "GROOVE",
+    category: "workout",
+    description: "Deep house / downtempo · 稳定节奏",
+    urls: [
+      "https://ice5.somafm.com/beatblender-128-mp3",
+      "https://ice2.somafm.com/beatblender-128-mp3"
+    ]
+  },
+  {
+    id: "yoga-flow",
+    label: "Yoga Flow",
+    shortLabel: "FLOW",
+    category: "yoga",
+    description: "Ambient / downtempo · 拉伸与瑜伽",
+    urls: [
+      "https://ice5.somafm.com/groovesalad-128-mp3",
+      "https://ice2.somafm.com/groovesalad-128-mp3"
+    ]
+  },
+  {
+    id: "yoga-deep",
+    label: "Yoga Deep",
+    shortLabel: "DEEP",
+    category: "yoga",
+    description: "Atmospheric ambient · 放松与恢复",
+    urls: [
+      "https://ice5.somafm.com/dronezone-128-mp3",
+      "https://ice6.somafm.com/dronezone-128-mp3"
+    ]
+  }
+];
+
 
 const dadRoutine: RoutineStep[] = [
   {
@@ -574,6 +635,228 @@ function ExerciseAnimation({
   );
 }
 
+
+function FitnessMusic({
+  person
+}: {
+  person: Person;
+}) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const defaultStationId =
+    person === "dad" ? "workout-energy" : "yoga-flow";
+
+  const [stationId, setStationId] = useState(defaultStationId);
+  const [playing, setPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.42);
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const [error, setError] = useState(false);
+
+  const station =
+    fitnessMusicStations.find((item) => item.id === stationId) ??
+    fitnessMusicStations[0];
+
+  useEffect(() => {
+    const nextStation =
+      person === "dad" ? "workout-energy" : "yoga-flow";
+
+    setStationId(nextStation);
+    setSourceIndex(0);
+    setPlaying(false);
+    setError(false);
+
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  }, [person]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.pause();
+    audio.src = station.urls[sourceIndex] ?? station.urls[0];
+    audio.volume = volume;
+    audio.load();
+
+    setPlaying(false);
+    setError(false);
+  }, [station.id, sourceIndex]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) audio.volume = volume;
+  }, [volume]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => {
+      if (!audio) return;
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    };
+  }, []);
+
+  async function toggleMusic() {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (playing) {
+      audio.pause();
+      setPlaying(false);
+      return;
+    }
+
+    try {
+      setError(false);
+      await audio.play();
+      setPlaying(true);
+    } catch {
+      setPlaying(false);
+      setError(true);
+    }
+  }
+
+  function selectStation(nextId: string) {
+    setStationId(nextId);
+    setSourceIndex(0);
+    setError(false);
+  }
+
+  function handleAudioError() {
+    if (sourceIndex < station.urls.length - 1) {
+      setSourceIndex((value) => value + 1);
+      return;
+    }
+
+    setError(true);
+    setPlaying(false);
+  }
+
+  const workoutStations = fitnessMusicStations.filter(
+    (item) => item.category === "workout"
+  );
+  const yogaStations = fitnessMusicStations.filter(
+    (item) => item.category === "yoga"
+  );
+
+  return (
+    <section className="mt-4 rounded-2xl border border-violet-300/10 bg-violet-300/[0.06] p-4">
+      <audio
+        ref={audioRef}
+        preload="none"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onError={handleAudioError}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-violet-200">
+            <Music2 size={17} />
+            FITNESS MUSIC
+          </div>
+          <div className="mt-1 text-sm text-slate-400">
+            {station.description}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleMusic}
+            className="grid h-12 w-12 place-items-center rounded-full bg-violet-300 text-slate-950 transition active:scale-95"
+            aria-label={playing ? "音乐暂停" : "音乐播放"}
+          >
+            {playing ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
+          </button>
+
+          <Volume2 size={18} className="text-slate-400" />
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={volume}
+            onChange={(event) => setVolume(Number(event.target.value))}
+            className="w-24 accent-violet-300 sm:w-32"
+            aria-label="音乐音量"
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        <div>
+          <div className="mb-2 text-[10px] font-bold tracking-[0.12em] text-blue-200">
+            WORKOUT
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {workoutStations.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => selectStation(item.id)}
+                className={`min-h-11 rounded-xl px-3 text-left transition ${
+                  stationId === item.id
+                    ? "bg-blue-300/20 ring-1 ring-blue-300/30"
+                    : "bg-slate-950/20 active:bg-white/[0.08]"
+                }`}
+              >
+                <div className="text-xs font-bold text-white">
+                  {item.shortLabel}
+                </div>
+                <div className="mt-0.5 truncate text-[10px] text-slate-500">
+                  {item.label}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-2 text-[10px] font-bold tracking-[0.12em] text-emerald-200">
+            YOGA / STRETCH
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {yogaStations.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => selectStation(item.id)}
+                className={`min-h-11 rounded-xl px-3 text-left transition ${
+                  stationId === item.id
+                    ? "bg-emerald-300/20 ring-1 ring-emerald-300/30"
+                    : "bg-slate-950/20 active:bg-white/[0.08]"
+                }`}
+              >
+                <div className="text-xs font-bold text-white">
+                  {item.shortLabel}
+                </div>
+                <div className="mt-0.5 truncate text-[10px] text-slate-500">
+                  {item.label}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-3 text-[10px] text-slate-500">
+        <span>
+          {playing
+            ? `▶ ${station.label}`
+            : error
+              ? "音乐连接失败，请换一个频道"
+              : `${station.label} · 点 Play 开始`}
+        </span>
+        <span className="shrink-0">SomaFM</span>
+      </div>
+    </section>
+  );
+}
+
 function formatSeconds(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
@@ -802,6 +1085,8 @@ export default function FitnessPage() {
             </div>
           </section>
         ) : null}
+
+        <FitnessMusic person={person} />
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <article className="rounded-3xl bg-white/[0.055] p-5 sm:p-6">
