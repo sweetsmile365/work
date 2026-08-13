@@ -566,9 +566,40 @@ export default function DisplayPage() {
     setRecentlyCompleted(null);
   };
 
+  const isDayScene = now.getHours() >= 6 && now.getHours() < 18;
+
   return (
-    <main className="h-[100dvh] overflow-hidden bg-[#06101f] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(129,140,248,0.16),transparent_26%),linear-gradient(145deg,#06101f,#0b1729_55%,#07111f)]" />
+    <main className={`h-[100dvh] overflow-hidden text-white ${isDayScene ? "bg-sky-200" : "bg-[#06101f]"}`}>
+      <div
+        className={`pointer-events-none fixed inset-0 ${
+          isDayScene
+            ? "bg-[linear-gradient(180deg,rgba(125,211,252,0.94)_0%,rgba(186,230,253,0.84)_38%,rgba(134,239,172,0.44)_100%)]"
+            : "bg-[radial-gradient(circle_at_15%_0%,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_88%_10%,rgba(129,140,248,0.16),transparent_26%),linear-gradient(145deg,#06101f,#0b1729_55%,#07111f)]"
+        }`}
+      />
+
+      {isDayScene ? (
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <div className="absolute right-[8%] top-[7%] h-40 w-40 rounded-full bg-amber-200/90 shadow-[0_0_70px_rgba(253,224,71,0.65)]" />
+          <div className="absolute right-[6%] top-[4%] h-64 w-64 rounded-full bg-amber-100/20 blur-3xl" />
+          <div className="absolute left-[9%] top-[13%] h-16 w-44 rounded-full bg-white/55 blur-sm" />
+          <div className="absolute left-[15%] top-[10%] h-20 w-60 rounded-full bg-white/35 blur-md" />
+          <div className="absolute right-[28%] top-[18%] h-14 w-48 rounded-full bg-white/35 blur-sm" />
+          <div className="absolute bottom-0 left-0 h-40 w-full bg-[linear-gradient(180deg,transparent,rgba(21,128,61,0.32))]" />
+          <div className="absolute bottom-8 left-[7%] h-3 w-3 rounded-full bg-pink-300 shadow-[42px_18px_0_rgba(244,114,182,0.75),96px_-6px_0_rgba(251,191,36,0.75),164px_22px_0_rgba(248,113,113,0.78),230px_4px_0_rgba(236,72,153,0.72),305px_20px_0_rgba(250,204,21,0.7)]" />
+          <div className="absolute left-[6%] top-[26%] text-3xl font-semibold text-slate-700/28">⌒ ⌒</div>
+          <div className="absolute left-[23%] top-[18%] text-2xl font-semibold text-slate-700/22">⌒</div>
+          <div className="absolute right-[18%] top-[30%] text-2xl font-semibold text-slate-700/22">⌒ ⌒</div>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,17,31,0.16),rgba(7,17,31,0.58))]" />
+        </div>
+      ) : (
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <div className="absolute left-[6%] top-[8%] h-1 w-1 rounded-full bg-white/90 shadow-[130px_60px_0_rgba(255,255,255,0.75),260px_22px_0_rgba(255,255,255,0.85),390px_110px_0_rgba(255,255,255,0.65),580px_42px_0_rgba(255,255,255,0.82),780px_92px_0_rgba(255,255,255,0.7),980px_38px_0_rgba(255,255,255,0.9),1180px_132px_0_rgba(255,255,255,0.72),1420px_66px_0_rgba(255,255,255,0.76),1620px_115px_0_rgba(255,255,255,0.7)]" />
+          <div className="absolute left-[22%] top-[-18%] h-[760px] w-[1180px] -rotate-12 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(224,242,254,0.28),rgba(125,211,252,0.11)_28%,rgba(168,85,247,0.10)_45%,transparent_68%)] blur-xl" />
+          <div className="absolute right-[9%] top-[12%] h-24 w-24 rounded-full bg-slate-100/80 shadow-[0_0_45px_rgba(255,255,255,0.35)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.08),rgba(2,6,23,0.42))]" />
+        </div>
+      )}
 
       <section className="relative mx-auto grid h-[100dvh] max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-4 lg:px-8">
         <header className="grid grid-cols-[minmax(260px,1fr)_auto] items-center gap-5 border-b border-white/10 pb-3">
