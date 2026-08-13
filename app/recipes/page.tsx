@@ -625,6 +625,88 @@ const meals: Record<SeasonId, Meal[]> = {
   ]
 };
 
+
+const fallbackFoodPhotos = {
+  salmon:
+    "https://unsplash.com/photos/8iDNy37sp8E/download?force=true&w=1200",
+  salmonSalad:
+    "https://unsplash.com/photos/inDRPMBfX8M/download?force=true&w=1200",
+  shrimp:
+    "https://unsplash.com/photos/jFJ0fa4J6vM/download?force=true&w=1200",
+  chicken:
+    "https://unsplash.com/photos/f6KqAhOEdgg/download?force=true&w=1200",
+  tofu:
+    "https://unsplash.com/photos/NDX6Hr95dtQ/download?force=true&w=1200",
+  ratatouille:
+    "https://unsplash.com/photos/R02KgL5Ti3Y/download?force=true&w=1200",
+  lentilSoup:
+    "https://unsplash.com/photos/BIRp2p8vR8k/download?force=true&w=1200",
+  vegetableSoup:
+    "https://unsplash.com/photos/RHLtemkEAaM/download?force=true&w=1200",
+  healthyBowl:
+    "https://unsplash.com/photos/qKbHvzXb85A/download?force=true&w=1200",
+  salad:
+    "https://unsplash.com/photos/IGfIGP5ONV0/download?force=true&w=1200"
+} as const;
+
+function fallbackMealPhoto(meal: Meal) {
+  const searchable = `${meal.title} ${meal.subtitle} ${meal.protein} ${meal.vegetables.join(" ")}`;
+
+  if (/鮭|サーモン|秋鮭/.test(searchable)) {
+    return /サラダ|ボウル/.test(searchable)
+      ? fallbackFoodPhotos.salmonSalad
+      : fallbackFoodPhotos.salmon;
+  }
+
+  if (/鯖|さば|アジ|あじ|鯛|鱈|たら|ぶり/.test(searchable)) {
+    return /サラダ/.test(searchable)
+      ? fallbackFoodPhotos.salmonSalad
+      : fallbackFoodPhotos.salmon;
+  }
+
+  if (/えび|エビ|虾|海老/.test(searchable)) {
+    return fallbackFoodPhotos.shrimp;
+  }
+
+  if (/鶏|鸡|チキン/.test(searchable)) {
+    return fallbackFoodPhotos.chicken;
+  }
+
+  if (/豆腐/.test(searchable)) {
+    return /ラタトゥイユ|番茄|トマト/.test(searchable)
+      ? fallbackFoodPhotos.ratatouille
+      : fallbackFoodPhotos.tofu;
+  }
+
+  if (/ラタトゥイユ/.test(searchable)) {
+    return fallbackFoodPhotos.ratatouille;
+  }
+
+  if (/レンズ豆|扁豆|スープ|汤|鍋|煮込み|炖/.test(searchable)) {
+    return /レンズ豆|扁豆/.test(searchable)
+      ? fallbackFoodPhotos.lentilSoup
+      : fallbackFoodPhotos.vegetableSoup;
+  }
+
+  if (/サラダ/.test(searchable)) {
+    return fallbackFoodPhotos.salad;
+  }
+
+  if (/ボウル|雑穀|丼/.test(searchable)) {
+    return fallbackFoodPhotos.healthyBowl;
+  }
+
+  return fallbackFoodPhotos.healthyBowl;
+}
+
+function mealPhoto(meal: Meal) {
+  return meal.imageUrl || fallbackMealPhoto(meal);
+}
+
+function mealPhotoLabel(meal: Meal) {
+  return meal.imageUrl ? "料理写真 · LIVE" : "料理イメージ";
+}
+
 const weekdayZh = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
 function minutesFromIndication(value?: string) {
@@ -878,19 +960,27 @@ export default function RecipesPage() {
               TODAY'S MEAL · 今日推荐
             </div>
 
-            {todayMeal.imageUrl ? (
-              <div className="mt-3 overflow-hidden rounded-2xl bg-slate-950/25">
-                <img
-                  src={todayMeal.imageUrl}
-                  alt=""
-                  className="h-36 w-full object-cover sm:h-44"
-                  loading="lazy"
-                  onError={(event) => {
-                    event.currentTarget.style.display = "none";
-                  }}
-                />
+            <div className="relative mt-3 overflow-hidden rounded-2xl bg-slate-950/25">
+              <img
+                src={mealPhoto(todayMeal)}
+                alt={`${todayMeal.title} の料理イメージ`}
+                className="h-44 w-full object-cover sm:h-52 lg:h-56"
+                loading="eager"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+              />
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-slate-950/90 via-slate-950/45 to-transparent px-4 pb-3 pt-8">
+                <span className="rounded-full bg-slate-950/55 px-2.5 py-1 text-[10px] font-semibold text-white/90 backdrop-blur-sm">
+                  {mealPhotoLabel(todayMeal)}
+                </span>
+                {todayMeal.live ? (
+                  <span className="rounded-full bg-emerald-300/90 px-2.5 py-1 text-[10px] font-bold text-slate-950">
+                    RAKUTEN LIVE
+                  </span>
+                ) : null}
               </div>
-            ) : null}
+            </div>
 
             <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -994,26 +1084,63 @@ export default function RecipesPage() {
                       : "bg-slate-950/20 active:bg-white/[0.08]"
                   }`}
                 >
-                  <div className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-3">
+                  <div className="grid grid-cols-[3.4rem_3.7rem_minmax(0,1fr)_auto] items-center gap-3">
                     <div className="text-xs font-semibold text-slate-400">
                       {weekdayZh[index]}
                     </div>
+
+                    <div className="relative h-11 w-[3.7rem] overflow-hidden rounded-lg bg-slate-900">
+                      <img
+                        src={mealPhoto(meal)}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                        onError={(event) => {
+                          event.currentTarget.style.display = "none";
+                        }}
+                      />
+                      {meal.live ? (
+                        <span className="absolute bottom-0.5 right-0.5 rounded bg-emerald-300/90 px-1 py-0.5 text-[7px] font-bold text-slate-950">
+                          LIVE
+                        </span>
+                      ) : null}
+                    </div>
+
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-white">
                         {meal.title}
                       </div>
                       <div className="mt-0.5 truncate text-[11px] text-slate-500">
-                        {meal.live ? "LIVE" : styleLabel(meal.style)} · {meal.protein}
+                        {meal.live ? "Rakuten" : styleLabel(meal.style)} · {meal.protein}
                       </div>
                     </div>
+
                     <div className="text-xs text-slate-500">
                       {meal.time}m
                     </div>
                   </div>
 
                   {openMeal === `${meal.id}-${index}` ? (
-                    <div className="mt-3 border-t border-white/5 pt-3 text-xs leading-relaxed text-slate-300">
-                      {meal.steps.join(" → ")}
+                    <div className="mt-3 border-t border-white/5 pt-3">
+                      <div className="grid gap-3 sm:grid-cols-[8rem_minmax(0,1fr)]">
+                        <div className="h-24 overflow-hidden rounded-xl bg-slate-950/30">
+                          <img
+                            src={mealPhoto(meal)}
+                            alt={`${meal.title} の料理イメージ`}
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                            onError={(event) => {
+                              event.currentTarget.style.display = "none";
+                            }}
+                          />
+                        </div>
+                        <div className="text-xs leading-relaxed text-slate-300">
+                          <div>{meal.steps.join(" → ")}</div>
+                          <div className="mt-2 text-[10px] text-slate-500">
+                            {mealPhotoLabel(meal)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ) : null}
                 </button>
@@ -1057,6 +1184,10 @@ export default function RecipesPage() {
             </div>
           </div>
         </section>
+
+        <div className="mt-4 text-center text-[10px] text-slate-600">
+          LIVE 食谱优先显示原料理照片；本地季节菜单使用相近料理的イメージ写真。
+        </div>
 
         <section className="mt-4 grid gap-3 sm:grid-cols-4">
           {[
