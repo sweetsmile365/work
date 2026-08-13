@@ -1157,11 +1157,8 @@ export default function DisplayPage() {
 
         <div className="mt-4 grid gap-4">
           <section className="rounded-2xl bg-cyan-300/[0.12] p-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
               <SectionTitle title="TODAY" accent="bg-cyan-300" />
-              <span className="rounded-full bg-cyan-300/15 px-2.5 py-1 text-xs text-cyan-100">
-                {data.todayEvents.length}件
-              </span>
             </div>
 
             {data.primaryEvent ? (
@@ -1364,9 +1361,8 @@ export default function DisplayPage() {
           </Link>
 
           <section className="rounded-2xl bg-indigo-300/[0.07] p-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
               <SectionTitle title="UPCOMING" accent="bg-indigo-300" />
-              <span className="text-xs text-slate-300">Next 5</span>
             </div>
 
             <div className="mt-3 grid gap-2">
@@ -1486,10 +1482,6 @@ export default function DisplayPage() {
             <article className="min-h-0 rounded-3xl border border-cyan-200/10 bg-cyan-300/[0.12] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
               <div className="mb-3 flex items-center justify-between">
                 <SectionTitle title="TODAY" accent="bg-cyan-300" />
-
-                <span className="rounded-full bg-cyan-300/15 px-3 py-1 text-[clamp(0.95rem,0.9vw,1.1rem)] text-cyan-100">
-                  {data.todayEvents.length}件
-                </span>
               </div>
 
               {data.primaryEvent ? (
@@ -1533,10 +1525,6 @@ export default function DisplayPage() {
                   title="UPCOMING"
                   accent="bg-indigo-300"
                 />
-
-                <span className="text-[clamp(0.9rem,0.85vw,1.05rem)] text-slate-300">
-                  Next 5
-                </span>
               </div>
 
               <div className="grid min-h-0 gap-1.5">
