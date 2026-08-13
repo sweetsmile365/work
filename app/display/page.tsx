@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   AlertCircle,
   Bell,
@@ -10,6 +11,7 @@ import {
   CloudSun,
   Dumbbell,
   ExternalLink,
+  Flame,
   MapPin,
   Music2,
   Pause,
@@ -29,6 +31,13 @@ import {
   isDailyEnglishTask,
   isDailyFitnessTask
 } from "@/lib/dailyTasks";
+import {
+  currentStreak,
+  habits,
+  localDateKey as habitDateKey,
+  statusForDate,
+  todayDoneCount
+} from "@/lib/habitStats";
 import type { ChildTask } from "@/types/activities";
 import type { FamilyEvent } from "@/types/events";
 
@@ -53,13 +62,20 @@ type MusicStation = {
 };
 
 type BookPick = {
-  category: "management" | "technology" | "junior";
+  category:
+    | "management"
+    | "technology"
+    | "junior"
+    | "chinaManagement"
+    | "chinaReading";
   categoryLabel: string;
   title: string;
   rank?: number;
   reason: string;
-  amazonUrl: string;
+  linkUrl?: string;
+  amazonUrl?: string;
   source: string;
+  market?: "JP" | "CN";
 };
 
 type BookPickResponse = {
@@ -613,6 +629,21 @@ export default function DisplayPage() {
         event.calendar_type === "child_activity"
     ).length;
 
+    const habitToday = habitDateKey(now);
+    const streaks = habits.map((habit) => ({
+      key: habit.key,
+      label: habit.shortLabel,
+      streak: currentStreak(state?.tasks ?? [], habit.key, habitToday),
+      done:
+        statusForDate(
+          state?.tasks ?? [],
+          habit.key,
+          habitToday,
+          habitToday
+        ) === "done"
+    }));
+    const habitsDoneToday = todayDoneCount(state?.tasks ?? [], now);
+
     return {
       todayEvents,
       primaryEvent: todayEvents[0],
@@ -621,7 +652,9 @@ export default function DisplayPage() {
       mainTasks,
       nextTasks,
       routineTasks,
-      childEventsToday
+      childEventsToday,
+      streaks,
+      habitsDoneToday
     };
   }, [state, now]);
 
@@ -947,18 +980,18 @@ export default function DisplayPage() {
                       </div>
                     </div>
                     <span className="text-[10px] text-slate-500">
-                      Amazon JP · weekly
+                      Amazon JP + 京东/当当 · weekly
                     </span>
                   </div>
 
                   <div className="grid gap-2">
-                    {bookPicks.slice(0, 3).map((book) => (
+                    {bookPicks.slice(0, 5).map((book) => (
                       <a
                         key={book.category}
-                        href={book.amazonUrl}
+                        href={book.linkUrl ?? book.amazonUrl ?? "#"}
                         target="_blank"
                         rel="noreferrer"
-                        className="group grid grid-cols-[5.7rem_minmax(0,1fr)_1rem] items-center gap-2 rounded-xl bg-white/[0.04] px-3 py-2 transition active:bg-white/[0.09]"
+                        className="group grid grid-cols-[6.7rem_minmax(0,1fr)_1rem] items-center gap-2 rounded-xl bg-white/[0.04] px-3 py-1.5 transition active:bg-white/[0.09]"
                       >
                         <div>
                           <div className="text-[10px] font-bold tracking-[0.08em] text-sky-200">
@@ -976,7 +1009,7 @@ export default function DisplayPage() {
                             {book.title}
                           </div>
                           <div className="mt-0.5 truncate text-[10px] text-slate-400">
-                            {book.reason}
+                            {book.reason} · {book.source}
                           </div>
                         </div>
 
@@ -996,11 +1029,40 @@ export default function DisplayPage() {
           </section>
         </div>
 
-        <footer className="flex items-center justify-between border-t border-white/10 pt-2 text-xs text-slate-500">
-          <span>
-            スマホで予定を編集すると、この画面にも反映されます。
-          </span>
-          <span>Cloud sync · 60 sec refresh</span>
+        <footer className="border-t border-white/10 pt-2">
+          <Link
+            href="/streak"
+            className="grid grid-cols-[auto_repeat(3,minmax(0,1fr))_auto] items-center gap-3 rounded-xl bg-white/[0.045] px-4 py-2 transition active:bg-white/[0.1]"
+            aria-label="坚持记录を開く"
+          >
+            <div className="flex items-center gap-2 pr-2 text-xs font-semibold tracking-[0.14em] text-orange-200">
+              <Flame className="h-4 w-4" />
+              STREAK
+            </div>
+
+            {data.streaks.map((habit) => (
+              <div
+                key={habit.key}
+                className="flex min-w-0 items-center justify-center gap-2 text-sm"
+              >
+                <span
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                    habit.done ? "bg-emerald-300" : "bg-slate-600"
+                  }`}
+                />
+                <span className="truncate text-slate-300">
+                  {habit.label}
+                </span>
+                <span className="shrink-0 font-semibold text-white">
+                  🔥 {habit.streak}日
+                </span>
+              </div>
+            ))}
+
+            <div className="rounded-full bg-emerald-300/10 px-3 py-1 text-sm font-semibold text-emerald-100">
+              Today {data.habitsDoneToday}/{habits.length} →
+            </div>
+          </Link>
         </footer>
       </section>
     </main>
