@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Circle, Pencil, Plus, Save, Trash2, X } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Check, Circle, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 import { MobileLayout } from "@/components/responsive/MobileLayout";
 import {
   loadState,
@@ -187,6 +188,16 @@ export default function LearningPage() {
 
   return (
     <MobileLayout title="Learning / 学習" user={state?.currentUser}>
+      <div className="flex justify-end">
+        <Link
+          href="/display"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-sm active:bg-slate-700"
+        >
+          <ArrowLeft size={18} />
+          Screenへ戻る
+        </Link>
+      </div>
+
       <section className="rounded-2xl bg-gradient-to-br from-emerald-50 to-cyan-50 p-4 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div>
