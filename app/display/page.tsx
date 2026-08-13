@@ -1135,7 +1135,7 @@ export default function DisplayPage() {
               <div className="mt-1 text-2xl font-bold leading-tight">
                 {greeting(now)}
               </div>
-              <div className="mt-1 text-sm text-slate-300">
+              <div className="mt-1 text-sm font-semibold text-slate-200">
                 {formatHeaderDate(now)}
               </div>
             </div>
@@ -1462,7 +1462,7 @@ export default function DisplayPage() {
               {greeting(now)}
             </div>
 
-            <div className="mt-2 text-[clamp(1rem,1.05vw,1.35rem)] text-slate-300">
+            <div className="mt-2 text-[clamp(1rem,1.05vw,1.35rem)] font-semibold text-slate-200">
               {formatHeaderDate(now)}
             </div>
           </div>
@@ -1471,8 +1471,13 @@ export default function DisplayPage() {
             <WeatherStrip weather={weather} />
             <MusicControl />
 
-            <div className="min-w-[210px] text-right text-[clamp(4rem,5.4vw,6.5rem)] font-bold leading-none tabular-nums text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
-              {formatClock(now)}
+            <div className="min-w-[230px] text-right">
+              <div className="mb-1 text-[clamp(1rem,1.05vw,1.3rem)] font-bold tracking-[0.03em] text-slate-100">
+                {formatShortDate(todayKey(now))}
+              </div>
+              <div className="text-[clamp(4rem,5.4vw,6.5rem)] font-bold leading-none tabular-nums text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
+                {formatClock(now)}
+              </div>
             </div>
           </div>
         </header>
