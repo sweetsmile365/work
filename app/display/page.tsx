@@ -1274,7 +1274,7 @@ export default function DisplayPage() {
           </section>
 
           <section className="rounded-2xl bg-slate-950/42 p-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <Dumbbell className="h-5 w-5 text-emerald-200" />
                 <SectionTitle
@@ -1282,26 +1282,37 @@ export default function DisplayPage() {
                   accent="bg-emerald-300"
                 />
               </div>
-              <Link
-                href="/fitness"
-                className="shrink-0 rounded-full bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100 active:bg-emerald-300/20"
-              >
-                FITNESS →
-              </Link>
-              <Link
-                href="/recipes"
-                className="shrink-0 rounded-full bg-amber-300/10 px-3 py-1.5 text-xs font-semibold text-amber-100 active:bg-amber-300/20"
-              >
-                MEALS →
-              </Link>
-              <Link
-                href="/badminton"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sky-300/10 text-base active:bg-sky-300/20"
-                aria-label="バドミントン素振り練習"
-                title="Badminton · 素振り練習"
-              >
-                🏸
-              </Link>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href="/fitness"
+                  className="shrink-0 rounded-full bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100 active:bg-emerald-300/20"
+                >
+                  FITNESS
+                </Link>
+                <Link
+                  href="/recipes"
+                  className="shrink-0 rounded-full bg-amber-300/10 px-3 py-1.5 text-xs font-semibold text-amber-100 active:bg-amber-300/20"
+                >
+                  MEALS
+                </Link>
+                <Link
+                  href="/mealtime"
+                  className="shrink-0 rounded-full bg-violet-300/10 px-3 py-1.5 text-xs font-semibold text-violet-100 active:bg-violet-300/20"
+                  aria-label="ごはん時間のニュースと英語"
+                  title="NEWS + ENGLISH · ごはん時間の英語"
+                >
+                  📰 ENGLISH
+                </Link>
+                <Link
+                  href="/badminton"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sky-300/10 text-base active:bg-sky-300/20"
+                  aria-label="バドミントン素振り練習"
+                  title="Badminton · 素振り練習"
+                >
+                  🏸
+                </Link>
+              </div>
             </div>
 
             <div className="mt-3 grid gap-2">
@@ -1732,6 +1743,14 @@ export default function DisplayPage() {
                       className="rounded-full bg-amber-300/10 px-2.5 py-1 text-[10px] font-semibold text-amber-100 active:bg-amber-300/20"
                     >
                       MEALS
+                    </Link>
+                    <Link
+                      href="/mealtime"
+                      className="rounded-full bg-violet-300/10 px-2.5 py-1 text-[10px] font-semibold text-violet-100 active:bg-violet-300/20"
+                      aria-label="ごはん時間のニュースと英語"
+                      title="NEWS + ENGLISH · ごはん時間の英語"
+                    >
+                      📰 ENGLISH
                     </Link>
                     <Link
                       href="/badminton"
