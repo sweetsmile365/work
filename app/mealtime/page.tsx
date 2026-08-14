@@ -18,28 +18,7 @@ import {
 const CNN10_UPLOADS_PLAYLIST = "UUTOoRgpHTjAQPk6Ak70u-pA";
 const NATGEO_KIDS_NEWEST_PLAYLIST = "PLQlnTldJs0ZQExTCjWSXXkCdfSvpjT5cO";
 
-const timeForKidsPool = [
-  {
-    title: "TIME for Kids · Grades 5–6",
-    subtitle: "Current Events for Students",
-    url: "https://www.timeforkids.com/g56/"
-  },
-  {
-    title: "TIME for Kids · Science",
-    subtitle: "Science & Technology",
-    url: "https://www.timeforkids.com/g56/"
-  },
-  {
-    title: "TIME for Kids · World",
-    subtitle: "World News for Students",
-    url: "https://www.timeforkids.com/g56/"
-  },
-  {
-    title: "TIME for Kids · Sports",
-    subtitle: "Sports & People",
-    url: "https://www.timeforkids.com/g56/"
-  }
-] as const;
+
 
 function tokyoDayKey(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -167,6 +146,103 @@ function PlaylistPlayer({
   );
 }
 
+function InlineReadingFrame({
+  title,
+  subtitle,
+  url,
+  accent,
+  challenge = false
+}: {
+  title: string;
+  subtitle: string;
+  url: string;
+  accent: "violet" | "amber";
+  challenge?: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  const accentClass =
+    accent === "violet"
+      ? "border-violet-300/10 bg-violet-300/[0.04]"
+      : "border-amber-300/10 bg-amber-300/[0.04]";
+
+  const buttonClass =
+    accent === "violet"
+      ? "bg-violet-300/12 text-violet-100"
+      : "bg-amber-300/12 text-amber-100";
+
+  return (
+    <article className={`overflow-hidden rounded-2xl border ${accentClass}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3 p-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold tracking-[0.12em] text-slate-300">
+            <BookOpen size={16} />
+            {challenge ? "CHALLENGE READING" : "EASY READ"}
+          </div>
+
+          <div className="mt-2 text-lg font-bold text-white">{title}</div>
+          <div className="mt-1 text-xs text-slate-400">{subtitle}</div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {challenge ? (
+            <span className="rounded-full bg-amber-300/10 px-2.5 py-1 text-[10px] font-bold text-amber-100">
+              CHALLENGE
+            </span>
+          ) : (
+            <span className="rounded-full bg-violet-300/10 px-2.5 py-1 text-[10px] font-bold text-violet-100">
+              G5–6
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setLoaded((value) => !value)}
+            className={`min-h-9 rounded-xl px-3 text-xs font-bold ${buttonClass}`}
+          >
+            {loaded ? "CLOSE" : "LOAD"}
+          </button>
+        </div>
+      </div>
+
+      {loaded ? (
+        <div className="border-t border-white/[0.06] p-3">
+          <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-white">
+            <iframe
+              src={url}
+              title={title}
+              loading="lazy"
+              className="h-[520px] w-full bg-white"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
+
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <div className="text-[11px] leading-relaxed text-slate-500">
+              サイト側が埋め込みを禁止している場合は、この枠内に表示できないことがあります。
+            </div>
+
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[11px] font-semibold ${buttonClass}`}
+            >
+              OPEN
+              <ExternalLink size={13} />
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div className="border-t border-white/[0.05] px-4 py-4 text-xs leading-relaxed text-slate-400">
+          必要な時だけ読み込みます。動画2本と同時に読み込まないので、LG画面を重くしません。
+        </div>
+      )}
+    </article>
+  );
+}
+
 export default function MealTimePage() {
   const today = tokyoDayKey();
   const seed = daySeed(today);
@@ -176,8 +252,6 @@ export default function MealTimePage() {
 
   // Nat Geo rotates among the first seven items in its official newest-video playlist.
   const natGeoIndex = seed % 7;
-
-  const timePick = timeForKidsPool[seed % timeForKidsPool.length];
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_16%_0%,rgba(56,189,248,0.09),transparent_27%),radial-gradient(circle_at_90%_8%,rgba(52,211,153,0.06),transparent_22%),linear-gradient(145deg,#08131f,#0a1724_52%,#07121d)] text-white">
@@ -266,38 +340,25 @@ export default function MealTimePage() {
                 </div>
               </article>
 
-              <article className="rounded-2xl border border-violet-300/10 bg-slate-950/36 p-4">
-                <div className="flex items-center gap-2 text-xs font-bold tracking-[0.12em] text-violet-200">
-                  <BookOpen size={17} />
-                  EASY READ
-                </div>
-
-                <div className="mt-2 text-lg font-bold">TIME for Kids</div>
-                <div className="mt-1 text-xs text-slate-400">
-                  Grades 5–6 · 3–5 min
-                </div>
-
-                <div className="mt-4 rounded-xl bg-white/[0.04] p-3">
-                  <div className="text-sm font-semibold text-white">
-                    {timePick.title}
-                  </div>
-                  <div className="mt-1 text-xs text-slate-400">
-                    {timePick.subtitle}
-                  </div>
-                </div>
-
-                <a
-                  href={timePick.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl bg-violet-300/10 px-3 text-xs font-semibold text-violet-100 active:bg-violet-300/20"
-                >
-                  READ
-                  <ExternalLink size={14} />
-                </a>
-              </article>
             </div>
           </div>
+
+          <section className="mt-5 grid gap-4 lg:grid-cols-2">
+            <InlineReadingFrame
+              title="TIME for Kids"
+              subtitle="Grades 5–6 · Current Events · Audio付き記事もあり"
+              url="https://www.timeforkids.com/g56/?age=child"
+              accent="violet"
+            />
+
+            <InlineReadingFrame
+              title="Newsela"
+              subtitle="Middle School · 5 Levels · Daily Articles"
+              url="https://newsela.com/"
+              accent="amber"
+              challenge
+            />
+          </section>
 
           <div className="mt-5 border-t border-white/[0.06] pt-4">
             <div className="text-center text-xs font-bold tracking-[0.16em] text-slate-400">
