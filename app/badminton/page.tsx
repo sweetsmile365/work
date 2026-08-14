@@ -10,7 +10,8 @@ import {
   Pause,
   Play,
   RotateCcw,
-  ShieldCheck
+  ShieldCheck,
+  Timer
 } from "lucide-react";
 
 type Step = {
@@ -82,6 +83,7 @@ type RacketSkill = {
   id: string;
   title: string;
   videoPath: string;
+  practiceSeconds: number;
   target: string;
   cue: string;
   note: string;
@@ -90,6 +92,7 @@ type RacketSkill = {
 const racketSkills: RacketSkill[] = [
   {
     id: "figure-eight",
+    practiceSeconds: 40,
     title: "① 八の字 · Figure Eight",
     videoPath: "racket/figure-eight.mp4",
     target: "30〜45秒 × 2回",
@@ -98,6 +101,7 @@ const racketSkills: RacketSkill[] = [
   },
   {
     id: "forearm-figure-eight",
+    practiceSeconds: 40,
     title: "② 前腕の八の字",
     videoPath: "racket/forearm-figure-eight.mp4",
     target: "30〜45秒 × 2回",
@@ -106,6 +110,7 @@ const racketSkills: RacketSkill[] = [
   },
   {
     id: "quick-swing",
+    practiceSeconds: 30,
     title: "③ 前腕クイックスイング",
     videoPath: "racket/quick-swing.mp4",
     target: "15〜20回 × 2回",
@@ -114,6 +119,7 @@ const racketSkills: RacketSkill[] = [
   },
   {
     id: "finger-control",
+    practiceSeconds: 40,
     title: "④ 指でラケット操作",
     videoPath: "racket/finger-control.mp4",
     target: "30秒 × 2回",
@@ -122,6 +128,7 @@ const racketSkills: RacketSkill[] = [
   },
   {
     id: "grip-switch",
+    practiceSeconds: 40,
     title: "⑤ 正反手グリップ切替",
     videoPath: "racket/grip-switch.mp4",
     target: "10〜15往復 × 2回",
@@ -130,19 +137,21 @@ const racketSkills: RacketSkill[] = [
   },
   {
     id: "juggling",
+    practiceSeconds: 90,
     title: "⑥ 正反手リフティング",
     videoPath: "racket/juggling.mp4",
-    target: "30〜60秒",
-    cue: "フォア・バック交互に高さをそろえる",
-    note: "回数より、同じ高さ・同じ位置で安定して触れることを優先します。"
+    target: "90秒 · できる所まで",
+    cue: "まず同じ面で3回 → 慣れたらフォア・バック交互",
+    note: "最初から交互連続を目標にしません。①同じ面で3回、②5回、③正反手交互3回の順に進めます。"
   },
   {
     id: "stop-control",
+    practiceSeconds: 90,
     title: "⑦ 正反手ストップ",
     videoPath: "racket/stop-control.mp4",
-    target: "左右5〜10回",
-    cue: "飛んできたシャトルの力を吸収して止める",
-    note: "ラケット面を安定させ、強く弾かず柔らかく受けます。"
+    target: "90秒 · 1回止められればOK",
+    cue: "まず高く上げたシャトルを1回だけ柔らかく止める",
+    note: "①フォアだけ、②バックだけ、③左右交互の順。成功回数より、拍面を柔らかく使う感覚を優先します。"
   }
 ];
 
@@ -150,6 +159,7 @@ type AnkleStep = {
   id: string;
   title: string;
   videoPath?: string;
+  practiceSeconds: number;
   target: string;
   cue: string;
   note: string;
@@ -158,6 +168,7 @@ type AnkleStep = {
 const ankleRoutine: AnkleStep[] = [
   {
     id: "plantar-flexion",
+    practiceSeconds: 60,
     title: "バンド底屈 · つま先を下へ",
     videoPath: "ankle/plantar-flexion.mp4",
     target: "8〜10回 × 2セット",
@@ -166,6 +177,7 @@ const ankleRoutine: AnkleStep[] = [
   },
   {
     id: "eversion",
+    practiceSeconds: 50,
     title: "バンド外返し · 外側を強くする",
     videoPath: "ankle/eversion.mp4",
     target: "8回 × 2セット",
@@ -174,6 +186,7 @@ const ankleRoutine: AnkleStep[] = [
   },
   {
     id: "inversion",
+    practiceSeconds: 50,
     title: "バンド内返し · 内側をコントロール",
     videoPath: "ankle/inversion.mp4",
     target: "8回 × 2セット",
@@ -182,6 +195,7 @@ const ankleRoutine: AnkleStep[] = [
   },
   {
     id: "calf-raise",
+    practiceSeconds: 60,
     title: "カーフレイズ · 提踵",
     videoPath: "ankle/calf-raise.mp4",
     target: "10回 × 2セット",
@@ -190,6 +204,7 @@ const ankleRoutine: AnkleStep[] = [
   },
   {
     id: "single-leg-balance",
+    practiceSeconds: 30,
     title: "片脚バランス · 足首の安定",
     target: "30秒 × 2回 / 左右",
     cue: "壁や椅子のそばで片脚立ち",
@@ -202,6 +217,103 @@ function formatTime(seconds: number) {
   const minutes = Math.floor(safe / 60);
   const remain = safe % 60;
   return `${String(minutes).padStart(2, "0")}:${String(remain).padStart(2, "0")}`;
+}
+
+function PracticeTimer({
+  seconds,
+  label,
+  resetKey
+}: {
+  seconds: number;
+  label: string;
+  resetKey: string;
+}) {
+  const [remaining, setRemaining] = useState(seconds);
+  const [running, setRunning] = useState(false);
+
+  useEffect(() => {
+    setRemaining(seconds);
+    setRunning(false);
+  }, [seconds, resetKey]);
+
+  useEffect(() => {
+    if (!running) return;
+
+    const timerId = window.setInterval(() => {
+      setRemaining((current) => {
+        if (current <= 1) {
+          window.clearInterval(timerId);
+          setRunning(false);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timerId);
+  }, [running]);
+
+  const progress =
+    seconds > 0 ? Math.max(0, Math.min(1, remaining / seconds)) : 0;
+
+  return (
+    <div className="rounded-2xl border border-white/[0.07] bg-slate-950/35 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.12em] text-amber-200">
+            <Timer size={14} />
+            PRACTICE TIMER
+          </div>
+          <div className="mt-1 text-xs text-slate-400">{label}</div>
+        </div>
+
+        <div className="text-3xl font-bold tabular-nums text-white">
+          {formatTime(remaining)}
+        </div>
+      </div>
+
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.07]">
+        <div
+          className="h-full rounded-full bg-emerald-300 transition-[width] duration-300"
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            if (remaining === 0) setRemaining(seconds);
+            setRunning((current) => !current);
+          }}
+          className={`min-h-11 rounded-xl text-sm font-bold transition active:scale-[0.98] ${
+            running
+              ? "bg-amber-300/15 text-amber-100"
+              : "bg-emerald-300 text-slate-950"
+          }`}
+        >
+          {running ? "PAUSE" : remaining === 0 ? "RESTART" : "START"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setRunning(false);
+            setRemaining(seconds);
+          }}
+          className="min-h-11 rounded-xl bg-white/[0.07] text-sm font-semibold text-slate-200 transition active:scale-[0.98]"
+        >
+          RESET
+        </button>
+      </div>
+
+      {remaining === 0 ? (
+        <div className="mt-3 rounded-xl bg-emerald-300/12 px-3 py-2 text-center text-sm font-bold text-emerald-100">
+          完了 ✓　少し休んで次へ
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function FollowAlongAnimation({
@@ -733,7 +845,7 @@ export default function BadmintonPage() {
                 ラケット操作 · 真人示範
               </h2>
               <div className="mt-1 text-xs leading-relaxed text-slate-400">
-                1日2〜3項目を選んで練習。動画は短くループして、見たら自分でまねします。
+                ①〜⑤は毎日の基本練習。⑥〜⑦はチャレンジ練習として、できなくてもOK。動画を見てからタイマーで練習します。
               </div>
             </div>
 
@@ -777,6 +889,12 @@ export default function BadmintonPage() {
                 <div className="text-xs leading-relaxed text-slate-400">
                   {racketSkills[racketIndex].note}
                 </div>
+
+                <PracticeTimer
+                  seconds={racketSkills[racketIndex].practiceSeconds}
+                  label="動画を見た後、子どもが自分で練習"
+                  resetKey={racketSkills[racketIndex].id}
+                />
               </div>
             </div>
 
@@ -796,8 +914,19 @@ export default function BadmintonPage() {
                     {index + 1}
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold text-white">
-                      {item.title}
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="block min-w-0 truncate text-sm font-semibold text-white">
+                        {item.title}
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                          index < 5
+                            ? "bg-emerald-300/10 text-emerald-100"
+                            : "bg-amber-300/10 text-amber-100"
+                        }`}
+                      >
+                        {index < 5 ? "DAILY" : "CHALLENGE"}
+                      </span>
                     </span>
                     <span className="mt-0.5 block truncate text-[11px] text-slate-400">
                       {item.target}
@@ -826,12 +955,12 @@ export default function BadmintonPage() {
                 足首を守る · 4〜5 min
               </h2>
               <div className="mt-1 text-xs leading-relaxed text-slate-400">
-                素振り10分とは別メニュー。痛みがない日に、軽い強度で行います。
+                素振り10分とは別メニュー。痛みがない日に5〜7分程度、軽い強度で行います。
               </div>
             </div>
 
             <div className="rounded-full border border-emerald-200/10 bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100">
-              週2〜3回から
+              週3回から
             </div>
           </div>
 
@@ -886,6 +1015,16 @@ export default function BadmintonPage() {
                 <div className="text-xs leading-relaxed text-slate-400">
                   {ankleRoutine[ankleIndex].note}
                 </div>
+
+                <PracticeTimer
+                  seconds={ankleRoutine[ankleIndex].practiceSeconds}
+                  label={
+                    ankleRoutine[ankleIndex].id === "single-leg-balance"
+                      ? "左右それぞれ。壁・椅子のそばで"
+                      : "ゆっくり正しいフォームで行う"
+                  }
+                  resetKey={ankleRoutine[ankleIndex].id}
+                />
               </div>
             </div>
 
@@ -1050,6 +1189,38 @@ export default function BadmintonPage() {
                     </span>
                   </button>
                 ))}
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-cyan-300/10 bg-cyan-300/[0.05] p-4">
+              <div className="text-xs font-semibold tracking-[0.12em] text-cyan-200">
+                RECOMMENDED · おすすめ練習量
+              </div>
+              <div className="mt-3 grid gap-3">
+                <div className="rounded-xl bg-slate-950/25 p-3">
+                  <div className="font-bold text-white">ラケット①〜⑤</div>
+                  <div className="mt-1 text-xs text-slate-300">
+                    毎日OK · 合計3〜5分
+                  </div>
+                </div>
+                <div className="rounded-xl bg-amber-300/[0.05] p-3">
+                  <div className="font-bold text-white">ラケット⑥〜⑦</div>
+                  <div className="mt-1 text-xs text-slate-300">
+                    Challenge · 各90秒 · 失敗してOK
+                  </div>
+                </div>
+                <div className="rounded-xl bg-slate-950/25 p-3">
+                  <div className="font-bold text-white">足首ケア</div>
+                  <div className="mt-1 text-xs text-slate-300">
+                    週3回 · 5〜7分
+                  </div>
+                </div>
+                <div className="rounded-xl bg-slate-950/25 p-3">
+                  <div className="font-bold text-white">素振り</div>
+                  <div className="mt-1 text-xs text-slate-300">
+                    10分 · 疲れた日は短縮
+                  </div>
+                </div>
               </div>
             </section>
 
