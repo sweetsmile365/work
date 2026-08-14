@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  Activity,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
@@ -73,6 +74,128 @@ const routine: Step[] = [
 ];
 
 const totalSeconds = routine.reduce((sum, step) => sum + step.duration, 0);
+
+const badmintonVideoUrl = (path?: string) =>
+  path ? `/badminton/videos/${path}` : "";
+
+type RacketSkill = {
+  id: string;
+  title: string;
+  videoPath: string;
+  target: string;
+  cue: string;
+  note: string;
+};
+
+const racketSkills: RacketSkill[] = [
+  {
+    id: "figure-eight",
+    title: "① 八の字 · Figure Eight",
+    videoPath: "racket/figure-eight.mp4",
+    target: "30〜45秒 × 2回",
+    cue: "ラケットヘッドで滑らかな「8」を描く",
+    note: "肩の力を抜き、手首と前腕を柔らかく使います。大きく振りすぎません。"
+  },
+  {
+    id: "forearm-figure-eight",
+    title: "② 前腕の八の字",
+    videoPath: "racket/forearm-figure-eight.mp4",
+    target: "30〜45秒 × 2回",
+    cue: "前腕の回旋を使って連続させる",
+    note: "肘を固めず、前腕が自然に回る感覚を覚えます。"
+  },
+  {
+    id: "quick-swing",
+    title: "③ 前腕クイックスイング",
+    videoPath: "racket/quick-swing.mp4",
+    target: "15〜20回 × 2回",
+    cue: "小さな動きで素早く切り返す",
+    note: "力任せに振らず、指・手首・前腕を連動させます。"
+  },
+  {
+    id: "finger-control",
+    title: "④ 指でラケット操作",
+    videoPath: "racket/finger-control.mp4",
+    target: "30秒 × 2回",
+    cue: "握り込まず、指で拍面をコントロール",
+    note: "グリップを常に強く握らず、必要な瞬間だけ短く締めます。"
+  },
+  {
+    id: "grip-switch",
+    title: "⑤ 正反手グリップ切替",
+    videoPath: "racket/grip-switch.mp4",
+    target: "10〜15往復 × 2回",
+    cue: "フォア ↔ バックを止まらず切り替える",
+    note: "親指と人差し指を中心に、握り替えを小さく速く行います。"
+  },
+  {
+    id: "juggling",
+    title: "⑥ 正反手リフティング",
+    videoPath: "racket/juggling.mp4",
+    target: "30〜60秒",
+    cue: "フォア・バック交互に高さをそろえる",
+    note: "回数より、同じ高さ・同じ位置で安定して触れることを優先します。"
+  },
+  {
+    id: "stop-control",
+    title: "⑦ 正反手ストップ",
+    videoPath: "racket/stop-control.mp4",
+    target: "左右5〜10回",
+    cue: "飛んできたシャトルの力を吸収して止める",
+    note: "ラケット面を安定させ、強く弾かず柔らかく受けます。"
+  }
+];
+
+type AnkleStep = {
+  id: string;
+  title: string;
+  videoPath?: string;
+  target: string;
+  cue: string;
+  note: string;
+};
+
+const ankleRoutine: AnkleStep[] = [
+  {
+    id: "plantar-flexion",
+    title: "バンド底屈 · つま先を下へ",
+    videoPath: "ankle/plantar-flexion.mp4",
+    target: "8〜10回 × 2セット",
+    cue: "つま先をゆっくり下へ押し、戻す時もゆっくり",
+    note: "軽いゴムから開始。膝と股関節はなるべく動かさず、足首をコントロールします。"
+  },
+  {
+    id: "eversion",
+    title: "バンド外返し · 外側を強くする",
+    videoPath: "ankle/eversion.mp4",
+    target: "8回 × 2セット",
+    cue: "かかとを動かさず、足先だけ外へ",
+    note: "足首の外側の筋肉を使います。急いで反動をつけないようにします。"
+  },
+  {
+    id: "inversion",
+    title: "バンド内返し · 内側をコントロール",
+    videoPath: "ankle/inversion.mp4",
+    target: "8回 × 2セット",
+    cue: "軽い抵抗で、足先を内側へゆっくり",
+    note: "強いゴムは不要です。痛みや引っかかりがあれば中止します。"
+  },
+  {
+    id: "calf-raise",
+    title: "カーフレイズ · 提踵",
+    videoPath: "ankle/calf-raise.mp4",
+    target: "10回 × 2セット",
+    cue: "両足でゆっくり上げて、3秒かけて下ろす",
+    note: "壁や椅子に手を添えて安定させます。両足で安定してから片足へ進みます。"
+  },
+  {
+    id: "single-leg-balance",
+    title: "片脚バランス · 足首の安定",
+    target: "30秒 × 2回 / 左右",
+    cue: "壁や椅子のそばで片脚立ち",
+    note: "転びそうになったらすぐ支えられる場所で行います。動画にはありませんが、足首の安定性を高めるために追加しています。"
+  }
+];
 
 function formatTime(seconds: number) {
   const safe = Math.max(0, Math.floor(seconds));
@@ -521,6 +644,8 @@ function FollowAlongAnimation({
 }
 
 export default function BadmintonPage() {
+  const [racketIndex, setRacketIndex] = useState(0);
+  const [ankleIndex, setAnkleIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
   const [remaining, setRemaining] = useState(routine[0].duration);
   const [running, setRunning] = useState(false);
@@ -583,7 +708,7 @@ export default function BadmintonPage() {
               素振り練習 · 10 min
             </h1>
             <div className="mt-1 text-sm text-slate-400">
-              まずフォームを整えてから、スピードを上げます。今回は素振りだけに集中し、フットワークは入れません。
+              真人動画はアプリ内のローカル動画から再生。ラケット7技巧・足首ケア・素振り10分を分けて練習できます。
             </div>
           </div>
 
@@ -595,6 +720,209 @@ export default function BadmintonPage() {
             Screenへ戻る
           </Link>
         </header>
+
+
+
+        <section className="mt-4 rounded-3xl border border-sky-300/10 bg-sky-300/[0.055] p-4 sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold tracking-[0.14em] text-sky-200">
+                RACKET CONTROL · 7技巧
+              </div>
+              <h2 className="mt-1 text-xl font-bold sm:text-2xl">
+                ラケット操作 · 真人示範
+              </h2>
+              <div className="mt-1 text-xs leading-relaxed text-slate-400">
+                1日2〜3項目を選んで練習。動画は短くループして、見たら自分でまねします。
+              </div>
+            </div>
+
+            <div className="rounded-full border border-sky-200/10 bg-sky-300/10 px-3 py-1.5 text-xs font-semibold text-sky-100">
+              LOCAL VIDEO
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-slate-950/35">
+              <div className="border-b border-white/5 px-4 py-3">
+                <div className="text-[10px] font-bold tracking-[0.12em] text-amber-200">
+                  真人示範 · REAL DEMO
+                </div>
+                <div className="mt-1 text-base font-bold text-white">
+                  {racketSkills[racketIndex].title}
+                </div>
+              </div>
+
+              <div className="flex min-h-[300px] items-center justify-center bg-black p-2">
+                <video
+                  key={racketSkills[racketIndex].videoPath}
+                  className="max-h-[390px] w-full object-contain"
+                  src={badmintonVideoUrl(racketSkills[racketIndex].videoPath)}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  loop
+                >
+                  お使いのブラウザでは動画を再生できません。
+                </video>
+              </div>
+
+              <div className="grid gap-2 border-t border-white/5 px-4 py-3">
+                <div className="text-sm font-bold text-sky-100">
+                  {racketSkills[racketIndex].target}
+                </div>
+                <div className="text-sm leading-relaxed text-white">
+                  {racketSkills[racketIndex].cue}
+                </div>
+                <div className="text-xs leading-relaxed text-slate-400">
+                  {racketSkills[racketIndex].note}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid content-start gap-2">
+              {racketSkills.map((item, index) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setRacketIndex(index)}
+                  className={`grid min-h-14 grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-3 text-left transition ${
+                    index === racketIndex
+                      ? "bg-sky-300/15 ring-1 ring-sky-300/20"
+                      : "bg-slate-950/25 active:bg-white/[0.07]"
+                  }`}
+                >
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.07] text-xs font-bold">
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-white">
+                      {item.title}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[11px] text-slate-400">
+                      {item.target}
+                    </span>
+                  </span>
+                  <ChevronRight size={16} className="text-slate-500" />
+                </button>
+              ))}
+
+              <div className="mt-2 rounded-2xl border border-sky-300/10 bg-sky-300/[0.04] p-3 text-[11px] leading-relaxed text-slate-400">
+                動画は <span className="text-sky-200">public/badminton/videos/racket/</span> から読み込みます。
+                完全な39秒動画は使わず、7つの短い示範に分割しています。
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-4 rounded-3xl border border-emerald-300/10 bg-emerald-300/[0.055] p-4 sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-emerald-200">
+                <Activity size={17} />
+                ANKLE GUARD · 足首ケア
+              </div>
+              <h2 className="mt-1 text-xl font-bold sm:text-2xl">
+                足首を守る · 4〜5 min
+              </h2>
+              <div className="mt-1 text-xs leading-relaxed text-slate-400">
+                素振り10分とは別メニュー。痛みがない日に、軽い強度で行います。
+              </div>
+            </div>
+
+            <div className="rounded-full border border-emerald-200/10 bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100">
+              週2〜3回から
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-slate-950/35">
+              <div className="border-b border-white/5 px-4 py-3">
+                <div className="text-[10px] font-bold tracking-[0.12em] text-amber-200">
+                  真人示範 · REAL DEMO
+                </div>
+                <div className="mt-1 text-base font-bold text-white">
+                  {ankleRoutine[ankleIndex].title}
+                </div>
+              </div>
+
+              {ankleRoutine[ankleIndex].videoPath ? (
+                <div className="flex min-h-[300px] items-center justify-center bg-black p-2">
+                  <video
+                    key={ankleRoutine[ankleIndex].videoPath}
+                    className="max-h-[380px] w-full object-contain"
+                    src={badmintonVideoUrl(ankleRoutine[ankleIndex].videoPath)}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    loop
+                  >
+                    お使いのブラウザでは動画を再生できません。
+                  </video>
+                </div>
+              ) : (
+                <div className="grid min-h-[300px] place-items-center bg-[radial-gradient(circle_at_50%_35%,rgba(52,211,153,0.12),transparent_35%),#071524] px-6 text-center">
+                  <div>
+                    <div className="mx-auto grid h-28 w-28 place-items-center rounded-full border border-emerald-200/15 bg-emerald-300/10 text-5xl">
+                      🦶
+                    </div>
+                    <div className="mt-4 text-xl font-bold text-white">
+                      片脚で30秒
+                    </div>
+                    <div className="mt-2 text-sm text-slate-300">
+                      壁・椅子のすぐ横で行う
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-2 border-t border-white/5 px-4 py-3">
+                <div className="text-sm font-bold text-emerald-100">
+                  {ankleRoutine[ankleIndex].target}
+                </div>
+                <div className="text-sm leading-relaxed text-white">
+                  {ankleRoutine[ankleIndex].cue}
+                </div>
+                <div className="text-xs leading-relaxed text-slate-400">
+                  {ankleRoutine[ankleIndex].note}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid content-start gap-2">
+              {ankleRoutine.map((item, index) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setAnkleIndex(index)}
+                  className={`grid min-h-14 grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-3 text-left transition ${
+                    index === ankleIndex
+                      ? "bg-emerald-300/15 ring-1 ring-emerald-300/20"
+                      : "bg-slate-950/25 active:bg-white/[0.07]"
+                  }`}
+                >
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.07] text-xs font-bold">
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-white">
+                      {item.title}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[11px] text-slate-400">
+                      {item.target}
+                    </span>
+                  </span>
+                  <ChevronRight size={16} className="text-slate-500" />
+                </button>
+              ))}
+
+              <div className="mt-2 rounded-2xl border border-amber-300/10 bg-amber-300/[0.05] p-3 text-[11px] leading-relaxed text-slate-400">
+                動画内に「20回×4セット」と表示されていますが、このアプリではその回数を採用しません。
+                子どもは軽い抵抗・少ない回数から始めます。足首に痛み、腫れ、熱感、不安定感がある日は中止してください。
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <article className="rounded-3xl border border-sky-300/10 bg-sky-300/[0.07] p-5">
@@ -618,6 +946,12 @@ export default function BadmintonPage() {
 
             <div className="mt-5">
               <FollowAlongAnimation step={current} running={running} />
+            </div>
+
+            <div className="mt-3 rounded-xl border border-white/[0.05] bg-slate-950/20 px-3 py-2 text-[11px] leading-relaxed text-slate-400">
+              真人スイング動画は今後
+              <span className="mx-1 text-sky-200">public/badminton/videos/swing/</span>
+              に forehand.mp4 / backhand.mp4 / overhead.mp4 を追加して差し替えます。
             </div>
 
             <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/[0.07]">
@@ -725,7 +1059,7 @@ export default function BadmintonPage() {
                 安全について
               </div>
               <div className="mt-2 text-xs leading-relaxed text-slate-400">
-                室内では、人・照明・家具にラケットが当たらない十分なスペースを確保してください。肩・肘・手首に痛みが出たら中止します。アニメーションは動きの目安であり、実際のフォームは必要に応じてコーチに確認してください。
+                室内では、人・照明・家具にラケットが当たらない十分なスペースを確保してください。肩・肘・手首、または足首に痛みが出たら中止します。足首に腫れや不安定感がある場合は練習より先に医療者へ相談してください。実際のフォームは必要に応じてコーチに確認してください。
               </div>
             </section>
           </div>
