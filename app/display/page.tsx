@@ -337,46 +337,56 @@ const musicStations: MusicStation[] = [
   }
 ];
 
-const TODAY_CARD_BACKGROUNDS = [
+const TODAY_BG_FILENAMES = [
   {
     id: "sun",
-    label: "Sun",
-    image: "/dashboard/today-bg/01-sunrise-bay.png"
+    file: "01-sunrise-bay.png"
   },
   {
     id: "mon",
-    label: "Mon",
-    image: "/dashboard/today-bg/02-misty-mountain-lake.png"
+    file: "02-misty-mountain-lake.png"
   },
   {
     id: "tue",
-    label: "Tue",
-    image: "/dashboard/today-bg/03-calm-lake-morning.png"
+    file: "03-calm-lake-morning.png"
   },
   {
     id: "wed",
-    label: "Wed",
-    image: "/dashboard/today-bg/04-golden-river-evening.png"
+    file: "04-golden-river-evening.png"
   },
   {
     id: "thu",
-    label: "Thu",
-    image: "/dashboard/today-bg/05-twilight-lotus-pond.png"
+    file: "05-twilight-lotus-pond.png"
   },
   {
     id: "fri",
-    label: "Fri",
-    image: "/dashboard/today-bg/06-coastal-dusk.png"
+    file: "06-coastal-dusk.png"
   },
   {
     id: "sat",
-    label: "Sat",
-    image: "/dashboard/today-bg/07-moonlit-water-town.png"
+    file: "07-moonlit-water-town.png"
   }
 ] as const;
 
-const todayCardBackgroundForDate = (date = new Date()) =>
-  TODAY_CARD_BACKGROUNDS[date.getDay() % TODAY_CARD_BACKGROUNDS.length];
+type TodayBgItem = (typeof TODAY_BG_FILENAMES)[number];
+type DayPhase = "day" | "night";
+
+const dayPhaseForDate = (date = new Date()): DayPhase =>
+  isDaytime(date) ? "day" : "night";
+
+const todayCardBackgroundForDate = (date = new Date()) => {
+  const season = seasonForDate(date);
+  const phase = dayPhaseForDate(date);
+  const item: TodayBgItem =
+    TODAY_BG_FILENAMES[date.getDay() % TODAY_BG_FILENAMES.length];
+
+  return {
+    id: item.id,
+    season,
+    phase,
+    image: `/dashboard/today-bg/${season}/${phase}/${item.file}`
+  };
+};
 
 const todayKey = (date = new Date()) => {
   const year = date.getFullYear();
