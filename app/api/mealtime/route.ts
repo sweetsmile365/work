@@ -3,276 +3,78 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-type FeedItem = {
+type YoutubeItem = {
+  videoId: string;
   title: string;
-  link: string;
   published?: string;
   description?: string;
-  mediaUrl?: string;
-  mediaType?: "audio" | "video";
+  channel: string;
 };
 
-type SourceConfig = {
-  id: string;
-  label: string;
-  kind: "news" | "video";
-  level: "EASY" | "NORMAL";
-  feed: string;
-  fallbackUrl: string;
-  fallbackTitle: string;
-};
+const CNN10_CHANNEL_ID = "UCTOoRgpHTjAQPk6Ak70u-pA";
+const NATGEO_KIDS_CHANNEL_ID = "UCXVCgDuD_QCkI7gTKU7-tpg";
 
-const SOURCES: SourceConfig[] = [
-  {
-    id: "as-it-is",
-    label: "VOA · As It Is",
-    kind: "news",
-    level: "NORMAL",
-    feed: "https://learningenglish.voanews.com/api/zkm-ql-vomx-tpej-rqi",
-    fallbackUrl: "https://learningenglish.voanews.com/z/1579",
-    fallbackTitle: "VOA Learning English · As It Is"
-  },
-  {
-    id: "voa60",
-    label: "VOA60 · Watch & Learn",
-    kind: "news",
-    level: "EASY",
-    feed: "https://learningenglish.voanews.com/api/zyk-il-vomx-tpetpqqm",
-    fallbackUrl: "https://learningenglish.voanews.com/z/3613",
-    fallbackTitle: "VOA60 · Watch & Learn"
-  },
-  {
-    id: "english-minute",
-    label: "English in a Minute",
-    kind: "video",
-    level: "EASY",
-    feed: "https://learningenglish.voanews.com/api/zjk-rl-vomx-tpebpqqo",
-    fallbackUrl: "https://learningenglish.voanews.com/z/3614",
-    fallbackTitle: "English in a Minute"
-  },
-  {
-    id: "level2",
-    label: "Let's Learn English · Level 2",
-    kind: "video",
-    level: "NORMAL",
-    feed: "https://learningenglish.voanews.com/api/zbptq_l-vomx-tpeq-kqv",
-    fallbackUrl: "https://learningenglish.voanews.com/p/6765.html",
-    fallbackTitle: "Let's Learn English · Level 2"
-  }
-];
+const FEED_BASE = "https://www.youtube.com/feeds/videos.xml?channel_id=";
 
-function stripCdata(value: string) {
+function cleanText(value = "") {
   return value
     .replace(/^<!\[CDATA\[/, "")
     .replace(/\]\]>$/, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
-function decodeEntities(value: string) {
-  return value
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-}
-
-function cleanText(value = "") {
-  return decodeEntities(
-    stripCdata(value)
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-  );
-}
-
-function readTag(block: string, tag: string) {
+function tagValue(block: string, tag: string) {
   const match = block.match(
     new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "i")
   );
-  return match?.[1]?.trim() ?? "";
+  return match?.[1] ?? "";
 }
 
-function normalizeMarkup(value: string) {
-  return value
-    .replace(/\\u002F/gi, "/")
-    .replace(/\\u0026/gi, "&")
-    .replace(/\\\//g, "/")
-    .replace(/&amp;/g, "&")
-    .replace(/&#x2F;/gi, "/")
-    .replace(/&#47;/g, "/")
-    .replace(/&quot;/g, '"');
-}
+function parseYoutubeFeed(xml: string, channel: string): YoutubeItem[] {
+  const entries = xml.match(/<entry\b[\s\S]*?<\/entry>/gi) ?? [];
 
-function readAttribute(tag: string, attr: string) {
-  const match = tag.match(
-    new RegExp(`\\b${attr}\\s*=\\s*["']([^"']+)["']`, "i")
-  );
-  return match?.[1] ? decodeEntities(match[1]) : "";
-}
-
-function mediaFromRssItem(block: string) {
-  const normalized = normalizeMarkup(block);
-  const mediaTags =
-    normalized.match(
-      /<(?:enclosure|media:content|media:player)\b[^>]*>/gi
-    ) ?? [];
-
-  const candidates = mediaTags
-    .map((tag) => ({
-      url: readAttribute(tag, "url") || readAttribute(tag, "href"),
-      type: readAttribute(tag, "type")
-    }))
-    .filter((item) => /^https?:\/\//i.test(item.url));
-
-  const video = candidates.find(
-    (item) =>
-      /video/i.test(item.type) ||
-      /\.mp4(?:\?|$)/i.test(item.url)
-  );
-  if (video) {
-    return {
-      mediaUrl: video.url,
-      mediaType: "video" as const
-    };
-  }
-
-  const audio = candidates.find(
-    (item) =>
-      /audio/i.test(item.type) ||
-      /\.mp3(?:\?|$)/i.test(item.url)
-  );
-  if (audio) {
-    return {
-      mediaUrl: audio.url,
-      mediaType: "audio" as const
-    };
-  }
-
-  // Some feeds put direct media URLs inside description/content HTML.
-  const directVideo = normalized.match(
-    /https?:\/\/[^"'\\s<>]+?\.mp4(?:\?[^"'\\s<>]*)?/i
-  )?.[0];
-  if (directVideo) {
-    return {
-      mediaUrl: directVideo,
-      mediaType: "video" as const
-    };
-  }
-
-  const directAudio = normalized.match(
-    /https?:\/\/[^"'\\s<>]+?\.mp3(?:\?[^"'\\s<>]*)?/i
-  )?.[0];
-  if (directAudio) {
-    return {
-      mediaUrl: directAudio,
-      mediaType: "audio" as const
-    };
-  }
-
-  return {};
-}
-
-function parseRss(xml: string): FeedItem[] {
-  const blocks = xml.match(/<item\b[\s\S]*?<\/item>/gi) ?? [];
-
-  return blocks
-    .map((block) => {
-      const title = cleanText(readTag(block, "title"));
-      const link = cleanText(readTag(block, "link"));
-      const published =
-        cleanText(readTag(block, "pubDate")) ||
-        cleanText(readTag(block, "dc:date"));
-      const description =
-        cleanText(readTag(block, "description")) ||
-        cleanText(readTag(block, "summary"));
-
-      const rssMedia = mediaFromRssItem(block);
+  return entries
+    .map((entry) => {
+      const videoId = cleanText(tagValue(entry, "yt:videoId"));
+      const title = cleanText(tagValue(entry, "title"));
+      const published = cleanText(tagValue(entry, "published"));
+      const description = cleanText(tagValue(entry, "media:description"));
 
       return {
+        videoId,
         title,
-        link,
         published: published || undefined,
         description: description || undefined,
-        ...rssMedia
+        channel
       };
     })
-    .filter((item) => item.title && /^https?:\/\//i.test(item.link));
+    .filter((item) => item.videoId && item.title);
 }
 
-function decodeUrl(value: string) {
-  return value
-    .replace(/&amp;/g, "&")
-    .replace(/\\u0026/g, "&")
-    .replace(/\\\//g, "/");
-}
-
-function pickBestVideo(urls: string[]) {
-  const clean = [...new Set(urls.map(decodeUrl))];
-  return (
-    clean.find((url) => /_480p\.mp4/i.test(url)) ??
-    clean.find((url) => /_360p\.mp4/i.test(url)) ??
-    clean.find((url) => /_720p\.mp4/i.test(url)) ??
-    clean.find((url) => /\.mp4(?:\?|$)/i.test(url))
-  );
-}
-
-function pickBestAudio(urls: string[]) {
-  const clean = [...new Set(urls.map(decodeUrl))];
-  return (
-    clean.find((url) => /_hq\.mp3/i.test(url)) ??
-    clean.find((url) => /128/i.test(url)) ??
-    clean.find((url) => /\.mp3(?:\?|$)/i.test(url))
-  );
-}
-
-async function resolveMedia(item: FeedItem): Promise<FeedItem> {
-  if (item.mediaUrl && item.mediaType) return item;
-
+async function loadYoutubeFeed(
+  channelId: string,
+  channel: string
+): Promise<YoutubeItem[]> {
   try {
-    const response = await fetch(item.link, {
+    const response = await fetch(`${FEED_BASE}${channelId}`, {
       headers: {
         "User-Agent": "Family-Schedule-Hub/1.0"
       },
-      next: { revalidate: 86400 }
+      next: { revalidate: 3600 }
     });
 
-    if (!response.ok) return item;
+    if (!response.ok) throw new Error(`YouTube RSS ${response.status}`);
 
-    const rawHtml = await response.text();
-    const html = normalizeMarkup(rawHtml);
-
-    const videoUrls =
-      html.match(
-        /https?:\/\/[^"'\\s<>]+?\.mp4(?:\?[^"'\\s<>]*)?/gi
-      ) ?? [];
-
-    const audioUrls =
-      html.match(
-        /https?:\/\/[^"'\\s<>]+?\.mp3(?:\?[^"'\\s<>]*)?/gi
-      ) ?? [];
-
-    const videoUrl = pickBestVideo(videoUrls);
-    if (videoUrl) {
-      return {
-        ...item,
-        mediaUrl: videoUrl,
-        mediaType: "video"
-      };
-    }
-
-    const audioUrl = pickBestAudio(audioUrls);
-    if (audioUrl) {
-      return {
-        ...item,
-        mediaUrl: audioUrl,
-        mediaType: "audio"
-      };
-    }
-
-    return item;
+    return parseYoutubeFeed(await response.text(), channel);
   } catch {
-    return item;
+    return [];
   }
 }
 
@@ -295,121 +97,55 @@ function daySeed(dayKey: string) {
   );
 }
 
-async function loadSource(source: SourceConfig) {
-  try {
-    const response = await fetch(source.feed, {
-      headers: {
-        "User-Agent": "Family-Schedule-Hub/1.0"
-      },
-      next: { revalidate: 21600 }
-    });
+function isShortNatGeoCandidate(item: YoutubeItem) {
+  const title = item.title.toLowerCase();
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
+  const exclude = [
+    "full episode",
+    "compilation",
+    "podcast",
+    "special edition",
+    "full documentary",
+    "livestream"
+  ];
 
-    const xml = await response.text();
-    const items = parseRss(xml).slice(0, 20);
+  return !exclude.some((word) => title.includes(word));
+}
 
-    if (!items.length) {
-      throw new Error("No RSS items");
-    }
+function latestCnn10(items: YoutubeItem[]) {
+  return items[0] ?? null;
+}
 
-    return {
-      source,
-      items,
-      live: true
-    };
-  } catch {
-    return {
-      source,
-      items: [
-        {
-          title: source.fallbackTitle,
-          link: source.fallbackUrl,
-          description: "Open the official VOA Learning English page."
-        }
-      ],
-      live: false
-    };
-  }
+function dailyNatGeo(items: YoutubeItem[], seed: number) {
+  const shortItems = items.filter(isShortNatGeoCandidate);
+  const pool = (shortItems.length >= 5 ? shortItems : items).slice(0, 12);
+
+  if (!pool.length) return null;
+  return pool[seed % pool.length];
 }
 
 export async function GET() {
   const dayKey = tokyoDayKey();
   const seed = daySeed(dayKey);
 
-  const loaded = await Promise.all(SOURCES.map(loadSource));
-
-  const byId = Object.fromEntries(
-    loaded.map((entry) => [entry.source.id, entry])
-  );
-
-  // News sources are already frequently refreshed, so prefer their newest item.
-  const mainNews = byId["as-it-is"].items[0];
-  const shortNews = byId["voa60"].items[0];
-
-  // Learning-video feeds may not publish every day. Rotate through recent items
-  // so the meal page still presents a different item each Japanese calendar day.
-  const easyVideos = byId["english-minute"].items;
-  const normalVideos = byId["level2"].items;
-
-  const easyVideo = easyVideos[seed % Math.min(easyVideos.length, 14)];
-  const normalVideo =
-    normalVideos[(seed + 5) % Math.min(normalVideos.length, 14)];
-
-  const [
-    resolvedMainNews,
-    resolvedShortNews,
-    resolvedEasyVideo,
-    resolvedNormalVideo
-  ] = await Promise.all([
-    resolveMedia(mainNews),
-    resolveMedia(shortNews),
-    resolveMedia(easyVideo),
-    resolveMedia(normalVideo)
+  const [cnnItems, natGeoItems] = await Promise.all([
+    loadYoutubeFeed(CNN10_CHANNEL_ID, "CNN 10"),
+    loadYoutubeFeed(NATGEO_KIDS_CHANNEL_ID, "Nat Geo Kids")
   ]);
 
+  const cnn10 = latestCnn10(cnnItems);
+  const natGeo = dailyNatGeo(natGeoItems, seed);
+
   const response = NextResponse.json({
-    ok: true,
+    ok: Boolean(cnn10 || natGeo),
     dayKey,
     updatedAt: new Date().toISOString(),
     picks: {
-      mainNews: {
-        ...resolvedMainNews,
-        source: byId["as-it-is"].source.label,
-        level: byId["as-it-is"].source.level,
-        minutes: "5–8 min",
-        live: byId["as-it-is"].live
-      },
-      shortNews: {
-        ...resolvedShortNews,
-        source: byId["voa60"].source.label,
-        level: byId["voa60"].source.level,
-        minutes: "1–3 min",
-        live: byId["voa60"].live
-      },
-      easyVideo: {
-        ...resolvedEasyVideo,
-        source: byId["english-minute"].source.label,
-        level: byId["english-minute"].source.level,
-        minutes: "1–3 min",
-        live: byId["english-minute"].live
-      },
-      normalVideo: {
-        ...resolvedNormalVideo,
-        source: byId["level2"].source.label,
-        level: byId["level2"].source.level,
-        minutes: "5–8 min",
-        live: byId["level2"].live
-      }
+      cnn10,
+      natGeo
     }
   });
 
-  response.headers.set(
-    "Cache-Control",
-    "no-store, max-age=0"
-  );
-
+  response.headers.set("Cache-Control", "no-store, max-age=0");
   return response;
 }
