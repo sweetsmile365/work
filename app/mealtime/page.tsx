@@ -12,7 +12,8 @@ import {
   Pause,
   Play,
   RotateCcw,
-  Sparkles
+  Sparkles,
+  Volume2
 } from "lucide-react";
 
 const CNN10_UPLOADS_PLAYLIST = "UUTOoRgpHTjAQPk6Ak70u-pA";
@@ -143,6 +144,215 @@ function PlaylistPlayer({
         allowFullScreen
       />
     </div>
+  );
+}
+
+type TimeForKidsArticle = {
+  title: string;
+  date?: string;
+  url: string;
+  imageUrl?: string;
+  excerpt: string;
+  audioUrl?: string;
+  audioMode: "official" | "speech";
+};
+
+type TimeForKidsResponse = {
+  ok: boolean;
+  dayKey: string;
+  article: TimeForKidsArticle | null;
+};
+
+function TimeForKidsReader() {
+  const [data, setData] = useState<TimeForKidsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [speaking, setSpeaking] = useState(false);
+
+  async function loadArticle(force = false) {
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `/api/time-for-kids?v=1${force ? `&t=${Date.now()}` : ""}`,
+        { cache: "no-store" }
+      );
+
+      if (!response.ok) throw new Error("TIME for Kids fetch failed");
+
+      const value = (await response.json()) as TimeForKidsResponse;
+      setData(value);
+    } catch {
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadArticle();
+
+    const timer = window.setInterval(() => {
+      void loadArticle();
+    }, 30 * 60 * 1000);
+
+    return () => {
+      window.clearInterval(timer);
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  function toggleSpeech() {
+    if (!data?.article?.excerpt || !("speechSynthesis" in window)) return;
+
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(
+      `${data.article.title}. ${data.article.excerpt}`
+    );
+    utterance.lang = "en-US";
+    utterance.rate = 0.88;
+    utterance.pitch = 1;
+
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+
+    setSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  const article = data?.article;
+
+  return (
+    <article className="overflow-hidden rounded-2xl border border-violet-300/10 bg-violet-300/[0.04]">
+      <div className="flex flex-wrap items-start justify-between gap-3 p-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold tracking-[0.12em] text-violet-200">
+            <BookOpen size={16} />
+            TODAY'S READING
+          </div>
+          <div className="mt-2 text-lg font-bold text-white">
+            TIME for Kids
+          </div>
+          <div className="mt-1 text-xs text-slate-400">
+            Grades 5–6 · Article + Audio · Daily Pick
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => void loadArticle(true)}
+          disabled={loading}
+          className="min-h-9 rounded-xl bg-violet-300/10 px-3 text-xs font-bold text-violet-100 disabled:opacity-50"
+        >
+          {loading ? "LOADING..." : "UPDATE"}
+        </button>
+      </div>
+
+      {loading && !article ? (
+        <div className="border-t border-white/[0.05] p-6 text-center text-sm text-slate-400">
+          TIME for Kids を読み込み中…
+        </div>
+      ) : article ? (
+        <div className="border-t border-white/[0.06]">
+          {article.imageUrl ? (
+            <div className="relative h-44 overflow-hidden bg-slate-950 sm:h-52">
+              <img
+                src={article.imageUrl}
+                alt=""
+                className="h-full w-full object-cover"
+                loading="lazy"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+            </div>
+          ) : null}
+
+          <div className="p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-violet-300/10 px-2.5 py-1 text-[10px] font-bold text-violet-100">
+                G5–6
+              </span>
+              {article.date ? (
+                <span className="text-[10px] text-slate-500">{article.date}</span>
+              ) : null}
+              <span className="rounded-full bg-sky-300/10 px-2.5 py-1 text-[9px] font-bold text-sky-100">
+                {article.audioMode === "official" ? "TIME AUDIO" : "READ ALOUD"}
+              </span>
+            </div>
+
+            <h3 className="mt-3 text-xl font-bold leading-snug text-white">
+              {article.title}
+            </h3>
+
+            <p className="mt-3 text-sm leading-7 text-slate-200">
+              {article.excerpt}
+            </p>
+
+            <div className="mt-4 rounded-xl border border-white/[0.06] bg-slate-950/35 p-3">
+              <div className="mb-2 flex items-center gap-2 text-[10px] font-bold tracking-[0.12em] text-sky-200">
+                <Volume2 size={15} />
+                LISTEN
+              </div>
+
+              {article.audioUrl ? (
+                <audio
+                  key={article.audioUrl}
+                  src={article.audioUrl}
+                  controls
+                  preload="metadata"
+                  className="w-full"
+                >
+                  Audio playback is not supported.
+                </audio>
+              ) : (
+                <button
+                  type="button"
+                  onClick={toggleSpeech}
+                  className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold ${
+                    speaking
+                      ? "bg-amber-300/15 text-amber-100"
+                      : "bg-sky-300/15 text-sky-100"
+                  }`}
+                >
+                  {speaking ? <Pause size={16} /> : <Play size={16} />}
+                  {speaking ? "STOP" : "LISTEN TO THIS ARTICLE"}
+                </button>
+              )}
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <div className="text-[11px] leading-relaxed text-slate-500">
+                App内には短い記事プレビューを表示。全文はTIME for Kids公式で確認できます。
+              </div>
+
+              <a
+                href={article.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg bg-violet-300/10 px-3 text-[11px] font-semibold text-violet-100"
+              >
+                FULL ARTICLE
+                <ExternalLink size={13} />
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="border-t border-white/[0.05] p-5 text-sm leading-relaxed text-amber-100">
+          今日の記事を取得できませんでした。UPDATEを押すか、後でもう一度確認してください。
+        </div>
+      )}
+    </article>
   );
 }
 
@@ -344,12 +554,7 @@ export default function MealTimePage() {
           </div>
 
           <section className="mt-5 grid gap-4 lg:grid-cols-2">
-            <InlineReadingFrame
-              title="TIME for Kids"
-              subtitle="Grades 5–6 · Current Events · Audio付き記事もあり"
-              url="https://www.timeforkids.com/g56/?age=child"
-              accent="violet"
-            />
+            <TimeForKidsReader />
 
             <InlineReadingFrame
               title="Newsela"
