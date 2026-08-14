@@ -701,6 +701,19 @@ function FitnessMusic({
     };
   }, []);
 
+  useEffect(() => {
+    const pauseForGuidedWorkout = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      audio.pause();
+      setPlaying(false);
+    };
+
+    window.addEventListener("fitness:guided-start", pauseForGuidedWorkout);
+    return () =>
+      window.removeEventListener("fitness:guided-start", pauseForGuidedWorkout);
+  }, []);
+
   async function toggleMusic() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -710,6 +723,11 @@ function FitnessMusic({
       setPlaying(false);
       return;
     }
+
+    // The new guided YouTube workout has coaching audio.
+    // Keep coach audio and Fitness Music mutually exclusive so TV/webOS
+    // does not fight over two media sessions and the instructions remain audible.
+    window.dispatchEvent(new CustomEvent("fitness:music-start"));
 
     try {
       setError(false);
