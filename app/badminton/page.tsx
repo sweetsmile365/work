@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { BadmintonFootworkBlitz } from "@/components/BadmintonFootworkBlitz";
 import {
   Activity,
   ArrowLeft,
@@ -944,6 +945,8 @@ export default function BadmintonPage() {
           </div>
         </section>
 
+        <BadmintonFootworkBlitz />
+
         <section className="mt-4 rounded-3xl border border-emerald-300/10 bg-emerald-300/[0.055] p-4 sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -1207,6 +1210,12 @@ export default function BadmintonPage() {
                   <div className="font-bold text-white">ラケット⑥〜⑦</div>
                   <div className="mt-1 text-xs text-slate-300">
                     Challenge · 各90秒 · 失敗してOK
+                  </div>
+                </div>
+                <div className="rounded-xl bg-indigo-300/[0.05] p-3">
+                  <div className="font-bold text-white">Footwork BASIC 6</div>
+                  <div className="mt-1 text-xs text-slate-300">
+                    技术练习 · 4〜5分 / FULL 17 は週1〜2回
                   </div>
                 </div>
                 <div className="rounded-xl bg-slate-950/25 p-3">
