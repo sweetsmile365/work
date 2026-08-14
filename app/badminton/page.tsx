@@ -317,320 +317,83 @@ function PracticeTimer({
   );
 }
 
-function FollowAlongAnimation({
+type RealVideoItem = {
+  id: string;
+  title: string;
+  source: string;
+  cue: string;
+};
+
+const realVideoGuides: Record<string, RealVideoItem> = {
+  warmup: {
+    id: "MTX-CAy0WRY",
+    title: "Badminton Specific Warm Up In 10 MINUTES!",
+    source: "Badminton Insight",
+    cue: "先看肩・肘・手首的动态热身，不追求速度。"
+  },
+  forehand: {
+    id: "xRv1JLg4NMM",
+    title: "Forehand Clear Tutorial",
+    source: "Badminton Insight",
+    cue: "松握拍、侧身、高点击球、前臂旋转。"
+  },
+  backhand: {
+    id: "F7Clf4SnTlI",
+    title: "Backhand Drop / Clear / Smash Tutorial",
+    source: "Badminton Insight",
+    cue: "Bevel grip、身体转向、前臂旋转，手臂保持放松。"
+  },
+  overhead: {
+    id: "HvAOMnoT3zQ",
+    title: "Smash and Clear Tutorial",
+    source: "Tobias Wadenka",
+    cue: "侧身准备 → 肘部带动 → 前臂加速 → 自然随挥。"
+  },
+  drive: {
+    id: "enPselRw-gY",
+    title: "Drive Warm-up · Real Court Example",
+    source: "Badminton Practice",
+    cue: "动作要短，拍面稳定，击球后立刻回到准备位置。"
+  }
+};
+
+const reviewIds = ["forehand", "backhand", "overhead", "drive"] as const;
+
+function RealVideoGuide({
   step,
   running
 }: {
   step: Step;
   running: boolean;
 }) {
-  const motion =
-    step.side === "backhand"
-      ? "followBackhand"
-      : step.side === "overhead"
-        ? "followOverhead"
-        : step.side === "drive"
-          ? "followDrive"
-          : step.side === "relax"
-            ? "followRelax"
-            : "followForehand";
+  const [loaded, setLoaded] = useState(false);
+  const [reviewId, setReviewId] =
+    useState<(typeof reviewIds)[number]>("forehand");
 
-  const cycle = step.side === "drive" ? 1.45 : 2.4;
-  const playState = running ? "running" : "paused";
+  useEffect(() => {
+    setLoaded(false);
+    if (step.id !== "form") return;
+    setReviewId("forehand");
+  }, [step.id]);
 
-  const renderPerson = ({
-    x,
-    kid,
-    delay
-  }: {
-    x: number;
-    kid: boolean;
-    delay: number;
-  }) => {
-    const headY = kid ? 78 : 66;
-    const shoulderY = kid ? 118 : 112;
-    const hipY = kid ? 184 : 192;
-    const groundY = 268;
-    const bodyWidth = kid ? 42 : 50;
-    const racketLength = kid ? 72 : 82;
-    const skin = kid ? "#f0c7a9" : "#d9ad8c";
-    const jersey = kid ? "#38bdf8" : "#34d399";
-    const shorts = kid ? "#1e3a5f" : "#164e63";
-    const stroke = "rgba(226,232,240,0.92)";
+  const guide =
+    step.id === "form"
+      ? realVideoGuides[reviewId]
+      : realVideoGuides[step.id] ?? realVideoGuides.forehand;
 
-    return (
-      <g transform={`translate(${x} 0)`}>
-        <ellipse
-          cx="0"
-          cy={groundY + 6}
-          rx={kid ? 54 : 62}
-          ry="8"
-          fill="rgba(0,0,0,0.22)"
-        />
-
-        <circle cx="0" cy={headY} r={kid ? 15 : 17} fill={skin} />
-        <path
-          d={
-            kid
-              ? `M -15 ${headY - 6} Q 0 ${headY - 22} 15 ${headY - 6}`
-              : `M -17 ${headY - 7} Q 0 ${headY - 24} 17 ${headY - 7}`
-          }
-          fill={kid ? "#2b1d1a" : "#27364a"}
-        />
-
-        <rect
-          x={-bodyWidth / 2}
-          y={shoulderY}
-          width={bodyWidth}
-          height={hipY - shoulderY}
-          rx={kid ? 15 : 17}
-          fill={jersey}
-        />
-
-        <path
-          d={`M -${bodyWidth / 2 - 4} ${hipY - 5} L ${bodyWidth / 2 - 4} ${hipY - 5} L ${
-            bodyWidth / 2 + 4
-          } ${hipY + 28} L -${bodyWidth / 2 + 4} ${hipY + 28} Z`}
-          fill={shorts}
-        />
-
-        <g
-          style={{
-            transformOrigin: `0px ${shoulderY + 4}px`,
-            animation: `${motion} ${cycle}s cubic-bezier(.45,.05,.25,1) ${delay}s infinite`,
-            animationPlayState: playState
-          }}
-        >
-          <line
-            x1="2"
-            y1={shoulderY + 4}
-            x2={kid ? 34 : 40}
-            y2={kid ? shoulderY + 28 : shoulderY + 30}
-            stroke={skin}
-            strokeWidth={kid ? 9 : 10}
-            strokeLinecap="round"
-          />
-          <line
-            x1={kid ? 34 : 40}
-            y1={kid ? shoulderY + 28 : shoulderY + 30}
-            x2={kid ? 62 : 72}
-            y2={kid ? shoulderY + 12 : shoulderY + 10}
-            stroke={skin}
-            strokeWidth={kid ? 8 : 9}
-            strokeLinecap="round"
-          />
-
-          <line
-            x1={kid ? 60 : 70}
-            y1={kid ? shoulderY + 12 : shoulderY + 10}
-            x2={kid ? 60 + racketLength - 28 : 70 + racketLength - 30}
-            y2={kid ? shoulderY - 30 : shoulderY - 38}
-            stroke="#cbd5e1"
-            strokeWidth="5"
-            strokeLinecap="round"
-          />
-
-          <ellipse
-            cx={kid ? 60 + racketLength - 16 : 70 + racketLength - 18}
-            cy={kid ? shoulderY - 46 : shoulderY - 56}
-            rx={kid ? 16 : 18}
-            ry={kid ? 23 : 27}
-            fill="rgba(15,23,42,0.2)"
-            stroke="#f8fafc"
-            strokeWidth="4"
-          />
-          <line
-            x1={kid ? 60 + racketLength - 28 : 70 + racketLength - 31}
-            y1={kid ? shoulderY - 46 : shoulderY - 56}
-            x2={kid ? 60 + racketLength - 4 : 70 + racketLength - 5}
-            y2={kid ? shoulderY - 46 : shoulderY - 56}
-            stroke="rgba(248,250,252,0.45)"
-            strokeWidth="1.5"
-          />
-          <line
-            x1={kid ? 60 + racketLength - 16 : 70 + racketLength - 18}
-            y1={kid ? shoulderY - 66 : shoulderY - 79}
-            x2={kid ? 60 + racketLength - 16 : 70 + racketLength - 18}
-            y2={kid ? shoulderY - 26 : shoulderY - 33}
-            stroke="rgba(248,250,252,0.45)"
-            strokeWidth="1.5"
-          />
-        </g>
-
-        <line
-          x1="-4"
-          y1={shoulderY + 8}
-          x2={kid ? -28 : -34}
-          y2={kid ? shoulderY + 38 : shoulderY + 42}
-          stroke={skin}
-          strokeWidth={kid ? 9 : 10}
-          strokeLinecap="round"
-        />
-
-        <line
-          x1="-10"
-          y1={hipY + 20}
-          x2={kid ? -26 : -31}
-          y2={groundY}
-          stroke={stroke}
-          strokeWidth={kid ? 10 : 11}
-          strokeLinecap="round"
-        />
-        <line
-          x1="10"
-          y1={hipY + 20}
-          x2={kid ? 30 : 36}
-          y2={groundY}
-          stroke={stroke}
-          strokeWidth={kid ? 10 : 11}
-          strokeLinecap="round"
-        />
-
-        <line
-          x1={kid ? -34 : -40}
-          y1={groundY}
-          x2={kid ? -18 : -22}
-          y2={groundY}
-          stroke="#f8fafc"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-        <line
-          x1={kid ? 24 : 29}
-          y1={groundY}
-          x2={kid ? 42 : 50}
-          y2={groundY}
-          stroke="#f8fafc"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-      </g>
-    );
-  };
+  const embedUrl =
+    `https://www.youtube-nocookie.com/embed/${guide.id}` +
+    "?rel=0&playsinline=1&modestbranding=1";
 
   return (
     <div className="overflow-hidden rounded-3xl border border-sky-300/10 bg-slate-950/35">
-      <style jsx>{`
-        @keyframes followForehand {
-          0%,
-          14% {
-            transform: rotate(-48deg);
-          }
-          44% {
-            transform: rotate(26deg);
-          }
-          58% {
-            transform: rotate(58deg);
-          }
-          78% {
-            transform: rotate(38deg);
-          }
-          100% {
-            transform: rotate(-48deg);
-          }
-        }
-
-        @keyframes followBackhand {
-          0%,
-          14% {
-            transform: rotate(42deg);
-          }
-          48% {
-            transform: rotate(-34deg);
-          }
-          64% {
-            transform: rotate(-58deg);
-          }
-          100% {
-            transform: rotate(42deg);
-          }
-        }
-
-        @keyframes followOverhead {
-          0%,
-          16% {
-            transform: rotate(-82deg);
-          }
-          42% {
-            transform: rotate(-38deg);
-          }
-          58% {
-            transform: rotate(34deg);
-          }
-          76% {
-            transform: rotate(58deg);
-          }
-          100% {
-            transform: rotate(-82deg);
-          }
-        }
-
-        @keyframes followDrive {
-          0%,
-          12% {
-            transform: rotate(-20deg);
-          }
-          46% {
-            transform: rotate(18deg);
-          }
-          62% {
-            transform: rotate(32deg);
-          }
-          100% {
-            transform: rotate(-20deg);
-          }
-        }
-
-        @keyframes followRelax {
-          0%,
-          18% {
-            transform: rotate(-24deg);
-          }
-          52% {
-            transform: rotate(18deg);
-          }
-          100% {
-            transform: rotate(-24deg);
-          }
-        }
-
-        @keyframes hitPulse {
-          0%,
-          38%,
-          100% {
-            opacity: 0.22;
-            transform: scale(0.82);
-          }
-          52%,
-          62% {
-            opacity: 1;
-            transform: scale(1.08);
-          }
-        }
-
-        @keyframes shuttleMove {
-          0%,
-          38% {
-            transform: translate(0, 0);
-            opacity: 0;
-          }
-          52% {
-            opacity: 1;
-          }
-          100% {
-            transform: translate(82px, -42px);
-            opacity: 0;
-          }
-        }
-      `}</style>
-
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 px-4 py-3">
         <div>
           <div className="text-[10px] font-bold tracking-[0.14em] text-sky-200">
-            FOLLOW ALONG · いっしょに素振り
+            REAL VIDEO GUIDE · 真人教学
           </div>
           <div className="mt-0.5 text-sm font-semibold text-white">
-            コーチを見て → 0.5秒あとにまねる
+            先看真人动作 → 再按 START 练习
           </div>
         </div>
 
@@ -641,116 +404,103 @@ function FollowAlongAnimation({
             }`}
           />
           <span className="text-[10px] font-semibold text-slate-300">
-            {running ? "練習中" : "スタートで開始"}
+            {running ? "练习计时中" : "先确认动作"}
           </span>
         </div>
       </div>
 
-      <div className="relative min-h-[330px] overflow-hidden bg-[radial-gradient(circle_at_50%_15%,rgba(56,189,248,0.10),transparent_30%),linear-gradient(180deg,#071524,#091421)]">
-        <div className="absolute inset-x-0 top-3 grid grid-cols-2 px-8 text-center">
-          <div>
-            <div className="text-[10px] font-bold tracking-[0.16em] text-emerald-200">
-              COACH
-            </div>
-            <div className="mt-1 text-[10px] text-slate-500">先に動く</div>
+      {step.id === "form" ? (
+        <div className="border-b border-white/5 px-4 py-3">
+          <div className="text-[10px] font-bold tracking-[0.12em] text-amber-200">
+            FORM REVIEW · 选择今天最不稳定的动作
           </div>
-          <div>
-            <div className="text-[10px] font-bold tracking-[0.16em] text-sky-200">
-              KID
-            </div>
-            <div className="mt-1 text-[10px] text-slate-500">0.5秒あと</div>
-          </div>
-        </div>
-
-        <svg
-          viewBox="0 0 760 330"
-          className="absolute inset-0 h-full w-full"
-          role="img"
-          aria-label={`${step.title} のコーチと子どもの素振りアニメーション`}
-        >
-          <line
-            x1="36"
-            y1="286"
-            x2="724"
-            y2="286"
-            stroke="rgba(148,163,184,0.14)"
-            strokeWidth="2"
-          />
-
-          <line
-            x1="380"
-            y1="56"
-            x2="380"
-            y2="286"
-            stroke="rgba(148,163,184,0.09)"
-            strokeDasharray="8 10"
-          />
-
-          {renderPerson({ x: 205, kid: false, delay: 0 })}
-          {renderPerson({ x: 555, kid: true, delay: 0.5 })}
-
-          <g
-            style={{
-              transformOrigin: "335px 116px",
-              animation: `${motion} ${cycle}s cubic-bezier(.45,.05,.25,1) 0s infinite`,
-              animationPlayState: playState
-            }}
-          >
-            <g
-              style={{
-                transformOrigin: "345px 93px",
-                animation: `shuttleMove ${cycle}s ease-out 0s infinite`,
-                animationPlayState: playState
-              }}
-            >
-              <circle cx="344" cy="94" r="5" fill="#fde047" />
-              <path
-                d="M340 90 L334 83 M344 89 L343 80 M348 90 L353 83"
-                stroke="#fde68a"
-                strokeWidth="2"
-              />
-            </g>
-          </g>
-        </svg>
-
-        <div className="absolute inset-x-0 bottom-4 flex items-center justify-center">
-          <div className="flex items-center gap-2 rounded-full border border-white/[0.07] bg-slate-950/55 px-4 py-2 backdrop-blur-sm">
-            {["1", "2", "3", "HIT"].map((beat, index) => (
-              <span
-                key={beat}
-                className={`grid h-8 min-w-8 place-items-center rounded-full px-2 text-[10px] font-bold ${
-                  beat === "HIT"
-                    ? "bg-amber-300/15 text-amber-100"
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {reviewIds.map((id) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => {
+                  setReviewId(id);
+                  setLoaded(false);
+                }}
+                className={`min-h-10 rounded-xl px-2 text-xs font-bold ${
+                  reviewId === id
+                    ? "bg-amber-300 text-slate-950"
                     : "bg-white/[0.06] text-slate-300"
                 }`}
-                style={
-                  beat === "HIT"
-                    ? {
-                        animation: `hitPulse ${cycle}s ease-in-out 0s infinite`,
-                        animationPlayState: playState
-                      }
-                    : undefined
-                }
               >
-                {beat}
-              </span>
+                {id === "forehand"
+                  ? "Forehand"
+                  : id === "backhand"
+                    ? "Backhand"
+                    : id === "overhead"
+                      ? "Overhead"
+                      : "Drive"}
+              </button>
             ))}
           </div>
         </div>
-      </div>
+      ) : null}
 
-      <div className="grid gap-2 border-t border-white/5 px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
-        <div className="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
-          今見るポイント
-        </div>
-        <div className="text-sm leading-relaxed text-slate-300">
-          {step.cue}
-        </div>
-      </div>
+      <div className="p-3 sm:p-4">
+        {!loaded ? (
+          <button
+            type="button"
+            onClick={() => setLoaded(true)}
+            className="group relative grid aspect-video w-full place-items-center overflow-hidden rounded-2xl bg-black"
+          >
+            <img
+              src={`https://i.ytimg.com/vi/${guide.id}/hqdefault.jpg`}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-300 group-hover:scale-[1.01]"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/25" />
 
-      <div className="border-t border-white/5 px-4 py-3 text-[11px] leading-relaxed text-slate-500">
-        COACHの動きを見てからKIDが少し遅れて同じ動きをします。
-        速さよりフォームを優先し、疲れたら一度止めてください。
+            <div className="relative grid h-16 w-16 place-items-center rounded-full bg-red-600 text-white shadow-2xl">
+              <Play size={28} className="translate-x-0.5" fill="currentColor" />
+            </div>
+
+            <div className="absolute bottom-4 left-4 right-4 text-left">
+              <div className="text-[10px] font-bold tracking-[0.13em] text-white/70">
+                TAP TO LOAD · {guide.source}
+              </div>
+              <div className="mt-1 text-base font-bold text-white sm:text-lg">
+                {guide.title}
+              </div>
+            </div>
+          </button>
+        ) : (
+          <div className="overflow-hidden rounded-2xl bg-black">
+            <iframe
+              key={`${step.id}-${guide.id}`}
+              className="aspect-video w-full"
+              src={embedUrl}
+              title={`${step.title} 真人教学`}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        )}
+
+        <div className="mt-3 grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+          <div className="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+            今見るポイント
+          </div>
+          <div className="text-sm leading-relaxed text-slate-300">
+            {step.cue}
+          </div>
+        </div>
+
+        <div className="mt-2 rounded-xl bg-sky-300/[0.05] px-3 py-2 text-xs leading-relaxed text-slate-400">
+          {guide.cue}
+        </div>
+
+        <div className="mt-2 text-[11px] leading-relaxed text-slate-500">
+          教学视频是动作参考，不需要完整看完。确认关键动作后开始本页计时，
+          练习过程中需要时再暂停回来查看。
+        </div>
       </div>
     </div>
   );
@@ -821,7 +571,7 @@ export default function BadmintonPage() {
               素振り練習 · 10 min
             </h1>
             <div className="mt-1 text-sm text-slate-400">
-              真人動画はアプリ内のローカル動画から再生。ラケット7技巧・足首ケア・素振り10分を分けて練習できます。
+              10分メニューは真人教学動画でフォーム確認。ラケット7技巧・Footwork・足首ケアも分けて練習できます。
             </div>
           </div>
 
@@ -1087,7 +837,7 @@ export default function BadmintonPage() {
             </div>
 
             <div className="mt-5">
-              <FollowAlongAnimation step={current} running={running} />
+              <RealVideoGuide step={current} running={running} />
             </div>
 
             <div className="mt-3 rounded-xl border border-white/[0.05] bg-slate-950/20 px-3 py-2 text-[11px] leading-relaxed text-slate-400">
