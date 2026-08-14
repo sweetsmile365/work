@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-export const revalidate = 21600; // refresh upstream feeds every 6 hours
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type FeedItem = {
   title: string;
@@ -92,6 +93,86 @@ function readTag(block: string, tag: string) {
   return match?.[1]?.trim() ?? "";
 }
 
+function normalizeMarkup(value: string) {
+  return value
+    .replace(/\\u002F/gi, "/")
+    .replace(/\\u0026/gi, "&")
+    .replace(/\\\//g, "/")
+    .replace(/&amp;/g, "&")
+    .replace(/&#x2F;/gi, "/")
+    .replace(/&#47;/g, "/")
+    .replace(/&quot;/g, '"');
+}
+
+function readAttribute(tag: string, attr: string) {
+  const match = tag.match(
+    new RegExp(`\\b${attr}\\s*=\\s*["']([^"']+)["']`, "i")
+  );
+  return match?.[1] ? decodeEntities(match[1]) : "";
+}
+
+function mediaFromRssItem(block: string) {
+  const normalized = normalizeMarkup(block);
+  const mediaTags =
+    normalized.match(
+      /<(?:enclosure|media:content|media:player)\b[^>]*>/gi
+    ) ?? [];
+
+  const candidates = mediaTags
+    .map((tag) => ({
+      url: readAttribute(tag, "url") || readAttribute(tag, "href"),
+      type: readAttribute(tag, "type")
+    }))
+    .filter((item) => /^https?:\/\//i.test(item.url));
+
+  const video = candidates.find(
+    (item) =>
+      /video/i.test(item.type) ||
+      /\.mp4(?:\?|$)/i.test(item.url)
+  );
+  if (video) {
+    return {
+      mediaUrl: video.url,
+      mediaType: "video" as const
+    };
+  }
+
+  const audio = candidates.find(
+    (item) =>
+      /audio/i.test(item.type) ||
+      /\.mp3(?:\?|$)/i.test(item.url)
+  );
+  if (audio) {
+    return {
+      mediaUrl: audio.url,
+      mediaType: "audio" as const
+    };
+  }
+
+  // Some feeds put direct media URLs inside description/content HTML.
+  const directVideo = normalized.match(
+    /https?:\/\/[^"'\\s<>]+?\.mp4(?:\?[^"'\\s<>]*)?/i
+  )?.[0];
+  if (directVideo) {
+    return {
+      mediaUrl: directVideo,
+      mediaType: "video" as const
+    };
+  }
+
+  const directAudio = normalized.match(
+    /https?:\/\/[^"'\\s<>]+?\.mp3(?:\?[^"'\\s<>]*)?/i
+  )?.[0];
+  if (directAudio) {
+    return {
+      mediaUrl: directAudio,
+      mediaType: "audio" as const
+    };
+  }
+
+  return {};
+}
+
 function parseRss(xml: string): FeedItem[] {
   const blocks = xml.match(/<item\b[\s\S]*?<\/item>/gi) ?? [];
 
@@ -106,11 +187,14 @@ function parseRss(xml: string): FeedItem[] {
         cleanText(readTag(block, "description")) ||
         cleanText(readTag(block, "summary"));
 
+      const rssMedia = mediaFromRssItem(block);
+
       return {
         title,
         link,
         published: published || undefined,
-        description: description || undefined
+        description: description || undefined,
+        ...rssMedia
       };
     })
     .filter((item) => item.title && /^https?:\/\//i.test(item.link));
@@ -143,6 +227,8 @@ function pickBestAudio(urls: string[]) {
 }
 
 async function resolveMedia(item: FeedItem): Promise<FeedItem> {
+  if (item.mediaUrl && item.mediaType) return item;
+
   try {
     const response = await fetch(item.link, {
       headers: {
@@ -153,16 +239,17 @@ async function resolveMedia(item: FeedItem): Promise<FeedItem> {
 
     if (!response.ok) return item;
 
-    const html = await response.text();
+    const rawHtml = await response.text();
+    const html = normalizeMarkup(rawHtml);
 
     const videoUrls =
       html.match(
-        /https:\/\/voa-video-[^"'\\s<>]+?\.mp4(?:\?[^"'\\s<>]*)?/gi
+        /https?:\/\/[^"'\\s<>]+?\.mp4(?:\?[^"'\\s<>]*)?/gi
       ) ?? [];
 
     const audioUrls =
       html.match(
-        /https:\/\/voa-audio[^"'\\s<>]+?\.mp3(?:\?[^"'\\s<>]*)?/gi
+        /https?:\/\/[^"'\\s<>]+?\.mp3(?:\?[^"'\\s<>]*)?/gi
       ) ?? [];
 
     const videoUrl = pickBestVideo(videoUrls);
@@ -321,7 +408,7 @@ export async function GET() {
 
   response.headers.set(
     "Cache-Control",
-    "public, s-maxage=21600, stale-while-revalidate=86400"
+    "no-store, max-age=0"
   );
 
   return response;

@@ -289,7 +289,7 @@ function PickCard({
 
           {!hasMedia ? (
             <div className="rounded-xl bg-amber-300/[0.06] p-3 text-xs leading-relaxed text-amber-100">
-              この項目は直接メディアを取得できませんでした。
+              この項目の直接メディアURLを取得できませんでした。更新ボタンを1回押してください。
             </div>
           ) : null}
 
@@ -323,9 +323,9 @@ export default function MealTimePage() {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/mealtime${force ? `?t=${Date.now()}` : ""}`,
+        `/api/mealtime?v=3${force ? `&t=${Date.now()}` : ""}`,
         {
-          cache: force ? "no-store" : "default"
+          cache: "no-store"
         }
       );
 
