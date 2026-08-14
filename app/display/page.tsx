@@ -448,6 +448,60 @@ const eventSortKey = (event: FamilyEvent) =>
 const sortEvents = (a: FamilyEvent, b: FamilyEvent) =>
   eventSortKey(a).localeCompare(eventSortKey(b));
 
+const eventStartMs = (event: FamilyEvent) => {
+  if (event.all_day || !event.start_datetime) return null;
+  const value = new Date(event.start_datetime).getTime();
+  return Number.isNaN(value) ? null : value;
+};
+
+const eventEndMs = (event: FamilyEvent) => {
+  if (event.all_day) return null;
+
+  if (event.end_datetime) {
+    const value = new Date(event.end_datetime).getTime();
+    if (!Number.isNaN(value)) return value;
+  }
+
+  const start = eventStartMs(event);
+  return start === null ? null : start + 60 * 60 * 1000;
+};
+
+const hasEventEnded = (event: FamilyEvent, now: Date) => {
+  if (event.all_day) return false;
+  const end = eventEndMs(event);
+  return end !== null && end <= now.getTime();
+};
+
+const isEventOngoing = (event: FamilyEvent, now: Date) => {
+  if (event.all_day) return false;
+
+  const start = eventStartMs(event);
+  const end = eventEndMs(event);
+  if (start === null || end === null) return false;
+
+  const current = now.getTime();
+  return start <= current && current < end;
+};
+
+const isEventUpcomingToday = (event: FamilyEvent, now: Date) => {
+  if (event.all_day) return false;
+  const start = eventStartMs(event);
+  return start !== null && start > now.getTime();
+};
+
+const selectPrimaryTodayEvent = (
+  events: FamilyEvent[],
+  now: Date
+): FamilyEvent | undefined => {
+  const ongoing = events.find((event) => isEventOngoing(event, now));
+  if (ongoing) return ongoing;
+
+  const next = events.find((event) => isEventUpcomingToday(event, now));
+  if (next) return next;
+
+  return events.find((event) => event.all_day);
+};
+
 const categoryColor = (event: FamilyEvent) => {
   if (event.calendar_type === "school") return "bg-sky-300";
   if (event.calendar_type === "child_activity") return "bg-emerald-300";
@@ -1022,8 +1076,15 @@ export default function DisplayPage() {
       (event) => event.date === today
     );
 
+    const primaryEvent = selectPrimaryTodayEvent(todayEvents, now);
+
     const upcomingEvents = events
-      .filter((event) => event.date >= today)
+      .filter((event) => {
+        if (event.date > today) return true;
+        if (event.date < today) return false;
+
+        return event.all_day || !hasEventEnded(event, now);
+      })
       .slice(0, 5);
 
     const notices = events
@@ -1094,7 +1155,7 @@ export default function DisplayPage() {
 
     return {
       todayEvents,
-      primaryEvent: todayEvents[0],
+      primaryEvent,
       upcomingEvents,
       notices,
       mainTasks,
@@ -1184,7 +1245,7 @@ export default function DisplayPage() {
               </div>
             ) : (
               <div className="mt-4 rounded-xl bg-slate-950/34 p-4 text-center text-sm text-slate-300">
-                今日の大きな予定はありません
+                {data.todayEvents.length > 0 ? "今日の予定は終了しました" : "今日の大きな予定はありません"}
               </div>
             )}
 
@@ -1554,7 +1615,7 @@ export default function DisplayPage() {
                 </div>
               ) : (
                 <div className="relative z-10 grid h-[calc(100%-3rem)] place-items-center text-center text-[clamp(1.3rem,1.4vw,1.8rem)] text-slate-300">
-                  今日の大きな予定はありません
+                  {data.todayEvents.length > 0 ? "今日の予定は終了しました" : "今日の大きな予定はありません"}
                 </div>
               )}
             </article>

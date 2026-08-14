@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   BookOpen,
+  ChevronDown,
   Clock3,
   ExternalLink,
   Headphones,
@@ -13,7 +14,8 @@ import {
   Play,
   RefreshCw,
   RotateCcw,
-  Sparkles
+  Sparkles,
+  Volume2
 } from "lucide-react";
 
 type Pick = {
@@ -25,6 +27,8 @@ type Pick = {
   level: "EASY" | "NORMAL";
   minutes: string;
   live: boolean;
+  mediaUrl?: string;
+  mediaType?: "audio" | "video";
 };
 
 type MealResponse = {
@@ -168,76 +172,152 @@ function MealTimer() {
 
 function PickCard({
   pick,
-  featured = false
+  featured = false,
+  open,
+  onToggle
 }: {
   pick: Pick;
   featured?: boolean;
+  open: boolean;
+  onToggle: () => void;
 }) {
+  const hasMedia = Boolean(pick.mediaUrl && pick.mediaType);
+
   return (
-    <a
-      href={pick.link}
-      target="_blank"
-      rel="noreferrer"
-      className={`group block rounded-2xl border border-white/[0.07] bg-slate-950/28 transition hover:bg-white/[0.07] ${
-        featured ? "p-5" : "p-4"
+    <div
+      className={`rounded-2xl border border-white/[0.07] bg-slate-950/28 transition ${
+        open ? "ring-1 ring-cyan-300/20" : ""
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                pick.level === "EASY"
-                  ? "bg-emerald-300/12 text-emerald-100"
-                  : "bg-sky-300/12 text-sky-100"
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`block w-full text-left ${featured ? "p-5" : "p-4"}`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                  pick.level === "EASY"
+                    ? "bg-emerald-300/12 text-emerald-100"
+                    : "bg-sky-300/12 text-sky-100"
+                }`}
+              >
+                {pick.level}
+              </span>
+              <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold text-slate-300">
+                {pick.minutes}
+              </span>
+              {pick.live ? (
+                <span className="rounded-full bg-cyan-300/10 px-2.5 py-1 text-[9px] font-bold text-cyan-100">
+                  AUTO
+                </span>
+              ) : null}
+              {hasMedia ? (
+                <span className="rounded-full bg-violet-300/10 px-2.5 py-1 text-[9px] font-bold text-violet-100">
+                  ▶ IN PAGE
+                </span>
+              ) : null}
+            </div>
+
+            <h3
+              className={`mt-3 font-bold leading-snug text-white ${
+                featured ? "text-xl sm:text-2xl" : "text-base"
               }`}
             >
-              {pick.level}
-            </span>
-            <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold text-slate-300">
-              {pick.minutes}
-            </span>
-            {pick.live ? (
-              <span className="rounded-full bg-cyan-300/10 px-2.5 py-1 text-[9px] font-bold text-cyan-100">
-                AUTO
-              </span>
+              {pick.title}
+            </h3>
+
+            <div className="mt-2 text-xs font-semibold text-slate-400">
+              {pick.source}
+              {formatPublished(pick.published)
+                ? ` · ${formatPublished(pick.published)}`
+                : ""}
+            </div>
+
+            {pick.description ? (
+              <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-slate-300">
+                {pick.description}
+              </p>
             ) : null}
           </div>
 
-          <h3
-            className={`mt-3 font-bold leading-snug text-white ${
-              featured ? "text-xl sm:text-2xl" : "text-base"
+          <ChevronDown
+            size={18}
+            className={`mt-1 shrink-0 text-slate-500 transition ${
+              open ? "rotate-180 text-white" : ""
             }`}
-          >
-            {pick.title}
-          </h3>
-
-          <div className="mt-2 text-xs font-semibold text-slate-400">
-            {pick.source}
-            {formatPublished(pick.published)
-              ? ` · ${formatPublished(pick.published)}`
-              : ""}
-          </div>
-
-          {pick.description ? (
-            <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-slate-300">
-              {pick.description}
-            </p>
-          ) : null}
+          />
         </div>
+      </button>
 
-        <ExternalLink
-          size={18}
-          className="shrink-0 text-slate-500 transition group-hover:text-white"
-        />
-      </div>
-    </a>
+      {open ? (
+        <div className="border-t border-white/[0.06] p-4">
+          {pick.mediaType === "video" && pick.mediaUrl ? (
+            <div className="overflow-hidden rounded-xl bg-black">
+              <video
+                key={pick.mediaUrl}
+                className="aspect-video w-full bg-black object-contain"
+                src={pick.mediaUrl}
+                controls
+                playsInline
+                preload="metadata"
+              >
+                このブラウザでは動画を再生できません。
+              </video>
+            </div>
+          ) : null}
+
+          {pick.mediaType === "audio" && pick.mediaUrl ? (
+            <div className="rounded-xl border border-sky-300/10 bg-sky-300/[0.06] p-4">
+              <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-[0.1em] text-sky-100">
+                <Volume2 size={16} />
+                LISTEN HERE
+              </div>
+              <audio
+                key={pick.mediaUrl}
+                className="w-full"
+                src={pick.mediaUrl}
+                controls
+                preload="metadata"
+              >
+                このブラウザでは音声を再生できません。
+              </audio>
+            </div>
+          ) : null}
+
+          {!hasMedia ? (
+            <div className="rounded-xl bg-amber-300/[0.06] p-3 text-xs leading-relaxed text-amber-100">
+              この項目は直接メディアを取得できませんでした。
+            </div>
+          ) : null}
+
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="text-[11px] text-slate-500">
+              ページを離れずに再生できます。
+            </div>
+
+            <a
+              href={pick.link}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 text-[11px] font-semibold text-slate-300 active:bg-white/[0.1]"
+            >
+              公式ページ
+              <ExternalLink size={13} />
+            </a>
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
 export default function MealTimePage() {
   const [content, setContent] = useState<MealResponse>(fallback);
   const [loading, setLoading] = useState(true);
+  const [openPick, setOpenPick] = useState<string | null>("easyVideo");
 
   async function loadToday(force = false) {
     setLoading(true);
@@ -337,8 +417,25 @@ export default function MealTimePage() {
             </div>
 
             <div className="mt-4 grid gap-3">
-              <PickCard pick={content.picks.mainNews} featured />
-              <PickCard pick={content.picks.shortNews} />
+              <PickCard
+                pick={content.picks.mainNews}
+                featured
+                open={openPick === "mainNews"}
+                onToggle={() =>
+                  setOpenPick((current) =>
+                    current === "mainNews" ? null : "mainNews"
+                  )
+                }
+              />
+              <PickCard
+                pick={content.picks.shortNews}
+                open={openPick === "shortNews"}
+                onToggle={() =>
+                  setOpenPick((current) =>
+                    current === "shortNews" ? null : "shortNews"
+                  )
+                }
+              />
             </div>
 
             <div className="mt-4 rounded-2xl bg-slate-950/30 p-3 text-xs leading-relaxed text-slate-400">
@@ -362,8 +459,25 @@ export default function MealTimePage() {
             </div>
 
             <div className="mt-4 grid gap-3">
-              <PickCard pick={content.picks.easyVideo} featured />
-              <PickCard pick={content.picks.normalVideo} />
+              <PickCard
+                pick={content.picks.easyVideo}
+                featured
+                open={openPick === "easyVideo"}
+                onToggle={() =>
+                  setOpenPick((current) =>
+                    current === "easyVideo" ? null : "easyVideo"
+                  )
+                }
+              />
+              <PickCard
+                pick={content.picks.normalVideo}
+                open={openPick === "normalVideo"}
+                onToggle={() =>
+                  setOpenPick((current) =>
+                    current === "normalVideo" ? null : "normalVideo"
+                  )
+                }
+              />
             </div>
 
             <div className="mt-4 rounded-2xl bg-slate-950/30 p-3 text-xs leading-relaxed text-slate-400">

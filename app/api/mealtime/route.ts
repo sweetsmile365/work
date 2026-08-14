@@ -7,6 +7,8 @@ type FeedItem = {
   link: string;
   published?: string;
   description?: string;
+  mediaUrl?: string;
+  mediaType?: "audio" | "video";
 };
 
 type SourceConfig = {
@@ -114,6 +116,79 @@ function parseRss(xml: string): FeedItem[] {
     .filter((item) => item.title && /^https?:\/\//i.test(item.link));
 }
 
+function decodeUrl(value: string) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/\\u0026/g, "&")
+    .replace(/\\\//g, "/");
+}
+
+function pickBestVideo(urls: string[]) {
+  const clean = [...new Set(urls.map(decodeUrl))];
+  return (
+    clean.find((url) => /_480p\.mp4/i.test(url)) ??
+    clean.find((url) => /_360p\.mp4/i.test(url)) ??
+    clean.find((url) => /_720p\.mp4/i.test(url)) ??
+    clean.find((url) => /\.mp4(?:\?|$)/i.test(url))
+  );
+}
+
+function pickBestAudio(urls: string[]) {
+  const clean = [...new Set(urls.map(decodeUrl))];
+  return (
+    clean.find((url) => /_hq\.mp3/i.test(url)) ??
+    clean.find((url) => /128/i.test(url)) ??
+    clean.find((url) => /\.mp3(?:\?|$)/i.test(url))
+  );
+}
+
+async function resolveMedia(item: FeedItem): Promise<FeedItem> {
+  try {
+    const response = await fetch(item.link, {
+      headers: {
+        "User-Agent": "Family-Schedule-Hub/1.0"
+      },
+      next: { revalidate: 86400 }
+    });
+
+    if (!response.ok) return item;
+
+    const html = await response.text();
+
+    const videoUrls =
+      html.match(
+        /https:\/\/voa-video-[^"'\\s<>]+?\.mp4(?:\?[^"'\\s<>]*)?/gi
+      ) ?? [];
+
+    const audioUrls =
+      html.match(
+        /https:\/\/voa-audio[^"'\\s<>]+?\.mp3(?:\?[^"'\\s<>]*)?/gi
+      ) ?? [];
+
+    const videoUrl = pickBestVideo(videoUrls);
+    if (videoUrl) {
+      return {
+        ...item,
+        mediaUrl: videoUrl,
+        mediaType: "video"
+      };
+    }
+
+    const audioUrl = pickBestAudio(audioUrls);
+    if (audioUrl) {
+      return {
+        ...item,
+        mediaUrl: audioUrl,
+        mediaType: "audio"
+      };
+    }
+
+    return item;
+  } catch {
+    return item;
+  }
+}
+
 function tokyoDayKey(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tokyo",
@@ -196,34 +271,46 @@ export async function GET() {
   const normalVideo =
     normalVideos[(seed + 5) % Math.min(normalVideos.length, 14)];
 
+  const [
+    resolvedMainNews,
+    resolvedShortNews,
+    resolvedEasyVideo,
+    resolvedNormalVideo
+  ] = await Promise.all([
+    resolveMedia(mainNews),
+    resolveMedia(shortNews),
+    resolveMedia(easyVideo),
+    resolveMedia(normalVideo)
+  ]);
+
   const response = NextResponse.json({
     ok: true,
     dayKey,
     updatedAt: new Date().toISOString(),
     picks: {
       mainNews: {
-        ...mainNews,
+        ...resolvedMainNews,
         source: byId["as-it-is"].source.label,
         level: byId["as-it-is"].source.level,
         minutes: "5–8 min",
         live: byId["as-it-is"].live
       },
       shortNews: {
-        ...shortNews,
+        ...resolvedShortNews,
         source: byId["voa60"].source.label,
         level: byId["voa60"].source.level,
         minutes: "1–3 min",
         live: byId["voa60"].live
       },
       easyVideo: {
-        ...easyVideo,
+        ...resolvedEasyVideo,
         source: byId["english-minute"].source.label,
         level: byId["english-minute"].source.level,
         minutes: "1–3 min",
         live: byId["english-minute"].live
       },
       normalVideo: {
-        ...normalVideo,
+        ...resolvedNormalVideo,
         source: byId["level2"].source.label,
         level: byId["level2"].source.level,
         minutes: "5–8 min",
