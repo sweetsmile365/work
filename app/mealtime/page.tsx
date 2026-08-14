@@ -11,38 +11,12 @@ import {
   Newspaper,
   Pause,
   Play,
-  RefreshCw,
   RotateCcw,
   Sparkles
 } from "lucide-react";
 
-type YoutubePick = {
-  videoId: string;
-  title: string;
-  published?: string;
-  description?: string;
-  channel: string;
-};
-
-type MealResponse = {
-  ok: boolean;
-  dayKey: string;
-  updatedAt: string;
-  picks: {
-    cnn10: YoutubePick | null;
-    natGeo: YoutubePick | null;
-  };
-};
-
-const fallback: MealResponse = {
-  ok: false,
-  dayKey: "",
-  updatedAt: "",
-  picks: {
-    cnn10: null,
-    natGeo: null
-  }
-};
+const CNN10_UPLOADS_PLAYLIST = "UUTOoRgpHTjAQPk6Ak70u-pA";
+const NATGEO_KIDS_NEWEST_PLAYLIST = "PLQlnTldJs0ZQExTCjWSXXkCdfSvpjT5cO";
 
 const timeForKidsPool = [
   {
@@ -86,10 +60,12 @@ function daySeed(dayKey: string) {
   );
 }
 
-function youtubeEmbedUrl(videoId: string) {
+function playlistEmbedUrl(playlistId: string, index = 0) {
   return (
-    `https://www.youtube-nocookie.com/embed/${videoId}` +
-    "?rel=0&playsinline=1&modestbranding=1"
+    `https://www.youtube-nocookie.com/embed/videoseries` +
+    `?list=${playlistId}` +
+    `&index=${index}` +
+    `&rel=0&playsinline=1&modestbranding=1`
   );
 }
 
@@ -168,32 +144,22 @@ function MealTimer() {
   );
 }
 
-function EmbeddedVideo({
-  pick,
-  compact = false
+function PlaylistPlayer({
+  playlistId,
+  index = 0,
+  title
 }: {
-  pick: YoutubePick | null;
-  compact?: boolean;
+  playlistId: string;
+  index?: number;
+  title: string;
 }) {
-  if (!pick) {
-    return (
-      <div
-        className={`grid place-items-center rounded-xl bg-slate-950/40 px-4 text-center text-xs text-slate-400 ${
-          compact ? "min-h-[160px]" : "min-h-[280px]"
-        }`}
-      >
-        今日の動画を取得中…
-      </div>
-    );
-  }
-
   return (
     <div className="overflow-hidden rounded-xl bg-black">
       <iframe
-        key={pick.videoId}
+        key={`${playlistId}-${index}`}
         className="aspect-video w-full"
-        src={youtubeEmbedUrl(pick.videoId)}
-        title={pick.title}
+        src={playlistEmbedUrl(playlistId, index)}
+        title={title}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
       />
@@ -202,41 +168,16 @@ function EmbeddedVideo({
 }
 
 export default function MealTimePage() {
-  const [content, setContent] = useState<MealResponse>(fallback);
-  const [loading, setLoading] = useState(true);
+  const today = tokyoDayKey();
+  const seed = daySeed(today);
 
-  async function loadToday(force = false) {
-    setLoading(true);
+  // CNN10 always starts from the newest upload.
+  const cnnIndex = 0;
 
-    try {
-      const response = await fetch(
-        `/api/mealtime?v=meal-layout-2${force ? `&t=${Date.now()}` : ""}`,
-        { cache: "no-store" }
-      );
+  // Nat Geo rotates among the first seven items in its official newest-video playlist.
+  const natGeoIndex = seed % 7;
 
-      if (!response.ok) throw new Error("Failed");
-
-      const value = (await response.json()) as MealResponse;
-      if (value?.picks) setContent(value);
-    } catch {
-      // Keep last good content.
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    void loadToday();
-
-    const timer = window.setInterval(() => {
-      void loadToday();
-    }, 30 * 60 * 1000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const todayKey = content.dayKey || tokyoDayKey();
-  const timePick = timeForKidsPool[daySeed(todayKey) % timeForKidsPool.length];
+  const timePick = timeForKidsPool[seed % timeForKidsPool.length];
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_16%_0%,rgba(56,189,248,0.09),transparent_27%),radial-gradient(circle_at_90%_8%,rgba(52,211,153,0.06),transparent_22%),linear-gradient(145deg,#08131f,#0a1724_52%,#07121d)] text-white">
@@ -261,22 +202,10 @@ export default function MealTimePage() {
             </h1>
 
             <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-300">
-              <span>毎日、自動で内容を更新</span>
+              <span>公式YouTube · ページ内再生 · 自動更新</span>
               <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-xs text-slate-400">
-                {todayKey}
+                {today}
               </span>
-              <button
-                type="button"
-                onClick={() => void loadToday(true)}
-                disabled={loading}
-                className="inline-flex min-h-9 items-center gap-2 rounded-xl bg-white/[0.06] px-3 text-xs font-semibold text-slate-300 disabled:opacity-50"
-              >
-                <RefreshCw
-                  size={14}
-                  className={loading ? "animate-spin" : ""}
-                />
-                更新
-              </button>
             </div>
           </div>
 
@@ -295,18 +224,21 @@ export default function MealTimePage() {
 
               <div className="mt-2 text-xl font-bold">CNN 10</div>
               <div className="mt-1 text-sm text-slate-400">
-                Today's student news · 約10分
+                Latest student news · 約10分
               </div>
 
               <div className="mt-4">
-                <EmbeddedVideo pick={content.picks.cnn10} />
+                <PlaylistPlayer
+                  playlistId={CNN10_UPLOADS_PLAYLIST}
+                  index={cnnIndex}
+                  title="CNN 10 latest student news"
+                />
               </div>
 
-              {content.picks.cnn10?.title ? (
-                <div className="mt-3 line-clamp-2 text-sm font-semibold text-white">
-                  {content.picks.cnn10.title}
-                </div>
-              ) : null}
+              <div className="mt-3 rounded-xl bg-slate-950/30 p-3 text-xs leading-relaxed text-slate-400">
+                CNN 10公式チャンネルの最新アップロードを直接表示。
+                API取得待ちはありません。
+              </div>
             </article>
 
             <div className="grid gap-4">
@@ -317,17 +249,21 @@ export default function MealTimePage() {
                 </div>
 
                 <div className="mt-2 text-lg font-bold">Nat Geo Kids</div>
-                <div className="mt-1 text-xs text-slate-400">2–4 min</div>
-
-                <div className="mt-3">
-                  <EmbeddedVideo pick={content.picks.natGeo} compact />
+                <div className="mt-1 text-xs text-slate-400">
+                  Daily pick · 2–4 min
                 </div>
 
-                {content.picks.natGeo?.title ? (
-                  <div className="mt-2 line-clamp-2 text-xs font-semibold text-white">
-                    {content.picks.natGeo.title}
-                  </div>
-                ) : null}
+                <div className="mt-3">
+                  <PlaylistPlayer
+                    playlistId={NATGEO_KIDS_NEWEST_PLAYLIST}
+                    index={natGeoIndex}
+                    title="Nat Geo Kids daily video"
+                  />
+                </div>
+
+                <div className="mt-2 text-xs leading-relaxed text-slate-400">
+                  最新動画プレイリストの先頭7本から日付で1本を選択。
+                </div>
               </article>
 
               <article className="rounded-2xl border border-violet-300/10 bg-slate-950/36 p-4">
@@ -370,7 +306,7 @@ export default function MealTimePage() {
 
             <div className="mt-3 flex flex-wrap justify-center gap-2">
               <a
-                href="https://www.cnn.com/cnn10"
+                href="https://www.youtube.com/@cnn10"
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-full bg-sky-300/10 px-3 py-1.5 text-xs font-semibold text-sky-100"
@@ -378,7 +314,7 @@ export default function MealTimePage() {
                 CNN10
               </a>
               <a
-                href="https://kids.nationalgeographic.com/videos"
+                href="https://www.youtube.com/@natgeokids"
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-full bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-100"
