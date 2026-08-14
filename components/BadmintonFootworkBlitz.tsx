@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   ChevronLeft,
@@ -59,8 +59,13 @@ function levelStyle(level: FootworkLevel) {
 }
 
 export function BadmintonFootworkBlitz() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<"basic" | "full">("basic");
   const [selectedId, setSelectedId] = useState("split-step");
+  const [autoNext, setAutoNext] = useState(true);
+  const [restSeconds, setRestSeconds] = useState<number | null>(null);
+  const [pendingAutoPlay, setPendingAutoPlay] = useState(false);
+  const [setComplete, setSetComplete] = useState(false);
 
   const visible = useMemo(
     () =>
@@ -74,14 +79,91 @@ export function BadmintonFootworkBlitz() {
     visible.find((item) => item.id === selectedId) ?? visible[0] ?? footworkDrills[0];
   const selectedIndex = Math.max(0, visible.findIndex((item) => item.id === selected.id));
 
+  useEffect(() => {
+    if (restSeconds === null) return;
+
+    if (restSeconds <= 0) {
+      if (selectedIndex >= visible.length - 1) {
+        setRestSeconds(null);
+        setSetComplete(true);
+        return;
+      }
+
+      const next = visible[selectedIndex + 1];
+      setRestSeconds(null);
+      setSelectedId(next.id);
+      setPendingAutoPlay(true);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setRestSeconds((value) => (value === null ? null : value - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [restSeconds, selectedIndex, visible]);
+
+  useEffect(() => {
+    if (!pendingAutoPlay) return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = autoNext;
+    video.defaultMuted = autoNext;
+
+    const timer = window.setTimeout(() => {
+      void video.play().catch(() => {
+        // AUTO NEXT uses muted playback to satisfy stricter iPhone/LG autoplay rules.
+      });
+      setPendingAutoPlay(false);
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [pendingAutoPlay, selectedId, autoNext]);
+
+  function resetTransitionState() {
+    setRestSeconds(null);
+    setPendingAutoPlay(false);
+    setSetComplete(false);
+  }
+
   function changeMode(next: "basic" | "full") {
+    resetTransitionState();
     setMode(next);
     setSelectedId(next === "basic" ? "split-step" : "jumping-jack");
   }
 
   function go(offset: number) {
+    resetTransitionState();
     const next = Math.max(0, Math.min(visible.length - 1, selectedIndex + offset));
     setSelectedId(visible[next].id);
+  }
+
+  function selectDrill(id: string) {
+    resetTransitionState();
+    setSelectedId(id);
+  }
+
+  function handleEnded() {
+    if (!autoNext) return;
+
+    if (selectedIndex >= visible.length - 1) {
+      setSetComplete(true);
+      return;
+    }
+
+    setRestSeconds(10);
+  }
+
+  function toggleAutoNext() {
+    setAutoNext((current) => {
+      const next = !current;
+      if (!next) setRestSeconds(null);
+      return next;
+    });
+    setPendingAutoPlay(false);
+    setSetComplete(false);
   }
 
   return (
@@ -98,25 +180,39 @@ export function BadmintonFootworkBlitz() {
           </div>
         </div>
 
-        <div className="flex rounded-xl bg-slate-950/30 p-1">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => changeMode("basic")}
-            className={`min-h-9 rounded-lg px-3 text-xs font-bold ${
-              mode === "basic" ? "bg-emerald-300 text-slate-950" : "text-slate-400"
+            onClick={toggleAutoNext}
+            className={`min-h-9 rounded-xl px-3 text-xs font-bold ${
+              autoNext
+                ? "bg-cyan-300 text-slate-950"
+                : "bg-slate-950/30 text-slate-400"
             }`}
           >
-            BASIC 6
+            AUTO NEXT {autoNext ? "ON" : "OFF"}
           </button>
-          <button
-            type="button"
-            onClick={() => changeMode("full")}
-            className={`min-h-9 rounded-lg px-3 text-xs font-bold ${
-              mode === "full" ? "bg-indigo-300 text-slate-950" : "text-slate-400"
-            }`}
-          >
-            FULL 17
-          </button>
+
+          <div className="flex rounded-xl bg-slate-950/30 p-1">
+            <button
+              type="button"
+              onClick={() => changeMode("basic")}
+              className={`min-h-9 rounded-lg px-3 text-xs font-bold ${
+                mode === "basic" ? "bg-emerald-300 text-slate-950" : "text-slate-400"
+              }`}
+            >
+              BASIC 6
+            </button>
+            <button
+              type="button"
+              onClick={() => changeMode("full")}
+              className={`min-h-9 rounded-lg px-3 text-xs font-bold ${
+                mode === "full" ? "bg-indigo-300 text-slate-950" : "text-slate-400"
+              }`}
+            >
+              FULL 17
+            </button>
+          </div>
         </div>
       </div>
 
@@ -132,16 +228,52 @@ export function BadmintonFootworkBlitz() {
             </span>
           </div>
 
-          <div className="flex min-h-[310px] items-center justify-center bg-black p-2">
+          <div className="relative flex min-h-[310px] items-center justify-center bg-black p-2">
             <video
+              ref={videoRef}
               key={selected.videoPath}
               src={videoUrl(selected.videoPath)}
               controls
               playsInline
               preload="metadata"
-              loop
+              muted={autoNext}
               className="max-h-[430px] w-full object-contain"
+              onPlay={() => {
+                setSetComplete(false);
+                setRestSeconds(null);
+              }}
+              onEnded={handleEnded}
             />
+
+            {restSeconds !== null ? (
+              <div className="absolute inset-0 grid place-items-center bg-slate-950/88 backdrop-blur-sm">
+                <div className="text-center">
+                  <div className="text-xs font-bold tracking-[0.16em] text-cyan-200">
+                    REST · 次の動作まで
+                  </div>
+                  <div className="mt-2 text-7xl font-black tabular-nums text-white">
+                    {restSeconds}
+                  </div>
+                  <div className="mt-2 text-sm text-slate-300">
+                    次：{visible[selectedIndex + 1]?.title}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {setComplete ? (
+              <div className="absolute inset-0 grid place-items-center bg-slate-950/90 backdrop-blur-sm">
+                <div className="text-center">
+                  <div className="text-xs font-bold tracking-[0.16em] text-emerald-200">
+                    SET COMPLETE
+                  </div>
+                  <div className="mt-2 text-4xl font-black text-white">完成 ✓</div>
+                  <div className="mt-3 text-sm text-slate-400">
+                    {mode === "basic" ? "BASIC 6" : "FULL 17"} 完成
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="p-4">
@@ -160,7 +292,9 @@ export function BadmintonFootworkBlitz() {
 
             <div className="mt-3 flex items-center gap-2 rounded-xl bg-slate-950/30 px-3 py-2 text-xs text-slate-400">
               <Timer size={15} />
-              视频本身就是30秒练习计时，不需要另开计时器。
+              {autoNext
+                ? "30秒动作 → 自动休息10秒 → 自动进入下一个。AUTO NEXT时视频静音。"
+                : "AUTO NEXT 已关闭。视频结束后手动选择下一个动作。"}
             </div>
 
             <div className="mt-3 grid grid-cols-[3rem_1fr_3rem] gap-2">
@@ -192,7 +326,7 @@ export function BadmintonFootworkBlitz() {
             <button
               key={item.id}
               type="button"
-              onClick={() => setSelectedId(item.id)}
+              onClick={() => selectDrill(item.id)}
               className={`grid min-h-14 grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-3 text-left transition ${
                 item.id === selected.id
                   ? "bg-indigo-300/15 ring-1 ring-indigo-300/20"
@@ -215,7 +349,7 @@ export function BadmintonFootworkBlitz() {
           <div className="mt-2 rounded-2xl border border-emerald-300/10 bg-emerald-300/[0.045] p-3 text-[11px] leading-relaxed text-slate-400">
             <div className="font-bold text-emerald-100">おすすめ</div>
             <div className="mt-1">
-              BASIC 6：技术日可以做，约4–5分钟。FULL 17：属于体能/冲击挑战，初学阶段建议每周1–2次即可，不放进每日必做。
+              AUTO NEXT：每段30秒，自动休息10秒并进入下一段。BASIC 6 适合技术日；FULL 17 属于体能/冲击挑战，初学阶段建议每周1–2次。
             </div>
           </div>
 
