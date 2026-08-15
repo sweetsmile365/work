@@ -61,12 +61,19 @@ export default function MeditationPage() {
     if (!audio) return;
 
     audio.pause();
+    setMusicPlaying(false);
+    setMusicError(false);
+
+    if (!selectedMusic) {
+      audio.removeAttribute("src");
+      audio.load();
+      return;
+    }
+
     audio.src = selectedMusic.url;
     audio.volume = musicVolume;
     audio.load();
-    setMusicPlaying(false);
-    setMusicError(false);
-  }, [selectedMusic.url]);
+  }, [selectedMusic?.url, musicVolume]);
 
   useEffect(() => {
     if (audioRef.current) {
