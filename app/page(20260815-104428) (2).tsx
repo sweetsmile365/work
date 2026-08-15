@@ -321,11 +321,6 @@ const musicStations: MusicStation[] = [
     url: "https://listen.181fm.com/181-classicalguitar_128k.mp3"
   },
   {
-    id: "japanese-ambient-kyoto",
-    label: "日本纯音乐 · Kyoto",
-    url: "https://server.laradio.online:59009/live"
-  },
-  {
     id: "jazz",
     label: "Jazz",
     url: "https://ice1.somafm.com/sonicuniverse-128-mp3"
@@ -1383,14 +1378,6 @@ export default function DisplayPage() {
                 >
                   🏸
                 </Link>
-                <Link
-                  href="/meditation"
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-violet-300/10 text-base active:bg-violet-300/20"
-                  aria-label="冥想"
-                  title="Meditation · 冥想"
-                >
-                  🧘
-                </Link>
               </div>
             </div>
 
@@ -1838,14 +1825,6 @@ export default function DisplayPage() {
                       title="Badminton · 素振り練習"
                     >
                       🏸
-                    </Link>
-                    <Link
-                      href="/meditation"
-                      className="grid h-7 w-7 place-items-center rounded-full bg-violet-300/10 text-sm active:bg-violet-300/20"
-                      aria-label="冥想"
-                      title="Meditation · 冥想"
-                    >
-                      🧘
                     </Link>
                   </div>
                 </div>
