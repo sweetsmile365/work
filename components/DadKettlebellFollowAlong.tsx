@@ -31,6 +31,18 @@ const GUIDED_VIDEOS: GuidedVideo[] = [
     label: "Kettlebell Training · Added Video",
     shortLabel: "NEW VIDEO",
     startSeconds: 22
+  },
+  {
+    id: "extra-kettlebell-2",
+    videoId: "4stAcpR4pFs",
+    label: "Kettlebell Training · Added Video 2",
+    shortLabel: "NEW VIDEO 2"
+  },
+  {
+    id: "extra-kettlebell-3",
+    videoId: "ptdB52ggDvo",
+    label: "Kettlebell Training · Added Video 3",
+    shortLabel: "NEW VIDEO 3"
   }
 ];
 
@@ -264,6 +276,20 @@ export function DadKettlebellFollowAlong() {
                     <span className="font-bold text-white">NEW VIDEO</span>
                     <div className="mt-1 text-xs text-slate-400">
                       新增你指定的 YouTube 壶铃视频，并从 00:22 开始播放。
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-slate-950/25 p-3">
+                    <span className="font-bold text-white">NEW VIDEO 2</span>
+                    <div className="mt-1 text-xs text-slate-400">
+                      第二条新增壶铃视频，从开头开始播放。
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-slate-950/25 p-3">
+                    <span className="font-bold text-white">NEW VIDEO 3</span>
+                    <div className="mt-1 text-xs text-slate-400">
+                      第三条新增壶铃视频，从开头开始播放。
                     </div>
                   </div>
 
