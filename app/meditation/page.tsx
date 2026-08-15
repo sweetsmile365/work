@@ -22,19 +22,14 @@ type MeditationMusic = {
 
 const MEDITATION_MUSIC: MeditationMusic[] = [
   {
-    id: "kyoto",
-    label: "日本纯音乐 · Kyoto",
-    url: "https://server.laradio.online:59009/live"
+    id: "drone-zone",
+    label: "Meditation · Calm",
+    url: "https://ice5.somafm.com/dronezone-128-mp3"
   },
   {
-    id: "guitar",
-    label: "Peaceful Guitar",
-    url: "https://listen.181fm.com/181-classicalguitar_128k.mp3"
-  },
-  {
-    id: "piano",
-    label: "Peaceful Piano",
-    url: "https://pianosolo.streamguys1.com/live"
+    id: "deep-space-one",
+    label: "Meditation · Deep",
+    url: "https://ice5.somafm.com/deepspaceone-128-mp3"
   }
 ];
 
@@ -59,7 +54,7 @@ export default function MeditationPage() {
   const phase = PHASES[phaseIndex];
 
   const selectedMusic =
-    MEDITATION_MUSIC.find((item) => item.id === musicId) ?? MEDITATION_MUSIC[0];
+    MEDITATION_MUSIC.find((item) => item.id === musicId) ?? null;
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -91,7 +86,7 @@ export default function MeditationPage() {
 
   const toggleMusic = async () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !selectedMusic) return;
 
     setMusicError(false);
 
@@ -196,7 +191,8 @@ export default function MeditationPage() {
               <button
                 type="button"
                 onClick={toggleMusic}
-                className="grid h-10 w-10 place-items-center rounded-full bg-violet-200 text-slate-950 transition hover:bg-violet-100 active:scale-[0.98]"
+                disabled={!selectedMusic}
+                className="grid h-10 w-10 place-items-center rounded-full bg-violet-200 text-slate-950 transition hover:bg-violet-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label={musicPlaying ? "停止冥想音乐" : "播放冥想音乐"}
               >
                 {musicPlaying ? (
@@ -208,10 +204,20 @@ export default function MeditationPage() {
 
               <select
                 value={musicId}
-                onChange={(event) => setMusicId(event.target.value)}
+                onChange={(event) => {
+                  const nextId = event.target.value;
+                  if (nextId === "silent") {
+                    audioRef.current?.pause();
+                    setMusicPlaying(false);
+                    setMusicId("silent");
+                    return;
+                  }
+                  setMusicId(nextId);
+                }}
                 className="h-10 min-w-[190px] rounded-xl border border-white/10 bg-slate-950/70 px-3 text-sm text-white outline-none"
                 aria-label="冥想音乐"
               >
+                <option value="silent">Silent · 无音乐</option>
                 {MEDITATION_MUSIC.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.label}
@@ -235,9 +241,11 @@ export default function MeditationPage() {
             <div className="mt-2 min-h-4 text-center text-xs text-slate-400">
               {musicError
                 ? "音乐暂时无法播放"
-                : musicPlaying
-                  ? `${selectedMusic.label} · 播放中`
-                  : selectedMusic.label}
+                : !selectedMusic
+                  ? "Silent · 无音乐"
+                  : musicPlaying
+                    ? `${selectedMusic.label} · 播放中`
+                    : selectedMusic.label}
             </div>
           </div>
 
