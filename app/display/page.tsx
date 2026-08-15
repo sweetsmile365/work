@@ -1377,12 +1377,13 @@ export default function DisplayPage() {
                   📰 ENGLISH
                 </Link>
                 <Link
-                  href="/schedule"
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cyan-300/10 text-cyan-100 active:bg-cyan-300/20"
-                  aria-label="日程"
-                  title="Schedule · 日程"
+                  href="/calendar"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100 active:bg-cyan-300/20"
+                  aria-label="日程修改"
+                  title="Calendar · 日程修改"
                 >
                   <CalendarDays className="h-4 w-4" />
+                  日程修改
                 </Link>
                 <Link
                   href="/badminton"
@@ -1839,6 +1840,15 @@ export default function DisplayPage() {
                       title="NEWS + ENGLISH · ごはん時間の英語"
                     >
                       📰 ENGLISH
+                    </Link>
+                    <Link
+                      href="/calendar"
+                      className="inline-flex items-center gap-1 rounded-full bg-cyan-300/10 px-2.5 py-1 text-[10px] font-semibold text-cyan-100 active:bg-cyan-300/20"
+                      aria-label="日程修改"
+                      title="Calendar · 日程修改"
+                    >
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      日程修改
                     </Link>
                     <Link
                       href="/badminton"
