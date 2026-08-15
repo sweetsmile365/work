@@ -316,6 +316,11 @@ const musicStations: MusicStation[] = [
     url: "https://pianosolo.streamguys1.com/live"
   },
   {
+    id: "peaceful-guitar",
+    label: "Guitar · Peaceful",
+    url: "https://listen.181fm.com/181-classicalguitar_128k.mp3"
+  },
+  {
     id: "jazz",
     label: "Jazz",
     url: "https://ice1.somafm.com/sonicuniverse-128-mp3"
