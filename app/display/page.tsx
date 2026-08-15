@@ -423,7 +423,7 @@ const formatHeaderDate = (date: Date) => {
     day: "numeric",
     weekday: "long",
     timeZone: "Asia/Tokyo"
-  }).formatToParts(date);
+  }).formatToParts(date) as Array<{ type: string; value: string }>;
 
   const yearName =
     parts.find((part) => part.type === "yearName")?.value ?? "";
