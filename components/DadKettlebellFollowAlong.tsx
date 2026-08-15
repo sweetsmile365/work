@@ -10,19 +10,54 @@ import {
   Video
 } from "lucide-react";
 
-const VIDEO_ID = "dC4lMOH36CY";
+type GuidedVideo = {
+  id: string;
+  videoId: string;
+  label: string;
+  shortLabel: string;
+  startSeconds?: number;
+};
 
-function youtubeEmbedUrl() {
-  return (
-    `https://www.youtube-nocookie.com/embed/${VIDEO_ID}` +
-    "?rel=0&playsinline=1&modestbranding=1&enablejsapi=1"
-  );
+const GUIDED_VIDEOS: GuidedVideo[] = [
+  {
+    id: "beginner-15",
+    videoId: "dC4lMOH36CY",
+    label: "15-Minute Beginner Kettlebell Workout",
+    shortLabel: "15 MIN"
+  },
+  {
+    id: "extra-kettlebell",
+    videoId: "nTrJ9Ry6EDo",
+    label: "Kettlebell Training · Added Video",
+    shortLabel: "NEW VIDEO",
+    startSeconds: 22
+  }
+];
+
+function youtubeEmbedUrl(video: GuidedVideo) {
+  const params = new URLSearchParams({
+    rel: "0",
+    playsinline: "1",
+    modestbranding: "1",
+    enablejsapi: "1"
+  });
+
+  if (video.startSeconds) {
+    params.set("start", String(video.startSeconds));
+  }
+
+  return `https://www.youtube-nocookie.com/embed/${video.videoId}?${params.toString()}`;
 }
 
 export function DadKettlebellFollowAlong() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [open, setOpen] = useState(true);
   const [loaded, setLoaded] = useState(false);
+  const [selectedVideoId, setSelectedVideoId] = useState(GUIDED_VIDEOS[0].id);
+
+  const selectedVideo =
+    GUIDED_VIDEOS.find((video) => video.id === selectedVideoId) ??
+    GUIDED_VIDEOS[0];
 
   useEffect(() => {
     const pauseVideo = () => {
@@ -56,6 +91,19 @@ export function DadKettlebellFollowAlong() {
     };
   }, []);
 
+  function selectVideo(videoId: string) {
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({
+        event: "command",
+        func: "pauseVideo",
+        args: []
+      }),
+      "*"
+    );
+    setLoaded(false);
+    setSelectedVideoId(videoId);
+  }
+
   function loadVideo() {
     // Pause Fitness Music and any other guided workout first.
     window.dispatchEvent(new CustomEvent("fitness:guided-start"));
@@ -81,7 +129,7 @@ export function DadKettlebellFollowAlong() {
 
           <div className="min-w-0">
             <div className="text-xs font-bold tracking-[0.13em] text-fuchsia-200">
-              GUIDED WORKOUT · 15 MIN
+              GUIDED WORKOUT · KETTLEBELL
             </div>
             <div className="mt-1 text-lg font-bold text-white">
               Beginner Kettlebell · FOLLOW ALONG
@@ -108,6 +156,26 @@ export function DadKettlebellFollowAlong() {
         <div className="border-t border-white/[0.06] p-4 sm:p-5">
           <div className="grid gap-4 xl:grid-cols-[1.35fr_0.65fr]">
             <div>
+              <div className="mb-3 flex flex-wrap gap-2">
+                {GUIDED_VIDEOS.map((video) => {
+                  const active = video.id === selectedVideo.id;
+                  return (
+                    <button
+                      key={video.id}
+                      type="button"
+                      onClick={() => selectVideo(video.id)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                        active
+                          ? "bg-fuchsia-200 text-slate-950"
+                          : "bg-white/[0.07] text-slate-300 hover:bg-white/[0.11]"
+                      }`}
+                    >
+                      {video.shortLabel}
+                    </button>
+                  );
+                })}
+              </div>
+
               {!loaded ? (
                 <button
                   type="button"
@@ -115,7 +183,7 @@ export function DadKettlebellFollowAlong() {
                   className="group relative grid aspect-video w-full place-items-center overflow-hidden rounded-2xl bg-black"
                 >
                   <img
-                    src={`https://i.ytimg.com/vi/${VIDEO_ID}/hqdefault.jpg`}
+                    src={`https://i.ytimg.com/vi/${selectedVideo.videoId}/hqdefault.jpg`}
                     alt=""
                     className="absolute inset-0 h-full w-full object-cover opacity-75 transition group-hover:scale-[1.01]"
                     loading="lazy"
@@ -123,7 +191,11 @@ export function DadKettlebellFollowAlong() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/25" />
 
                   <div className="relative grid h-16 w-16 place-items-center rounded-full bg-red-600 text-white shadow-2xl">
-                    <Play size={28} className="translate-x-0.5" fill="currentColor" />
+                    <Play
+                      size={28}
+                      className="translate-x-0.5"
+                      fill="currentColor"
+                    />
                   </div>
 
                   <div className="absolute bottom-4 left-4 right-4 text-left">
@@ -131,17 +203,23 @@ export function DadKettlebellFollowAlong() {
                       TAP TO LOAD
                     </div>
                     <div className="mt-1 text-lg font-bold text-white">
-                      15-Minute Beginner Kettlebell Workout
+                      {selectedVideo.label}
                     </div>
+                    {selectedVideo.startSeconds ? (
+                      <div className="mt-1 text-xs text-white/65">
+                        从 00:22 开始播放
+                      </div>
+                    ) : null}
                   </div>
                 </button>
               ) : (
                 <div className="overflow-hidden rounded-2xl bg-black">
                   <iframe
                     ref={iframeRef}
+                    key={selectedVideo.id}
                     className="aspect-video w-full"
-                    src={youtubeEmbedUrl()}
-                    title="15-Minute Beginner Kettlebell Workout - Follow Along"
+                    src={youtubeEmbedUrl(selectedVideo)}
+                    title={selectedVideo.label}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                   />
@@ -150,13 +228,16 @@ export function DadKettlebellFollowAlong() {
 
               <div className="mt-3 rounded-2xl bg-slate-950/30 p-4">
                 <div className="flex items-start gap-3">
-                  <Headphones size={18} className="mt-0.5 shrink-0 text-fuchsia-200" />
+                  <Headphones
+                    size={18}
+                    className="mt-0.5 shrink-0 text-fuchsia-200"
+                  />
                   <div>
                     <div className="text-sm font-bold text-white">
                       COACH AUDIO 模式
                     </div>
                     <div className="mt-1 text-xs leading-relaxed text-slate-400">
-                      这条视频有跟练指导声音。开始 Guided Workout 时会暂停 Fitness Music；
+                      视频有指导声音。开始 Guided Workout 时会暂停 Fitness Music；
                       如果你重新打开 Fitness Music，视频会自动暂停，避免两个声音互相干扰。
                     </div>
                   </div>
@@ -170,17 +251,26 @@ export function DadKettlebellFollowAlong() {
                   <Dumbbell size={16} />
                   HOW TO USE
                 </div>
+
                 <div className="mt-3 grid gap-2 text-sm text-slate-300">
                   <div className="rounded-xl bg-slate-950/25 p-3">
-                    <span className="font-bold text-white">MON / SAT</span>
+                    <span className="font-bold text-white">15 MIN</span>
                     <div className="mt-1 text-xs text-slate-400">
-                      可以直接用这条 15 分钟视频做 Full Body。
+                      原来的 Beginner Full Body 跟练。
                     </div>
                   </div>
+
+                  <div className="rounded-xl bg-slate-950/25 p-3">
+                    <span className="font-bold text-white">NEW VIDEO</span>
+                    <div className="mt-1 text-xs text-slate-400">
+                      新增你指定的 YouTube 壶铃视频，并从 00:22 开始播放。
+                    </div>
+                  </div>
+
                   <div className="rounded-xl bg-slate-950/25 p-3">
                     <span className="font-bold text-white">其他训练日</span>
                     <div className="mt-1 text-xs text-slate-400">
-                      继续按照上面的 Weekly Plan 做当天 5 个动作，不强制播放整套视频。
+                      继续按照上面的 Weekly Plan 做当天动作，不强制播放整套视频。
                     </div>
                   </div>
                 </div>
@@ -199,13 +289,13 @@ export function DadKettlebellFollowAlong() {
 
               <div className="rounded-2xl bg-slate-950/25 p-4">
                 <div className="text-[10px] font-bold tracking-[0.12em] text-slate-400">
-                  OLD VIDEO
+                  VIDEO SWITCH
                 </div>
                 <div className="mt-1 text-sm font-semibold text-white">
-                  旧的 16:25 本地视频不再作为主跟练
+                  两条 YouTube 视频可在同一区域切换
                 </div>
                 <div className="mt-1 text-xs leading-relaxed text-slate-500">
-                  文件可以暂时留在仓库，不影响页面；确认新版稳定后再删除即可。
+                  切换视频时当前视频会停止，避免同时播放两个声音。
                 </div>
               </div>
             </div>

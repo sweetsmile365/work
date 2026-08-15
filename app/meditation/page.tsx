@@ -33,31 +33,6 @@ const MEDITATION_MUSIC: MeditationMusic[] = [
   }
 ];
 
-type MeditationSceneId = "campfire" | "waves" | "none";
-
-const MEDITATION_SCENES: Array<{
-  id: Exclude<MeditationSceneId, "none">;
-  label: string;
-  url: string;
-  credit: string;
-  sourceUrl: string;
-}> = [
-  {
-    id: "campfire",
-    label: "🔥 篝火",
-    url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Campfire.webm",
-    credit: "Vijayanrajapuram · CC BY-SA 4.0",
-    sourceUrl: "https://commons.wikimedia.org/wiki/File:Campfire.webm"
-  },
-  {
-    id: "waves",
-    label: "🌊 海浪",
-    url: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ocean%20waves%20at%20L%C3%A6kjavik%20beach%2C%20Iceland.webm",
-    credit: "Alexander Grebenkov · CC BY 3.0",
-    sourceUrl: "https://commons.wikimedia.org/wiki/File:Ocean_waves_at_L%C3%A6kjavik_beach,_Iceland.webm"
-  }
-];
-
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
@@ -75,13 +50,7 @@ export default function MeditationPage() {
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [musicVolume, setMusicVolume] = useState(0.3);
   const [musicError, setMusicError] = useState(false);
-  const [sceneId, setSceneId] = useState<MeditationSceneId>("waves");
-
   const phase = PHASES[phaseIndex];
-  const selectedScene =
-    sceneId === "none"
-      ? null
-      : MEDITATION_SCENES.find((item) => item.id === sceneId) ?? null;
 
   const selectedMusic =
     MEDITATION_MUSIC.find((item) => item.id === musicId) ?? null;
@@ -210,66 +179,23 @@ export default function MeditationPage() {
             <p className="mt-2 text-sm text-slate-300">跟着呼吸，不需要做到完美。</p>
           </div>
 
-          <div className="mt-6">
-            <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
-              <span className="mr-1 text-xs font-semibold tracking-[0.14em] text-cyan-100/70">
-                REAL SCENE
-              </span>
-              {MEDITATION_SCENES.map((scene) => (
-                <button
-                  key={scene.id}
-                  type="button"
-                  onClick={() => setSceneId(scene.id)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                    sceneId === scene.id
-                      ? "bg-cyan-200 text-slate-950"
-                      : "bg-white/10 text-slate-100 hover:bg-white/15"
-                  }`}
-                >
-                  {scene.label}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => setSceneId("none")}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                  sceneId === "none"
-                    ? "bg-cyan-200 text-slate-950"
-                    : "bg-white/10 text-slate-100 hover:bg-white/15"
-                }`}
-              >
-                关闭
-              </button>
+          <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+            <div className="border-b border-white/10 px-4 py-3 text-center">
+              <div className="text-xs font-semibold tracking-[0.14em] text-cyan-100/80">
+                MEDITATION VIDEO PLAYLIST
+              </div>
+              <div className="mt-1 text-[11px] text-slate-400">
+                マインドフルネス · ヨガ · 禅 · 连续循环播放
+              </div>
             </div>
 
-            {selectedScene ? (
-              <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-black/30">
-                <video
-                  key={selectedScene.id}
-                  src={selectedScene.url}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  className="h-full w-full object-cover"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-slate-950/20" />
-                <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2">
-                  <div className="pointer-events-none rounded-full bg-black/35 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-sm">
-                    {selectedScene.label} · 真实视频
-                  </div>
-                  <a
-                    href={selectedScene.sourceUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-full bg-black/35 px-3 py-1 text-[10px] text-white/70 backdrop-blur-sm hover:text-white"
-                  >
-                    {selectedScene.credit}
-                  </a>
-                </div>
-              </div>
-            ) : null}
+            <iframe
+              className="aspect-video w-full"
+              src="https://www.youtube-nocookie.com/embed/videoseries?list=PL-rCBM0aVbRVUDyVFOu15vmc0TG-hgYWt&loop=1&playsinline=1&rel=0"
+              title="Meditation music playlist"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
           </div>
 
           <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.055] p-3 sm:p-4">
@@ -283,7 +209,7 @@ export default function MeditationPage() {
 
             <div className="mb-3 flex items-center justify-center gap-2 text-xs font-semibold tracking-[0.14em] text-cyan-100/80">
               <Music2 className="h-4 w-4" />
-              MEDITATION MUSIC
+              MEDITATION MUSIC · AUDIO ONLY
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2">
