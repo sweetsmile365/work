@@ -6,6 +6,7 @@ import {
   AlertCircle,
   Bell,
   BookOpen,
+  CalendarDays,
   CheckCircle2,
   ChevronRight,
   Circle,
@@ -1374,6 +1375,14 @@ export default function DisplayPage() {
                   title="NEWS + ENGLISH · ごはん時間の英語"
                 >
                   📰 ENGLISH
+                </Link>
+                <Link
+                  href="/schedule"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cyan-300/10 text-cyan-100 active:bg-cyan-300/20"
+                  aria-label="日程"
+                  title="Schedule · 日程"
+                >
+                  <CalendarDays className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/badminton"
