@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Pause, Play, RotateCcw } from "lucide-react";
+import { ArrowLeft, Music2, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
 
 type Phase = "inhale" | "hold" | "exhale";
 
@@ -13,6 +13,30 @@ const PHASES: Array<{ phase: Phase; seconds: number; label: string; hint: string
 ];
 
 const PRESETS = [5, 10, 15] as const;
+
+type MeditationMusic = {
+  id: string;
+  label: string;
+  url: string;
+};
+
+const MEDITATION_MUSIC: MeditationMusic[] = [
+  {
+    id: "kyoto",
+    label: "日本纯音乐 · Kyoto",
+    url: "https://server.laradio.online:59009/live"
+  },
+  {
+    id: "guitar",
+    label: "Peaceful Guitar",
+    url: "https://listen.181fm.com/181-classicalguitar_128k.mp3"
+  },
+  {
+    id: "piano",
+    label: "Peaceful Piano",
+    url: "https://pianosolo.streamguys1.com/live"
+  }
+];
 
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -26,8 +50,65 @@ export default function MeditationPage() {
   const [running, setRunning] = useState(false);
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [phaseRemaining, setPhaseRemaining] = useState(PHASES[0].seconds);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [musicId, setMusicId] = useState(MEDITATION_MUSIC[0].id);
+  const [musicPlaying, setMusicPlaying] = useState(false);
+  const [musicVolume, setMusicVolume] = useState(0.3);
+  const [musicError, setMusicError] = useState(false);
 
   const phase = PHASES[phaseIndex];
+
+  const selectedMusic =
+    MEDITATION_MUSIC.find((item) => item.id === musicId) ?? MEDITATION_MUSIC[0];
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.pause();
+    audio.src = selectedMusic.url;
+    audio.volume = musicVolume;
+    audio.load();
+    setMusicPlaying(false);
+    setMusicError(false);
+  }, [selectedMusic.url]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = musicVolume;
+    }
+  }, [musicVolume]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => {
+      if (!audio) return;
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    };
+  }, []);
+
+  const toggleMusic = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    setMusicError(false);
+
+    if (musicPlaying) {
+      audio.pause();
+      setMusicPlaying(false);
+      return;
+    }
+
+    try {
+      await audio.play();
+      setMusicPlaying(true);
+    } catch {
+      setMusicError(true);
+      setMusicPlaying(false);
+    }
+  };
 
   useEffect(() => {
     if (!running) return;
@@ -79,7 +160,7 @@ export default function MeditationPage() {
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between gap-3">
           <Link
-            href="/"
+            href="/display"
             className="inline-flex h-10 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-semibold text-slate-100 transition hover:bg-white/15"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -95,6 +176,69 @@ export default function MeditationPage() {
             <div className="text-4xl">🧘</div>
             <h1 className="mt-3 text-2xl font-bold tracking-wide sm:text-3xl">安静冥想</h1>
             <p className="mt-2 text-sm text-slate-300">跟着呼吸，不需要做到完美。</p>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.055] p-3 sm:p-4">
+            <audio
+              ref={audioRef}
+              preload="none"
+              onError={() => setMusicError(true)}
+              onPause={() => setMusicPlaying(false)}
+              onPlay={() => setMusicPlaying(true)}
+            />
+
+            <div className="mb-3 flex items-center justify-center gap-2 text-xs font-semibold tracking-[0.14em] text-cyan-100/80">
+              <Music2 className="h-4 w-4" />
+              MEDITATION MUSIC
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={toggleMusic}
+                className="grid h-10 w-10 place-items-center rounded-full bg-violet-200 text-slate-950 transition hover:bg-violet-100 active:scale-[0.98]"
+                aria-label={musicPlaying ? "停止冥想音乐" : "播放冥想音乐"}
+              >
+                {musicPlaying ? (
+                  <Pause className="h-5 w-5" />
+                ) : (
+                  <Play className="h-5 w-5 pl-0.5" />
+                )}
+              </button>
+
+              <select
+                value={musicId}
+                onChange={(event) => setMusicId(event.target.value)}
+                className="h-10 min-w-[190px] rounded-xl border border-white/10 bg-slate-950/70 px-3 text-sm text-white outline-none"
+                aria-label="冥想音乐"
+              >
+                {MEDITATION_MUSIC.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+
+              <Volume2 className="h-4 w-4 text-slate-300" />
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={musicVolume}
+                onChange={(event) => setMusicVolume(Number(event.target.value))}
+                className="w-24 accent-violet-200"
+                aria-label="冥想音乐音量"
+              />
+            </div>
+
+            <div className="mt-2 min-h-4 text-center text-xs text-slate-400">
+              {musicError
+                ? "音乐暂时无法播放"
+                : musicPlaying
+                  ? `${selectedMusic.label} · 播放中`
+                  : selectedMusic.label}
+            </div>
           </div>
 
           <div className="mt-6 flex justify-center gap-2">
