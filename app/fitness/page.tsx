@@ -30,6 +30,7 @@ import {
 import { ensureDailyTasks, localDateKey } from "@/lib/dailyTasks";
 import { DadKettlebellWeeklyPlan } from "@/components/DadKettlebellWeeklyPlan";
 import { DadKettlebellFollowAlong } from "@/components/DadKettlebellFollowAlong";
+import { DadBodyweightFollowAlong } from "@/components/DadBodyweightFollowAlong";
 
 type Person = "dad" | "mom";
 type MomMode = "recovery" | "normal";
@@ -1110,6 +1111,7 @@ export default function FitnessPage() {
           <>
             <DadKettlebellWeeklyPlan />
             <DadKettlebellFollowAlong />
+            <DadBodyweightFollowAlong />
           </>
         ) : null}
 
