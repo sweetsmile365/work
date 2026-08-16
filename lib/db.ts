@@ -455,6 +455,68 @@ export const defaultChecklists = {
   chinese: ["中国語教材", "宿題ノート", "作文", "ノート", "朗読資料"]
 };
 
+const zkaiLearningTasks: ChildTask[] = [
+  {
+    id: "zkai-learning-2026-08-16-math",
+    title: "Math 路 Z浼?AI閫熷姽 30鍒?,
+    task_type: "practice",
+    due_date: "2026-08-16",
+    status: "todo",
+    completed_by_child: false,
+    note:
+      "鈽?鏂囧瓧寮忋倰浣裤仯銇熻鏄庡晱椤孿n鈽?1娆℃柟绋嬪紡銇▓绠梊n鈽?1娆℃柟绋嬪紡銇枃绔犻\n\n褰撳墠鏈€鍊煎緱纭鐨?椤?
+  },
+  {
+    id: "zkai-learning-2026-08-17-science",
+    title: "Science 路 Z浼?AI閫熷姽 20鍒?,
+    task_type: "practice",
+    due_date: "2026-08-17",
+    status: "todo",
+    completed_by_child: false,
+    note:
+      "鈽?韬伄銇俱倧銈娿伄鐗╄唱銇ㄣ仢銇€ц唱\n鈽?姘椾綋銇€ц唱\n\n妞嶇墿銆佸姩鐗╁凡鏈夎緝澶氬畬鎴愯瘉鎹紝涓嶉噸鍒?
+  },
+  {
+    id: "zkai-learning-2026-08-18-english",
+    title: "English 路 Z浼?AI閫熷姽 30鍒?,
+    task_type: "practice",
+    due_date: "2026-08-18",
+    status: "todo",
+    completed_by_child: false,
+    note:
+      "鈽?be鍕曡銇枃\n鈽?涓€鑸嫊瑭炪伄鏂囷紙I銆乊ou锛塡n鈽?涓€鑸嫊瑭炪伄鏂囷紙3浜虹О鍗樻暟锛塡n\nGrammar / be鍕曡鐩稿叧鎴愮哗鏈夋槑鏄句笉绋冲畾锛岄噸鏂扮‘璁?
+  },
+  {
+    id: "zkai-learning-2026-08-19-math-check",
+    title: "Math 路 Z浼?AI閫熷姽 鏁板纰鸿獚 20鍒?,
+    task_type: "practice",
+    due_date: "2026-08-19",
+    status: "todo",
+    completed_by_child: false,
+    note:
+      "8/16銇?闋呫亴鍩烘湰銇с亶銇︺亜銈屻伆锛歕n鈽?涔楁硶銇ㄩ櫎娉昞n鈽?鍥涘墖婕旂畻銆佹銇暟銉昏矤銇暟銇繙鐢╘n\n鐜板湪杩樹細涓嶄細鐨勪竴娆＄‘璁?
+  },
+  {
+    id: "zkai-learning-2026-08-20-ctest",
+    title: "Other 路 C Test 妯℃摤鈶狅綔绶忓悎瑷烘柇",
+    task_type: "exam_preparation",
+    due_date: "2026-08-20",
+    status: "todo",
+    completed_by_child: false,
+    note:
+      "銇撱伄鏃ャ伅Z浼?AI閫熷姽銈掋仐銇亜銆俓nC Test 妯℃摤鈶犮倰瀹熸柦銇椼€?/21浠ラ檷銇京缈掋仚銈嬪急鐐广倰瑷烘柇銇欍倠銆?
+  },
+  {
+    id: "zkai-learning-2026-08-21-mock-weakness",
+    title: "Other 路 Z浼?AI閫熷姽锝淢ock寮辩偣 1锝?闋?20锝?0鍒?,
+    task_type: "practice",
+    due_date: "2026-08-21",
+    status: "todo",
+    completed_by_child: false,
+    note:
+      "8/20銇甅ock绲愭灉銇嬨倝銆佹湰褰撱伀寮便亱銇ｃ仧1锝?闋呫仩銇戙倰閬搞倱銇у京缈掋仚銈嬨€俓n鍏ㄩ儴銇瘎鍥层倰鍏堛伀鍒枫倝銇亜銆?
+  }
+];
 const defaultSchoolTimetable: SchoolTimetable = {
   gradeClass: "1年E組",
   dayTimes: ["9:00-9:50", "10:00-10:50", "11:00-11:50", "12:45-13:35", "13:45-14:35", "14:45-15:35", "15:40-15:55"],
@@ -501,6 +563,7 @@ const initialState: AppState = {
   importCandidates: [],
   busCandidates: [],
   tasks: [
+    ...zkaiLearningTasks,
     { id: "t1", title: "英語宿題", task_type: "homework", due_date: isoDate(2), status: "todo" },
     { id: "t2", title: "バドミントン 弁当確認", task_type: "bring_item", due_date: isoDate(1), status: "todo" }
   ],
@@ -559,7 +622,13 @@ function mergeDefaultData(state: AppState): AppState {
       from_label: zhText(item.from_label),
       to_label: zhText(item.to_label)
     })),
-    tasks: state.tasks.map((task) => ({
+    tasks: [
+      ...zkaiLearningTasks.filter(
+        (defaultTask) =>
+          !(state.tasks ?? []).some((task) => task.id === defaultTask.id)
+      ),
+      ...(state.tasks ?? [])
+    ].map((task) => ({
       ...task,
       title: zhText(task.title),
       note: zhText(task.note)
@@ -761,4 +830,5 @@ export function toggleTask(taskId: string) {
   saveState(next);
   return next;
 }
+
 
