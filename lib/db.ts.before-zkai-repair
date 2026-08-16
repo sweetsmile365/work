@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ChildTask } from "@/types/activities";
 import type { BusTimetable } from "@/types/busTimetable";
@@ -392,39 +392,39 @@ const zkaiReviewEvents: Array<{
 }> = [
   {
     date: "2026-08-16",
-    title: "Z\u4F1A AI\u901F\u52B9\uFF5C\u6570\u5B66 30\u5206",
+    title: "Z浼?AI閫熷姽锝滄暟瀛?30鍒?,
     child_note:
-      "\u2611 \u6587\u5B57\u5F0F\u3092\u4F7F\u3063\u305F\u8AAC\u660E\u554F\u984C\n\u2611 1\u6B21\u65B9\u7A0B\u5F0F\u306E\u8A08\u7B97\n\u2611 1\u6B21\u65B9\u7A0B\u5F0F\u306E\u6587\u7AE0\u984C\n\n\u76EE\u7684\uFF1A\u5F53\u524D\u6700\u503C\u5F97\u786E\u8BA4\u76843\u9879"
+      "鈽?鏂囧瓧寮忋倰浣裤仯銇熻鏄庡晱椤孿n鈽?1娆℃柟绋嬪紡銇▓绠梊n鈽?1娆℃柟绋嬪紡銇枃绔犻\n\n鐩殑锛氬綋鍓嶆渶鍊煎緱纭鐨?椤?
   },
   {
     date: "2026-08-17",
-    title: "Z\u4F1A AI\u901F\u52B9\uFF5C\u7406\u79D1 20\u5206",
+    title: "Z浼?AI閫熷姽锝滅悊绉?20鍒?,
     child_note:
-      "\u2611 \u8EAB\u306E\u307E\u308F\u308A\u306E\u7269\u8CEA\u3068\u305D\u306E\u6027\u8CEA\n\u2611 \u6C17\u4F53\u306E\u6027\u8CEA\n\n\u76EE\u7684\uFF1A\u690D\u7269\u3001\u52A8\u7269\u5DF2\u6709\u8F83\u591A\u5B8C\u6210\u8BC1\u636E\uFF0C\u4E0D\u91CD\u5237"
+      "鈽?韬伄銇俱倧銈娿伄鐗╄唱銇ㄣ仢銇€ц唱\n鈽?姘椾綋銇€ц唱\n\n鐩殑锛氭鐗┿€佸姩鐗╁凡鏈夎緝澶氬畬鎴愯瘉鎹紝涓嶉噸鍒?
   },
   {
     date: "2026-08-18",
-    title: "Z\u4F1A AI\u901F\u52B9\uFF5C\u82F1\u8A9E 30\u5206",
+    title: "Z浼?AI閫熷姽锝滆嫳瑾?30鍒?,
     child_note:
-      "\u2611 be\u52D5\u8A5E\u306E\u6587\n\u2611 \u4E00\u822C\u52D5\u8A5E\u306E\u6587\uFF08I\u3001You\uFF09\n\u2611 \u4E00\u822C\u52D5\u8A5E\u306E\u6587\uFF083\u4EBA\u79F0\u5358\u6570\uFF09\n\n\u76EE\u7684\uFF1AGrammar / be\u52D5\u8A5E\u306E\u4E0D\u5B89\u5B9A\u306A\u90E8\u5206\u3092\u518D\u78BA\u8A8D"
+      "鈽?be鍕曡銇枃\n鈽?涓€鑸嫊瑭炪伄鏂囷紙I銆乊ou锛塡n鈽?涓€鑸嫊瑭炪伄鏂囷紙3浜虹О鍗樻暟锛塡n\n鐩殑锛氳繃鍘?Grammar / be鍔ㄨ瘝鐩稿叧鎴愮哗鏈夋槑鏄句笉绋冲畾锛屽€煎緱閲嶆柊纭"
   },
   {
     date: "2026-08-19",
-    title: "Z\u4F1A AI\u901F\u52B9\uFF5C\u6570\u5B66\u78BA\u8A8D 20\u5206",
+    title: "Z浼?AI閫熷姽锝滄暟瀛︾⒑瑾?20鍒?,
     child_note:
-      "8/16\u306E3\u9805\u304C\u57FA\u672C\u3067\u304D\u3066\u3044\u308C\u3070\uFF1A\n\u2611 \u4E57\u6CD5\u3068\u9664\u6CD5\n\u2611 \u56DB\u5247\u6F14\u7B97\u3001\u6B63\u306E\u6570\u30FB\u8CA0\u306E\u6570\u306E\u5FDC\u7528\n\n\u76EE\u7684\uFF1A\u73B0\u5728\u8FD8\u4F1A\u4E0D\u4F1A\u7684\u4E00\u6B21\u786E\u8BA4"
+      "8/16銇?闋呫亴鍩烘湰銇с亶銇︺亜銈屻伆锛歕n鈽?涔楁硶銇ㄩ櫎娉昞n鈽?鍥涘墖婕旂畻銆佹銇暟銉昏矤銇暟銇繙鐢╘n\n鐩殑锛氱幇鍦ㄨ繕浼氫笉浼氱殑涓€娆＄‘璁?
   },
   {
     date: "2026-08-20",
-    title: "C Test \u6A21\u64EC\u2460\uFF5C\u7DCF\u5408\u8A3A\u65AD",
+    title: "C Test 妯℃摤鈶狅綔绶忓悎瑷烘柇",
     child_note:
-      "Z\u4F1A AI\u901F\u52B9\u306F\u3057\u306A\u3044\u3002\nC Test \u6A21\u64EC\u2460\u3092\u5B9F\u65BD\u3057\u30018/21\u4EE5\u964D\u306B\u5FA9\u7FD2\u3059\u308B\u5F31\u70B9\u3092\u6C7A\u3081\u308B\u3002"
+      "Z浼?AI閫熷姽銇仐銇亜銆俓nC Test 妯℃摤鈶犮倰瀹熸柦銇椼€?/21浠ラ檷銇京缈掋仚銈嬪急鐐广倰姹恒倎銈嬨€?
   },
   {
     date: "2026-08-21",
-    title: "Z\u4F1A AI\u901F\u52B9\uFF5CMock\u5F31\u70B9 1\uFF5E3\u9805 20\uFF5E30\u5206",
+    title: "Z浼?AI閫熷姽锝淢ock寮辩偣 1锝?闋?20锝?0鍒?,
     child_note:
-      "8/20\u306EMock\u7D50\u679C\u304B\u3089\u3001\u672C\u5F53\u306B\u5F31\u304B\u3063\u305F1\uFF5E3\u9805\u3060\u3051\u3092\u9078\u629E\u3057\u3066\u5FA9\u7FD2\u3059\u308B\u3002\n\u5168\u90E8\u306E\u7BC4\u56F2\u3092\u5148\u306B\u5237\u3089\u306A\u3044\u3002"
+      "8/20銇甅ock绲愭灉銇嬨倝銆佹湰褰撱伀寮便亱銇ｃ仧1锝?闋呫仩銇戙倰閬告姙銇椼仸寰╃繏銇欍倠銆俓n鍏ㄩ儴銇瘎鍥层倰鍏堛伀鍒枫倝銇亜銆?
   }
 ];
 
@@ -458,63 +458,63 @@ export const defaultChecklists = {
 const zkaiLearningTasks: ChildTask[] = [
   {
     id: "zkai-learning-2026-08-16-math",
-    title: "Math \u00B7 Z\u4F1A AI\u901F\u52B9 30\u5206",
+    title: "Math 路 Z浼?AI閫熷姽 30鍒?,
     task_type: "practice",
     due_date: "2026-08-16",
     status: "todo",
     completed_by_child: false,
     note:
-      "\u2611 \u6587\u5B57\u5F0F\u3092\u4F7F\u3063\u305F\u8AAC\u660E\u554F\u984C\n\u2611 1\u6B21\u65B9\u7A0B\u5F0F\u306E\u8A08\u7B97\n\u2611 1\u6B21\u65B9\u7A0B\u5F0F\u306E\u6587\u7AE0\u984C\n\n\u5F53\u524D\u6700\u503C\u5F97\u786E\u8BA4\u76843\u9879"
+      "鈽?鏂囧瓧寮忋倰浣裤仯銇熻鏄庡晱椤孿n鈽?1娆℃柟绋嬪紡銇▓绠梊n鈽?1娆℃柟绋嬪紡銇枃绔犻\n\n褰撳墠鏈€鍊煎緱纭鐨?椤?
   },
   {
     id: "zkai-learning-2026-08-17-science",
-    title: "Science \u00B7 Z\u4F1A AI\u901F\u52B9 20\u5206",
+    title: "Science 路 Z浼?AI閫熷姽 20鍒?,
     task_type: "practice",
     due_date: "2026-08-17",
     status: "todo",
     completed_by_child: false,
     note:
-      "\u2611 \u8EAB\u306E\u307E\u308F\u308A\u306E\u7269\u8CEA\u3068\u305D\u306E\u6027\u8CEA\n\u2611 \u6C17\u4F53\u306E\u6027\u8CEA\n\n\u690D\u7269\u3001\u52A8\u7269\u5DF2\u6709\u8F83\u591A\u5B8C\u6210\u8BC1\u636E\uFF0C\u4E0D\u91CD\u5237"
+      "鈽?韬伄銇俱倧銈娿伄鐗╄唱銇ㄣ仢銇€ц唱\n鈽?姘椾綋銇€ц唱\n\n妞嶇墿銆佸姩鐗╁凡鏈夎緝澶氬畬鎴愯瘉鎹紝涓嶉噸鍒?
   },
   {
     id: "zkai-learning-2026-08-18-english",
-    title: "English \u00B7 Z\u4F1A AI\u901F\u52B9 30\u5206",
+    title: "English 路 Z浼?AI閫熷姽 30鍒?,
     task_type: "practice",
     due_date: "2026-08-18",
     status: "todo",
     completed_by_child: false,
     note:
-      "\u2611 be\u52D5\u8A5E\u306E\u6587\n\u2611 \u4E00\u822C\u52D5\u8A5E\u306E\u6587\uFF08I\u3001You\uFF09\n\u2611 \u4E00\u822C\u52D5\u8A5E\u306E\u6587\uFF083\u4EBA\u79F0\u5358\u6570\uFF09\n\nGrammar / be\u52D5\u8A5E\u306E\u4E0D\u5B89\u5B9A\u306A\u90E8\u5206\u3092\u518D\u78BA\u8A8D"
+      "鈽?be鍕曡銇枃\n鈽?涓€鑸嫊瑭炪伄鏂囷紙I銆乊ou锛塡n鈽?涓€鑸嫊瑭炪伄鏂囷紙3浜虹О鍗樻暟锛塡n\nGrammar / be鍕曡鐩稿叧鎴愮哗鏈夋槑鏄句笉绋冲畾锛岄噸鏂扮‘璁?
   },
   {
     id: "zkai-learning-2026-08-19-math-check",
-    title: "Math \u00B7 Z\u4F1A AI\u901F\u52B9 \u6570\u5B66\u78BA\u8A8D 20\u5206",
+    title: "Math 路 Z浼?AI閫熷姽 鏁板纰鸿獚 20鍒?,
     task_type: "practice",
     due_date: "2026-08-19",
     status: "todo",
     completed_by_child: false,
     note:
-      "8/16\u306E3\u9805\u304C\u57FA\u672C\u3067\u304D\u3066\u3044\u308C\u3070\uFF1A\n\u2611 \u4E57\u6CD5\u3068\u9664\u6CD5\n\u2611 \u56DB\u5247\u6F14\u7B97\u3001\u6B63\u306E\u6570\u30FB\u8CA0\u306E\u6570\u306E\u5FDC\u7528\n\n\u73B0\u5728\u8FD8\u4F1A\u4E0D\u4F1A\u7684\u4E00\u6B21\u786E\u8BA4"
+      "8/16銇?闋呫亴鍩烘湰銇с亶銇︺亜銈屻伆锛歕n鈽?涔楁硶銇ㄩ櫎娉昞n鈽?鍥涘墖婕旂畻銆佹銇暟銉昏矤銇暟銇繙鐢╘n\n鐜板湪杩樹細涓嶄細鐨勪竴娆＄‘璁?
   },
   {
     id: "zkai-learning-2026-08-20-ctest",
-    title: "Other \u00B7 C Test \u6A21\u64EC\u2460\uFF5C\u7DCF\u5408\u8A3A\u65AD",
+    title: "Other 路 C Test 妯℃摤鈶狅綔绶忓悎瑷烘柇",
     task_type: "exam_preparation",
     due_date: "2026-08-20",
     status: "todo",
     completed_by_child: false,
     note:
-      "\u3053\u306E\u65E5\u306FZ\u4F1A AI\u901F\u52B9\u3092\u3057\u306A\u3044\u3002\nC Test \u6A21\u64EC\u2460\u3092\u5B9F\u65BD\u3057\u30018/21\u4EE5\u964D\u306B\u5FA9\u7FD2\u3059\u308B\u5F31\u70B9\u3092\u8A3A\u65AD\u3059\u308B\u3002"
+      "銇撱伄鏃ャ伅Z浼?AI閫熷姽銈掋仐銇亜銆俓nC Test 妯℃摤鈶犮倰瀹熸柦銇椼€?/21浠ラ檷銇京缈掋仚銈嬪急鐐广倰瑷烘柇銇欍倠銆?
   },
   {
     id: "zkai-learning-2026-08-21-mock-weakness",
-    title: "Other \u00B7 Z\u4F1A AI\u901F\u52B9\uFF5CMock\u5F31\u70B9 1\uFF5E3\u9805 20\uFF5E30\u5206",
+    title: "Other 路 Z浼?AI閫熷姽锝淢ock寮辩偣 1锝?闋?20锝?0鍒?,
     task_type: "practice",
     due_date: "2026-08-21",
     status: "todo",
     completed_by_child: false,
     note:
-      "8/20\u306EMock\u7D50\u679C\u304B\u3089\u3001\u672C\u5F53\u306B\u5F31\u304B\u3063\u305F1\uFF5E3\u9805\u3060\u3051\u3092\u9078\u3093\u3067\u5FA9\u7FD2\u3059\u308B\u3002\n\u5168\u90E8\u306E\u7BC4\u56F2\u3092\u5148\u306B\u5237\u3089\u306A\u3044\u3002"
+      "8/20銇甅ock绲愭灉銇嬨倝銆佹湰褰撱伀寮便亱銇ｃ仧1锝?闋呫仩銇戙倰閬搞倱銇у京缈掋仚銈嬨€俓n鍏ㄩ儴銇瘎鍥层倰鍏堛伀鍒枫倝銇亜銆?
   }
 ];
 const defaultSchoolTimetable: SchoolTimetable = {
