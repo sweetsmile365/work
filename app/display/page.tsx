@@ -322,11 +322,6 @@ const musicStations: MusicStation[] = [
     url: "https://listen.181fm.com/181-classicalguitar_128k.mp3"
   },
   {
-    id: "japanese-ambient-kyoto",
-    label: "日本纯音乐 · Kyoto",
-    url: "https://server.laradio.online:59009/live"
-  },
-  {
     id: "jazz",
     label: "Jazz",
     url: "https://ice1.somafm.com/sonicuniverse-128-mp3"
