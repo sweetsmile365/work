@@ -41,6 +41,10 @@ import {
 } from "@/lib/habitStats";
 import type { ChildTask } from "@/types/activities";
 import type { FamilyEvent } from "@/types/events";
+import type {
+  SchoolTimetable,
+  WeekdayKey
+} from "@/types/timetable";
 
 type WeatherPoint = {
   id: string;
@@ -545,6 +549,202 @@ const categoryColor = (event: FamilyEvent) => {
   if (event.calendar_type.includes("holiday")) return "bg-blue-300";
   return "bg-amber-300";
 };
+
+type TodayClassItem = {
+  period: number;
+  subject: string;
+  short: string;
+  time?: string;
+  changed: boolean;
+};
+
+type TodayClassSummary = {
+  classes: TodayClassItem[];
+  label?: string;
+};
+
+const SCHOOL_DISPLAY_DEFAULT_FROM = "2026-08-24";
+
+const weekdayKeyForSchoolDate = (date: Date): WeekdayKey | null => {
+  const day = date.getDay();
+  if (day === 1) return "mon";
+  if (day === 2) return "tue";
+  if (day === 3) return "wed";
+  if (day === 4) return "thu";
+  if (day === 5) return "fri";
+  return null;
+};
+
+const subjectShortLabel = (subject: string) => {
+  const normalized = subject.trim();
+  const aliases: Record<string, string> = {
+    数学: "数",
+    国語: "国",
+    英語: "英",
+    英TT: "英",
+    体育: "体",
+    生物: "生",
+    化学: "化",
+    地理: "地",
+    歴史: "歴",
+    美術: "美",
+    音楽: "音",
+    家庭: "家",
+    総合: "総",
+    道徳: "道",
+    LHR: "L"
+  };
+
+  return aliases[normalized] ?? normalized.slice(0, 1);
+};
+
+const subjectPillClass = (subject: string) => {
+  if (subject.startsWith("数")) return "border-blue-300/30 bg-blue-300/15 text-blue-100";
+  if (subject.startsWith("国")) return "border-rose-300/30 bg-rose-300/15 text-rose-100";
+  if (subject.startsWith("英")) return "border-emerald-300/30 bg-emerald-300/15 text-emerald-100";
+  if (subject.startsWith("体")) return "border-orange-300/30 bg-orange-300/15 text-orange-100";
+  if (subject.startsWith("生")) return "border-lime-300/30 bg-lime-300/15 text-lime-100";
+  if (subject.startsWith("化")) return "border-cyan-300/30 bg-cyan-300/15 text-cyan-100";
+  if (subject.startsWith("地")) return "border-teal-300/30 bg-teal-300/15 text-teal-100";
+  if (subject.startsWith("歴")) return "border-amber-300/30 bg-amber-300/15 text-amber-100";
+  if (subject.startsWith("美")) return "border-fuchsia-300/30 bg-fuchsia-300/15 text-fuchsia-100";
+  if (subject.startsWith("音")) return "border-violet-300/30 bg-violet-300/15 text-violet-100";
+  if (subject.startsWith("家")) return "border-pink-300/30 bg-pink-300/15 text-pink-100";
+  if (subject.startsWith("総")) return "border-indigo-300/30 bg-indigo-300/15 text-indigo-100";
+  return "border-slate-300/25 bg-slate-300/10 text-slate-100";
+};
+
+const resolveTodayClasses = (
+  timetable: SchoolTimetable | undefined,
+  date: Date,
+  todayEvents: FamilyEvent[]
+): TodayClassSummary | null => {
+  if (!timetable) return null;
+  if (timetable.displayEnabled === false) return null;
+
+  const dateKey = todayKey(date);
+  const displayFrom =
+    timetable.displayFrom || SCHOOL_DISPLAY_DEFAULT_FROM;
+
+  if (dateKey < displayFrom) return null;
+
+  const weekday = weekdayKeyForSchoolDate(date);
+  if (!weekday) return null;
+
+  const schoolDayOff = todayEvents.some(
+    (event) =>
+      event.calendar_type === "school" &&
+      (event.is_day_off || event.event_type === "school_holiday")
+  );
+  if (schoolDayOff) return null;
+
+  const dayOverride = timetable.dailyOverrides?.[dateKey];
+  if (dayOverride?.noSchool) return null;
+
+  const baseSlots = timetable.weekdays?.[weekday] ?? [];
+  const limit =
+    dayOverride?.periodCount !== undefined
+      ? Math.max(0, Math.min(dayOverride.periodCount, baseSlots.length))
+      : baseSlots.length;
+
+  const classes: TodayClassItem[] = [];
+
+  for (let index = 0; index < limit; index += 1) {
+    const key = String(index);
+    const hasOverride = Object.prototype.hasOwnProperty.call(
+      dayOverride?.slots ?? {},
+      key
+    );
+    const overrideSlot = hasOverride
+      ? dayOverride?.slots?.[key]
+      : undefined;
+    const slot = hasOverride
+      ? overrideSlot
+      : baseSlots[index];
+
+    if (!slot?.subject?.trim()) continue;
+
+    classes.push({
+      period: index + 1,
+      subject: slot.subject,
+      short: subjectShortLabel(slot.subject),
+      time: timetable.dayTimes?.[index],
+      changed: hasOverride
+    });
+  }
+
+  if (classes.length === 0) return null;
+
+  return {
+    classes,
+    label: dayOverride?.label
+  };
+};
+
+function TodayClassesStrip({
+  summary,
+  compact = false
+}: {
+  summary: TodayClassSummary | null;
+  compact?: boolean;
+}) {
+  if (!summary) return null;
+
+  return (
+    <Link
+      href="/timetable"
+      className={`block rounded-xl border border-sky-200/15 bg-slate-950/35 backdrop-blur-sm ${
+        compact ? "px-2.5 py-2" : "px-3 py-2.5"
+      }`}
+      title="学校時間割を開く"
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={`font-semibold text-sky-100 ${
+            compact ? "text-[10px]" : "text-xs"
+          }`}
+        >
+          今日の授業 · {summary.classes.length}科目
+        </span>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          {summary.classes.map((item) => (
+            <span
+              key={`${item.period}-${item.subject}`}
+              className={`relative grid place-items-center rounded-lg border font-bold ${subjectPillClass(
+                item.subject
+              )} ${
+                compact
+                  ? "h-7 min-w-7 px-1 text-xs"
+                  : "h-8 min-w-8 px-1.5 text-sm"
+              }`}
+              title={`${item.period}限 ${item.subject}${
+                item.time ? ` · ${item.time}` : ""
+              }${item.changed ? " · 臨時変更" : ""}`}
+            >
+              {item.short}
+              {item.changed ? (
+                <sup className="absolute -right-1 -top-1 text-[9px] text-amber-200">
+                  ↻
+                </sup>
+              ) : null}
+            </span>
+          ))}
+        </div>
+
+        {summary.label ? (
+          <span
+            className={`truncate text-amber-100 ${
+              compact ? "text-[9px]" : "text-[10px]"
+            }`}
+          >
+            {summary.label}
+          </span>
+        ) : null}
+      </div>
+    </Link>
+  );
+}
 
 const weatherLabel = (code?: number) => {
   if (code === undefined) return "取得不可";
@@ -1112,6 +1312,11 @@ export default function DisplayPage() {
     );
 
     const primaryEvent = selectPrimaryTodayEvent(todayEvents, now);
+    const todayClasses = resolveTodayClasses(
+      state?.schoolTimetable,
+      now,
+      todayEvents
+    );
 
     const upcomingEvents = events
       .filter((event) => {
@@ -1191,6 +1396,7 @@ export default function DisplayPage() {
     return {
       todayEvents,
       primaryEvent,
+      todayClasses,
       upcomingEvents,
       notices,
       mainTasks,
@@ -1302,6 +1508,12 @@ export default function DisplayPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            ) : null}
+
+            {data.todayClasses ? (
+              <div className="mt-3">
+                <TodayClassesStrip summary={data.todayClasses} />
               </div>
             ) : null}
           </section>
@@ -1654,20 +1866,38 @@ export default function DisplayPage() {
                     ) : null}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
-                      <span className="text-cyan-200">▣</span>
-                      今日の予定 {data.todayEvents.length}件
-                    </div>
-                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
-                      <span className="text-cyan-200">◎</span>
-                      学校・子ども関連 {data.childEventsToday}件
+                  <div className="space-y-2">
+                    {data.todayClasses ? (
+                      <TodayClassesStrip
+                        summary={data.todayClasses}
+                        compact
+                      />
+                    ) : null}
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
+                        <span className="text-cyan-200">▣</span>
+                        今日の予定 {data.todayEvents.length}件
+                      </div>
+                      <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
+                        <span className="text-cyan-200">◎</span>
+                        学校・子ども関連 {data.childEventsToday}件
+                      </div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="relative z-10 grid h-[calc(100%-3rem)] place-items-center text-center text-[clamp(1.3rem,1.4vw,1.8rem)] text-slate-300">
-                  {data.todayEvents.length > 0 ? "今日の予定は終了しました" : "今日の大きな予定はありません"}
+                <div className="relative z-10 grid h-[calc(100%-3rem)] content-center gap-4">
+                  <div className="text-center text-[clamp(1.3rem,1.4vw,1.8rem)] text-slate-300">
+                    {data.todayEvents.length > 0 ? "今日の予定は終了しました" : "今日の大きな予定はありません"}
+                  </div>
+
+                  {data.todayClasses ? (
+                    <TodayClassesStrip
+                      summary={data.todayClasses}
+                      compact
+                    />
+                  ) : null}
                 </div>
               )}
             </article>
