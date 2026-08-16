@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ChildTask } from "@/types/activities";
 import type { BusTimetable } from "@/types/busTimetable";
@@ -385,6 +385,63 @@ function createMomHandwrittenCalendarEvents(): FamilyEvent[] {
   }));
 }
 
+const zkaiReviewEvents: Array<{
+  date: string;
+  title: string;
+  child_note: string;
+}> = [
+  {
+    date: "2026-08-16",
+    title: "Z浼?AI閫熷姽锝滄暟瀛?30鍒?,
+    child_note:
+      "鈽?鏂囧瓧寮忋倰浣裤仯銇熻鏄庡晱椤孿n鈽?1娆℃柟绋嬪紡銇▓绠梊n鈽?1娆℃柟绋嬪紡銇枃绔犻\n\n鐩殑锛氬綋鍓嶆渶鍊煎緱纭鐨?椤?
+  },
+  {
+    date: "2026-08-17",
+    title: "Z浼?AI閫熷姽锝滅悊绉?20鍒?,
+    child_note:
+      "鈽?韬伄銇俱倧銈娿伄鐗╄唱銇ㄣ仢銇€ц唱\n鈽?姘椾綋銇€ц唱\n\n鐩殑锛氭鐗┿€佸姩鐗╁凡鏈夎緝澶氬畬鎴愯瘉鎹紝涓嶉噸鍒?
+  },
+  {
+    date: "2026-08-18",
+    title: "Z浼?AI閫熷姽锝滆嫳瑾?30鍒?,
+    child_note:
+      "鈽?be鍕曡銇枃\n鈽?涓€鑸嫊瑭炪伄鏂囷紙I銆乊ou锛塡n鈽?涓€鑸嫊瑭炪伄鏂囷紙3浜虹О鍗樻暟锛塡n\n鐩殑锛氳繃鍘?Grammar / be鍔ㄨ瘝鐩稿叧鎴愮哗鏈夋槑鏄句笉绋冲畾锛屽€煎緱閲嶆柊纭"
+  },
+  {
+    date: "2026-08-19",
+    title: "Z浼?AI閫熷姽锝滄暟瀛︾⒑瑾?20鍒?,
+    child_note:
+      "8/16銇?闋呫亴鍩烘湰銇с亶銇︺亜銈屻伆锛歕n鈽?涔楁硶銇ㄩ櫎娉昞n鈽?鍥涘墖婕旂畻銆佹銇暟銉昏矤銇暟銇繙鐢╘n\n鐩殑锛氱幇鍦ㄨ繕浼氫笉浼氱殑涓€娆＄‘璁?
+  },
+  {
+    date: "2026-08-20",
+    title: "C Test 妯℃摤鈶狅綔绶忓悎瑷烘柇",
+    child_note:
+      "Z浼?AI閫熷姽銇仐銇亜銆俓nC Test 妯℃摤鈶犮倰瀹熸柦銇椼€?/21浠ラ檷銇京缈掋仚銈嬪急鐐广倰姹恒倎銈嬨€?
+  },
+  {
+    date: "2026-08-21",
+    title: "Z浼?AI閫熷姽锝淢ock寮辩偣 1锝?闋?20锝?0鍒?,
+    child_note:
+      "8/20銇甅ock绲愭灉銇嬨倝銆佹湰褰撱伀寮便亱銇ｃ仧1锝?闋呫仩銇戙倰閬告姙銇椼仸寰╃繏銇欍倠銆俓n鍏ㄩ儴銇瘎鍥层倰鍏堛伀鍒枫倝銇亜銆?
+  }
+];
+
+function createZkaiReviewCalendarEvents(): FamilyEvent[] {
+  return zkaiReviewEvents.map((event) => ({
+    id: `zkai-ai-review-${event.date}`,
+    title: event.title,
+    event_type: "other",
+    calendar_type: "child_activity",
+    date: event.date,
+    all_day: true,
+    visibility: "family",
+    need_parent_action: false,
+    child_note: event.child_note,
+    created_by: "study-plan-2026-08"
+  }));
+}
 const users: FamilyUser[] = [
   { id: "mom", email: "mom@example.com", display_name: "ママ", role: "admin", avatar: "🌸", color: "#e76f51", timezone: "Asia/Tokyo", preferred_language: "ja", notification_enabled: true },
   { id: "dad", email: "dad@example.com", display_name: "パパ", role: "parent", avatar: "💙", color: "#2a9d8f", timezone: "Asia/Tokyo", preferred_language: "ja", notification_enabled: true },
@@ -422,6 +479,7 @@ const initialState: AppState = {
     ...createSchoolYearCalendarEvents(),
     ...createBadmintonClubCalendarEvents(),
     ...createMomHandwrittenCalendarEvents(),
+    ...createZkaiReviewCalendarEvents(),
     { id: "e1", title: "学校面談", event_type: "school_interview", calendar_type: "school", date: isoDate(0), start_datetime: isoAt(isoDate(0), "15:00"), end_datetime: isoAt(isoDate(0), "15:40"), location: "学校", visibility: "family", need_parent_action: true, transport_owner: "ママ" },
     { id: "e2", title: "バドミントン部 練習", event_type: "badminton_practice", calendar_type: "child_activity", date: isoDate(1), start_datetime: isoAt(isoDate(1), "17:00"), end_datetime: isoAt(isoDate(1), "19:00"), location: "体育館", visibility: "family", need_transport: true, route_id: "r15", pickup_required: true },
     { id: "e3", title: "ピアノレッスン", event_type: "piano_lesson", calendar_type: "child_activity", date: isoDate(2), start_datetime: isoAt(isoDate(2), "16:30"), end_datetime: isoAt(isoDate(2), "17:15"), location: "ピアノ教室", visibility: "family", route_id: "r9", transport_owner: "パパ" },
@@ -473,7 +531,8 @@ function mergeDefaultData(state: AppState): AppState {
   const missingSchoolEvents = createSchoolYearCalendarEvents().filter(isMissingEvent);
   const missingBadmintonEvents = defaultBadmintonEvents.filter(isMissingEvent);
   const missingMomEvents = createMomHandwrittenCalendarEvents().filter(isMissingEvent);
-  const mergedEvents = [...missingCompanyEvents, ...missingSchoolEvents, ...missingBadmintonEvents, ...missingMomEvents, ...state.events]
+  const missingZkaiReviewEvents = createZkaiReviewCalendarEvents().filter(isMissingEvent);
+  const mergedEvents = [...missingCompanyEvents, ...missingSchoolEvents, ...missingBadmintonEvents, ...missingMomEvents, ...missingZkaiReviewEvents, ...state.events]
     .map((event) => ({
       ...event,
       start_datetime: defaultBadmintonById.get(event.id)?.start_datetime ?? event.start_datetime,
@@ -702,3 +761,4 @@ export function toggleTask(taskId: string) {
   saveState(next);
   return next;
 }
+
