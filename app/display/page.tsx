@@ -322,6 +322,11 @@ const musicStations: MusicStation[] = [
     url: "https://listen.181fm.com/181-classicalguitar_128k.mp3"
   },
   {
+    id: "scottish-bagpipes",
+    label: "Scottish Bagpipes · Celtic",
+    url: "https://celtic-sounds.stream.laut.fm/celtic-sounds"
+  },
+  {
     id: "jazz",
     label: "Jazz",
     url: "https://ice1.somafm.com/sonicuniverse-128-mp3"
