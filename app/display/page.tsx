@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  AlertCircle,
-  Bell,
   BookOpen,
   CalendarDays,
   CheckCircle2,
@@ -746,6 +744,184 @@ function TodayClassesStrip({
   );
 }
 
+type TwoDayFlash = {
+  category: string;
+  kind: "考试" | "常识";
+  title: string;
+  keyPoint: string;
+  hint: string;
+  question?: string;
+  answer?: string;
+};
+
+type TwoDayFlashView = TwoDayFlash & {
+  rangeLabel: string;
+};
+
+const TWO_DAY_FLASH_START = "2026-08-16";
+
+const twoDayFlashes: TwoDayFlash[] = [
+  {
+    category: "地理",
+    kind: "考试",
+    title: "时差",
+    keyPoint: "15° = 1小时",
+    hint: "往东算 → ＋　往西算 → －",
+    question: "日本18:00时，伦敦几点？",
+    answer: "9:00"
+  },
+  {
+    category: "数学",
+    kind: "考试",
+    title: "一次方程式",
+    keyPoint: "x + 7 = 15 → x = 8",
+    hint: "等式两边要做相同的运算",
+    question: "x - 5 = 9，x是多少？",
+    answer: "14"
+  },
+  {
+    category: "英语",
+    kind: "考试",
+    title: "三单现",
+    keyPoint: "He / She / It → 动词通常 + s",
+    hint: "I play. / She plays.",
+    question: "He (play) tennis. 怎么写？",
+    answer: "He plays tennis."
+  },
+  {
+    category: "理科",
+    kind: "考试",
+    title: "气体的性质",
+    keyPoint: "先看：颜色・气味・水溶性・比空气轻重",
+    hint: "做题时按固定顺序确认，不要凭印象猜",
+    question: "收集气体时，为什么要先看它是否溶于水？",
+    answer: "因为是否溶于水会影响能不能用排水法收集。"
+  },
+  {
+    category: "历史",
+    kind: "考试",
+    title: "文明",
+    keyPoint: "古代文明常在大河流域发展",
+    hint: "河流提供水、农业条件和交通便利",
+    question: "为什么早期文明常出现在大河附近？",
+    answer: "因为水源、灌溉、农业和交通条件较好。"
+  },
+  {
+    category: "常识",
+    kind: "常识",
+    title: "为什么有四季？",
+    keyPoint: "地轴倾斜 + 地球公转",
+    hint: "不是因为夏天地球离太阳更近",
+    question: "南半球和北半球的季节一样吗？",
+    answer: "相反。北半球是夏季时，南半球通常是冬季。"
+  }
+];
+
+const flashDateFromKey = (dateKey: string) => {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+};
+
+const flashDateLabel = (date: Date) =>
+  `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
+
+const twoDayFlashForDate = (date: Date): TwoDayFlashView => {
+  const dateKey = todayKey(date);
+  const start = flashDateFromKey(TWO_DAY_FLASH_START);
+  const current = flashDateFromKey(dateKey);
+  const dayOffset = Math.max(
+    0,
+    Math.floor((current.getTime() - start.getTime()) / 86_400_000)
+  );
+  const blockIndex = Math.floor(dayOffset / 2);
+  const flash = twoDayFlashes[blockIndex % twoDayFlashes.length];
+  const blockStart = new Date(start.getTime() + blockIndex * 2 * 86_400_000);
+  const blockEnd = new Date(blockStart.getTime() + 86_400_000);
+
+  return {
+    ...flash,
+    rangeLabel: `${flashDateLabel(blockStart)}–${flashDateLabel(blockEnd)}`
+  };
+};
+
+function TwoDayFlashCard({
+  flash,
+  mode = "full"
+}: {
+  flash: TwoDayFlashView;
+  mode?: "full" | "compact" | "tiny";
+}) {
+  if (mode === "tiny") {
+    return (
+      <div className="rounded-xl border border-cyan-200/10 bg-cyan-300/[0.07] px-3 py-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0 truncate text-xs font-semibold text-cyan-100">
+            ⚡ 今日知识点 · {flash.category}｜{flash.title}
+          </div>
+          <div className="shrink-0 text-[10px] text-slate-400">
+            {flash.rangeLabel}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === "compact") {
+    return (
+      <div className="rounded-xl border border-cyan-200/10 bg-cyan-300/[0.07] px-3 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[10px] font-bold tracking-[0.12em] text-cyan-200">
+            ⚡ 2-DAY FLASH · {flash.category}
+          </div>
+          <div className="text-[10px] text-slate-400">{flash.rangeLabel}</div>
+        </div>
+        <div className="mt-1 text-sm font-bold text-white">{flash.title}</div>
+        <div className="mt-1 text-sm font-semibold text-emerald-100">
+          {flash.keyPoint}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-cyan-200/12 bg-[linear-gradient(145deg,rgba(34,211,238,0.08),rgba(16,185,129,0.05))] p-3.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[10px] font-bold tracking-[0.12em] text-cyan-200">
+          ⚡ 2-DAY FLASH · {flash.kind}
+        </div>
+        <div className="rounded-full bg-white/[0.06] px-2 py-1 text-[9px] text-slate-300">
+          {flash.rangeLabel}
+        </div>
+      </div>
+
+      <div className="mt-2 flex items-center gap-2">
+        <span className="rounded-full bg-emerald-300/10 px-2 py-1 text-[10px] font-semibold text-emerald-100">
+          {flash.category}
+        </span>
+        <div className="text-base font-bold text-white">{flash.title}</div>
+      </div>
+
+      <div className="mt-2 text-[clamp(1rem,1vw,1.2rem)] font-bold text-cyan-100">
+        {flash.keyPoint}
+      </div>
+      <div className="mt-1 text-xs leading-relaxed text-slate-300">
+        {flash.hint}
+      </div>
+
+      {flash.question && flash.answer ? (
+        <details className="mt-2 rounded-lg bg-slate-950/28 px-3 py-2">
+          <summary className="cursor-pointer list-none text-xs font-semibold text-amber-100">
+            Q. {flash.question}　<span className="text-slate-400">答えを見る</span>
+          </summary>
+          <div className="mt-2 text-sm font-bold text-white">
+            A. {flash.answer}
+          </div>
+        </details>
+      ) : null}
+    </div>
+  );
+}
+
 const weatherLabel = (code?: number) => {
   if (code === undefined) return "取得不可";
   if (code === 0) return "晴れ";
@@ -1228,6 +1404,7 @@ export default function DisplayPage() {
   const [bookPicks, setBookPicks] = useState<BookPick[]>([]);
   const activeDayRef = useRef(todayKey(new Date()));
   const currentTodayBackground = todayCardBackgroundForDate(now);
+  const twoDayFlash = twoDayFlashForDate(now);
 
   useEffect(() => {
     let disposed = false;
@@ -1327,14 +1504,6 @@ export default function DisplayPage() {
       })
       .slice(0, 5);
 
-    const notices = events
-      .filter(
-        (event) =>
-          event.date >= today &&
-          (event.need_parent_action || event.parent_task)
-      )
-      .slice(0, 3);
-
     const learningTasks = (state?.tasks ?? [])
       .filter(
         (task) =>
@@ -1348,20 +1517,9 @@ export default function DisplayPage() {
         )
       );
 
-    const mainTasks = learningTasks
-      .filter(
-        (task) =>
-          !task.due_date || task.due_date <= today
-      )
-      .slice(0, 5);
-
-    const nextTasks = learningTasks
-      .filter(
-        (task) =>
-          Boolean(task.due_date) &&
-          (task.due_date ?? "") > today
-      )
-      .slice(0, 2);
+    const mainTasks = learningTasks.filter(
+      (task) => !task.due_date || task.due_date <= today
+    );
 
     const routineTasks = (state?.tasks ?? [])
       .filter(
@@ -1398,9 +1556,7 @@ export default function DisplayPage() {
       primaryEvent,
       todayClasses,
       upcomingEvents,
-      notices,
       mainTasks,
-      nextTasks,
       routineTasks,
       childEventsToday,
       streaks,
@@ -1545,7 +1701,7 @@ export default function DisplayPage() {
             ) : null}
 
             <div className="mt-3 grid gap-2">
-              {data.mainTasks.map((task) => (
+              {data.mainTasks.slice(0, 3).map((task) => (
                 <button
                   key={task.id}
                   type="button"
@@ -1578,6 +1734,29 @@ export default function DisplayPage() {
                   今日の学習タスクはありません
                 </div>
               ) : null}
+
+              {data.mainTasks.length > 3 ? (
+                <Link
+                  href="/learning"
+                  className="flex min-h-11 items-center justify-between rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 text-sm font-semibold text-slate-300"
+                >
+                  <span>还有 {data.mainTasks.length - 3} 项</span>
+                  <span>Learning →</span>
+                </Link>
+              ) : null}
+            </div>
+
+            <div className="mt-3">
+              <TwoDayFlashCard
+                flash={twoDayFlash}
+                mode={
+                  data.mainTasks.length >= 4
+                    ? "tiny"
+                    : data.mainTasks.length === 3
+                      ? "compact"
+                      : "full"
+                }
+              />
             </div>
           </section>
 
@@ -1734,35 +1913,6 @@ export default function DisplayPage() {
             </div>
           </section>
 
-          {data.notices.length > 0 ? (
-            <section className="rounded-2xl bg-amber-300/[0.12] p-4">
-              <div className="flex items-center gap-2 text-sm font-semibold text-amber-100">
-                <Bell className="h-5 w-5" />
-                QUICK NOTICE
-              </div>
-              <div className="mt-3 grid gap-2">
-                {data.notices.slice(0, 2).map((event) => (
-                  <div
-                    key={event.id}
-                    className="rounded-xl bg-amber-200/10 px-3 py-2.5"
-                  >
-                    <div className="text-xs text-amber-100">
-                      {formatShortDate(event.date)} {eventTimeRange(event)}
-                    </div>
-                    <div className="mt-1 text-sm font-semibold text-white">
-                      {event.title}
-                    </div>
-                    {event.parent_task ? (
-                      <div className="mt-1 text-xs text-slate-300">
-                        {event.parent_task}
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
           <section className="rounded-2xl bg-sky-300/[0.06] p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -1867,13 +2017,6 @@ export default function DisplayPage() {
                   </div>
 
                   <div className="space-y-2">
-                    {data.todayClasses ? (
-                      <TodayClassesStrip
-                        summary={data.todayClasses}
-                        compact
-                      />
-                    ) : null}
-
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
                         <span className="text-cyan-200">▣</span>
@@ -1891,13 +2034,6 @@ export default function DisplayPage() {
                   <div className="text-center text-[clamp(1.3rem,1.4vw,1.8rem)] text-slate-300">
                     {data.todayEvents.length > 0 ? "今日の予定は終了しました" : "今日の大きな予定はありません"}
                   </div>
-
-                  {data.todayClasses ? (
-                    <TodayClassesStrip
-                      summary={data.todayClasses}
-                      compact
-                    />
-                  ) : null}
                 </div>
               )}
             </article>
@@ -1973,95 +2109,82 @@ export default function DisplayPage() {
                 </div>
               ) : null}
 
-              {data.mainTasks.length > 0 ? (
-                <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_0.34fr] gap-4">
-                  <div className="grid min-h-0 content-start gap-2">
-                    {data.mainTasks.slice(0, 3).map((task) => (
-                      <div
-                        key={task.id}
-                        className="grid min-h-14 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/[0.05] bg-slate-950/24 px-3 py-2"
+              <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_0.38fr] gap-4">
+                <div className="grid min-h-0 content-start gap-2">
+                  {data.mainTasks.slice(0, 3).map((task) => (
+                    <div
+                      key={task.id}
+                      className="grid min-h-14 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/[0.05] bg-slate-950/24 px-3 py-2"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => completeTaskFromScreen(task)}
+                        className="grid h-10 w-10 place-items-center rounded-full border-2 border-emerald-200/90 bg-emerald-300/[0.05] text-emerald-100 transition active:scale-95 active:bg-emerald-300/25"
+                        aria-label={`${task.title} を完了にする`}
+                        title="タップして完了"
                       >
-                        <button
-                          type="button"
-                          onClick={() => completeTaskFromScreen(task)}
-                          className="grid h-10 w-10 place-items-center rounded-full border-2 border-emerald-200/90 bg-emerald-300/[0.05] text-emerald-100 transition active:scale-95 active:bg-emerald-300/25"
-                          aria-label={`${task.title} を完了にする`}
-                          title="タップして完了"
-                        >
-                          <Circle className="h-5 w-5" />
-                        </button>
+                        <Circle className="h-5 w-5" />
+                      </button>
 
-                        <div className="min-w-0">
-                          <div className="line-clamp-2 text-[clamp(1.05rem,1.05vw,1.3rem)] font-medium leading-snug text-white">
-                            {task.title}
-                          </div>
-                          {task.note ? (
-                            <div className="mt-0.5 truncate text-[clamp(0.8rem,0.75vw,0.9rem)] text-slate-300">
-                              {task.note}
-                            </div>
-                          ) : null}
+                      <div className="min-w-0">
+                        <div className="line-clamp-2 text-[clamp(1.05rem,1.05vw,1.3rem)] font-medium leading-snug text-white">
+                          {task.title}
                         </div>
-
-                        {task.due_date ? (
-                          <div
-                            className={`text-[clamp(0.8rem,0.78vw,0.95rem)] ${
-                              task.due_date < todayKey(now)
-                                ? "font-semibold text-amber-200"
-                                : "text-slate-300"
-                            }`}
-                          >
-                            {task.due_date < todayKey(now)
-                              ? `期限超過 ${dueText(task.due_date)}`
-                              : dueText(task.due_date)}
+                        {task.note ? (
+                          <div className="mt-0.5 truncate text-[clamp(0.8rem,0.75vw,0.9rem)] text-slate-300">
+                            {task.note}
                           </div>
                         ) : null}
                       </div>
-                    ))}
 
-                    <Link
-                      href="/learning"
-                      className="flex min-h-10 items-center rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 text-sm font-semibold text-slate-300 transition active:bg-white/[0.08]"
-                    >
-                      ＋ 学習ページを開く
-                    </Link>
-                  </div>
-
-                  <div className="min-h-0">
-                    <div className="mb-2 text-xs font-semibold tracking-[0.12em] text-emerald-100">
-                      NEXT
-                    </div>
-
-                    <div className="grid gap-2">
-                      {data.nextTasks.slice(0, 1).map((task) => (
+                      {task.due_date ? (
                         <div
-                          key={task.id}
-                          className="rounded-xl border border-emerald-200/[0.08] bg-emerald-300/10 px-3 py-3"
+                          className={`text-[clamp(0.8rem,0.78vw,0.95rem)] ${
+                            task.due_date < todayKey(now)
+                              ? "font-semibold text-amber-200"
+                              : "text-slate-300"
+                          }`}
                         >
-                          <div className="line-clamp-3 text-[clamp(1rem,1vw,1.2rem)] font-medium leading-snug text-white">
-                            → {task.title}
-                          </div>
-
-                          {task.due_date ? (
-                            <div className="mt-2 text-sm text-slate-300">
-                              {dueText(task.due_date)}
-                            </div>
-                          ) : null}
-                        </div>
-                      ))}
-
-                      {data.nextTasks.length === 0 ? (
-                        <div className="text-sm text-slate-300">
-                          次の学習タスクはありません
+                          {task.due_date < todayKey(now)
+                            ? `期限超過 ${dueText(task.due_date)}`
+                            : dueText(task.due_date)}
                         </div>
                       ) : null}
                     </div>
-                  </div>
+                  ))}
+
+                  {data.mainTasks.length === 0 ? (
+                    <div className="grid min-h-[110px] place-items-center rounded-xl bg-slate-950/30 text-center text-[clamp(1.1rem,1.1vw,1.4rem)] text-slate-300">
+                      今日の学習タスクはありません
+                    </div>
+                  ) : null}
+
+                  <Link
+                    href="/learning"
+                    className="flex min-h-10 items-center justify-between rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 text-sm font-semibold text-slate-300 transition active:bg-white/[0.08]"
+                  >
+                    <span>
+                      {data.mainTasks.length > 3
+                        ? `还有 ${data.mainTasks.length - 3} 项`
+                        : "＋ 学習ページを開く"}
+                    </span>
+                    <span>Learning →</span>
+                  </Link>
                 </div>
-              ) : (
-                <div className="grid min-h-[160px] place-items-center rounded-2xl bg-slate-950/30 text-center text-[clamp(1.25rem,1.3vw,1.65rem)] text-slate-300">
-                  今日の学習タスクはありません
+
+                <div className="min-h-0">
+                  <TwoDayFlashCard
+                    flash={twoDayFlash}
+                    mode={
+                      data.mainTasks.length >= 4
+                        ? "tiny"
+                        : data.mainTasks.length === 3
+                          ? "compact"
+                          : "full"
+                    }
+                  />
                 </div>
-              )}
+              </div>
             </article>
 
             <div className="grid min-h-0 grid-rows-[1fr_auto] gap-3">
@@ -2147,23 +2270,9 @@ export default function DisplayPage() {
                 </div>
               </article>
 
-              {data.notices.length > 0 ? (
-                <article className="rounded-2xl border border-amber-200/10 bg-amber-200/[0.09] px-4 py-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.1em] text-amber-100">
-                    <Bell className="h-4 w-4" />
-                    QUICK NOTICE
-                  </div>
-                  <div className="mt-1 truncate text-[clamp(0.9rem,0.9vw,1.05rem)] font-semibold text-white">
-                    {formatShortDate(data.notices[0].date)}{" "}
-                    {data.notices[0].title}
-                  </div>
-                </article>
-              ) : (
-                <article className="flex items-center gap-2 rounded-2xl border border-white/[0.05] bg-slate-950/30 px-4 py-3 text-xs text-slate-300">
-                  <AlertCircle className="h-4 w-4 text-amber-200" />
-                  確認が必要な予定はありません
-                </article>
-              )}
+              {data.todayClasses ? (
+                <TodayClassesStrip summary={data.todayClasses} compact />
+              ) : null}
             </div>
 
             <article className="min-h-0 overflow-hidden rounded-3xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
