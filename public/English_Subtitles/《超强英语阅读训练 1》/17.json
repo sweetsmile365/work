@@ -1,0 +1,109 @@
+{
+  "source_file": "《超强英语阅读训练 1》/17.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 125.544,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 0.91,
+      "end": 10.95,
+      "text": "17. The eye in the sky. How cool would it be to have a flying robot?"
+    },
+    {
+      "start": 10.95,
+      "end": 16.95,
+      "text": "What's the first thing you would do with it? Maybe send it into battle or use it to spy on your neighbors?"
+    },
+    {
+      "start": 16.95,
+      "end": 25.95,
+      "text": "Well, this is not just a fantasy anymore. Drones are remote-controlled flying robots and they are getting more popular every day."
+    },
+    {
+      "start": 25.95,
+      "end": 28.95,
+      "text": "But is this a good thing for society?"
+    },
+    {
+      "start": 28.95,
+      "end": 35.95,
+      "text": "The popularity of drones has exploded in recent years as technology has improved and gotten cheaper."
+    },
+    {
+      "start": 35.95,
+      "end": 43.95,
+      "text": "A standard drone with a high-quality camera and four helicopter propellers now sells online for just a few hundred US dollars."
+    },
+    {
+      "start": 43.95,
+      "end": 50.95,
+      "text": "Drones are extremely useful for making videos because their cameras link directly to phones or tablets."
+    },
+    {
+      "start": 50.95,
+      "end": 55.95,
+      "text": "Nowadays, anyone can get professional-looking flyby shots from unique angles."
+    },
+    {
+      "start": 55.95,
+      "end": 64.95,
+      "text": "But could this cause problems? Because drones are so affordable, it means that anyone can send a robot flying around the neighborhood."
+    },
+    {
+      "start": 64.95,
+      "end": 68.95,
+      "text": "People might be surprised to find a camera floating outside their window."
+    },
+    {
+      "start": 68.95,
+      "end": 73.95,
+      "text": "This should be a huge concern for people who care about their privacy."
+    },
+    {
+      "start": 73.95,
+      "end": 78.95,
+      "text": "Many governments also invest in drones, but for very different reasons."
+    },
+    {
+      "start": 78.95,
+      "end": 81.95,
+      "text": "The United States uses military drones for spying."
+    },
+    {
+      "start": 81.95,
+      "end": 90.95,
+      "text": "Its most powerful drones, however, are Predator drones, which can fly higher than 15,000 meters at over 300 kilometers per hour."
+    },
+    {
+      "start": 90.95,
+      "end": 93.95,
+      "text": "And no, they don't just take pretty videos."
+    },
+    {
+      "start": 93.95,
+      "end": 101.95,
+      "text": "A Predator drone can hold 360 kilograms worth of bombs, enough to completely destroy an enemy camp."
+    },
+    {
+      "start": 101.95,
+      "end": 108.95,
+      "text": "The soldier controlling the drone sits safely away from the action, so it's impossible to know for sure who is getting killed."
+    },
+    {
+      "start": 108.95,
+      "end": 111.95,
+      "text": "Innocent people might be in danger."
+    },
+    {
+      "start": 111.95,
+      "end": 116.95,
+      "text": "Drones are very new technology and people are still exploring their possible uses."
+    },
+    {
+      "start": 116.95,
+      "end": 122.95,
+      "text": "Maybe someday you'll come up with a new, cool way to use your own remote-controlled robot."
+    }
+  ]
+}

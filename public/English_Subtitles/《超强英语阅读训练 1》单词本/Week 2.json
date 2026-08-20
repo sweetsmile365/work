@@ -1,0 +1,54 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 2.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 284.787,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 2.29,
+      "end": 26.03,
+      "text": "Week 2. Day 1. Internet Gossip Websites. Gossip. Celebrity. Constant. Update. Rumor. Spread."
+    },
+    {
+      "start": 26.03,
+      "end": 58.65,
+      "text": "Instantly. Lawsuit. Publicity. Paparazzi. Photographer. Day 2. Hachiko. District. Commute. Greet. Suffer."
+    },
+    {
+      "start": 58.65,
+      "end": 95.34,
+      "text": "Stroke. Abandon. Escape. Day in and day out. Recognize. Former. Spot. Pass on. Erect. Honor. Day 3."
+    },
+    {
+      "start": 95.34,
+      "end": 123.0,
+      "text": "The Challenger Tragedy. Launch. Light up. Take off. Spill. Administration. Minor. Disaster. Flame. Lift off. Collide."
+    },
+    {
+      "start": 123.66,
+      "end": 157.32,
+      "text": "Explode. Tear apart. Mechanics. Contribute. Investigator. Flawed. Discourage. Day 4. Postmodern architecture. Architecture. Reaction."
+    },
+    {
+      "start": 158.32,
+      "end": 193.81,
+      "text": "Functional. Strictly. Skyscraper. Elaborate. Figure. Gabled. Post. Jet. Striking. Alive. Inspiring. Day 5."
+    },
+    {
+      "start": 193.81,
+      "end": 223.55,
+      "text": "Self-generated energy. Generate. Battery. Movement. Trick. Direct. Charge. Crank. Device. Gear. Generator. Artificial."
+    },
+    {
+      "start": 223.81,
+      "end": 257.5,
+      "text": "Swing. Kinetic. Day 6. You are what you eat. Ancient. Hormone. Generally. Protein. Alert. Nutrition. Stressed."
+    },
+    {
+      "start": 257.5,
+      "end": 281.32,
+      "text": "Ingredient. Transfat. Link 2. Depression. Forgetful. Violent. Serotonin. For the moment. In the long run."
+    }
+  ]
+}

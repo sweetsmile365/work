@@ -1,0 +1,69 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 3.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 301.035,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 3.31,
+      "end": 23.99,
+      "text": "Week three. Day one. Fighting for animals. A brief history. Debate. Empire. Cruel. Prevention."
+    },
+    {
+      "start": 23.99,
+      "end": 48.47,
+      "text": "Laboratory. Deadly. Congress. Welfare. Liberation. Fur. Labor. Promote. Vegetarianism. Ethical."
+    },
+    {
+      "start": 48.47,
+      "end": 78.36,
+      "text": "Front. Day two. K2. Range. Fatality. Savage. Fearsome. Rocky. Steeply. Dramatically."
+    },
+    {
+      "start": 78.36,
+      "end": 104.68,
+      "text": "Attempt. Summit. As of. Dissent. Avalanche. Exhaustion. Despite. Day three. Class and"
+    },
+    {
+      "start": 104.68,
+      "end": 127.8,
+      "text": "accent. Accent. Bias. Distinct. Drawl. Stretch. Reassuring. Unintelligent. Mock. Decisive."
+    },
+    {
+      "start": 128.76,
+      "end": 155.3,
+      "text": "Undesirable. Elocution. Respond to. Untrustworthy. Apparently. Accomplished. Prejudice. Irrational. Day"
+    },
+    {
+      "start": 155.3,
+      "end": 180.42,
+      "text": "four. He's a hit. Everywhere. Professional. Break records. Tough. Pitch. Field. Mostly. Bat. Naturally."
+    },
+    {
+      "start": 180.42,
+      "end": 208.97,
+      "text": "Muscular. Physically. Imposing. Regular. Outstanding. Draft. Numerous. Day five. The eye in the sky."
+    },
+    {
+      "start": 208.97,
+      "end": 231.69,
+      "text": "Spy. Drone. Remote controlled. Popularity. Explode. Helicopter. Propeller. Extremely. Unique."
+    },
+    {
+      "start": 231.69,
+      "end": 264.46,
+      "text": "Angle. Float. Concern. Military. Destroy. Innocent. Day six. Is it a fair trade? Notice. Label."
+    },
+    {
+      "start": 264.54,
+      "end": 286.54,
+      "text": "Packaging. Sustainable. Poverty. Compassionate. Principle. Current. Invest. Expand. Avoid."
+    },
+    {
+      "start": 286.54,
+      "end": 296.94,
+      "text": "Middleman. Practice. Credit. At any point."
+    }
+  ]
+}

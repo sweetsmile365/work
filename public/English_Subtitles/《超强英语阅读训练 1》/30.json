@@ -1,0 +1,94 @@
+{
+  "source_file": "《超强英语阅读训练 1》/30.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 125.806,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 0.91,
+      "end": 11.61,
+      "text": "30. Reusing versus recycling. Reusing and recycling may sound similar, but they are"
+    },
+    {
+      "start": 11.61,
+      "end": 17.67,
+      "text": "actually quite different. Recycling has become more and more popular around the world in"
+    },
+    {
+      "start": 17.67,
+      "end": 24.99,
+      "text": "the last 20 or 30 years, while people have reused materials throughout history. Nowadays,"
+    },
+    {
+      "start": 24.99,
+      "end": 30.77,
+      "text": "people are talking more about reusing as a better alternative to recycling. So how is"
+    },
+    {
+      "start": 30.77,
+      "end": 37.97,
+      "text": "reusing different from recycling? Well, reusing something means that the object is still used"
+    },
+    {
+      "start": 37.97,
+      "end": 44.85,
+      "text": "for its original purpose. The goal of reusing is to help objects and materials lengthen their lives."
+    },
+    {
+      "start": 44.85,
+      "end": 52.17,
+      "text": "If you had an old oven, for example, you could reuse it by giving it to someone else. Maybe that"
+    },
+    {
+      "start": 52.17,
+      "end": 59.33,
+      "text": "person could repair it or upgrade it, but still use it as an oven. Recycling it, on the other hand,"
+    },
+    {
+      "start": 59.41,
+      "end": 66.33,
+      "text": "means the oven is taken apart. Its parts are used in different ways in new objects. When you give"
+    },
+    {
+      "start": 66.33,
+      "end": 72.57,
+      "text": "away clothes for other people to wear, that is reusing them. Cutting clothes up into rags is"
+    },
+    {
+      "start": 72.57,
+      "end": 81.33,
+      "text": "recycling them. More people are now focusing on reusing in addition to recycling. They say reusing"
+    },
+    {
+      "start": 81.33,
+      "end": 88.49,
+      "text": "should be our first step before we think about recycling. Reusing uses less energy than recycling."
+    },
+    {
+      "start": 88.49,
+      "end": 95.69,
+      "text": "It also causes less environmental damage because recycling often means that materials must be broken"
+    },
+    {
+      "start": 95.69,
+      "end": 102.89,
+      "text": "down or melted in polluting factories. People also say reusing helps create communities and"
+    },
+    {
+      "start": 102.89,
+      "end": 110.49,
+      "text": "helps people think about how they might be able to share more. Clearly, reusing and recycling will"
+    },
+    {
+      "start": 110.49,
+      "end": 116.99,
+      "text": "both be important as we all try to be less wasteful. But perhaps recycling less should"
+    },
+    {
+      "start": 116.99,
+      "end": 122.15,
+      "text": "actually be our new goal, as long as it means we are all reusing more."
+    }
+  ]
+}

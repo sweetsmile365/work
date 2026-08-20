@@ -1,0 +1,59 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 12.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 271.125,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 3.38,
+      "end": 22.58,
+      "text": "Week 12. Day 1. The Leaning Tower of Pisa. Leaning. Sight. Vertical. Be supposed to."
+    },
+    {
+      "start": 22.74,
+      "end": 49.69,
+      "text": "Foundation. Take some time off. Leave alone. Tilt. Chamber. Lead. Stabilize. Day 2. A house"
+    },
+    {
+      "start": 49.69,
+      "end": 75.29,
+      "text": "full of junk. Full of. Bear. Childhood. Outdated. Emergency. Hoard. Part with. Possession. Enormous."
+    },
+    {
+      "start": 75.29,
+      "end": 99.36,
+      "text": "Disorganized. Fill up with. Be recognized as. Participate. Day 3. Magic Realism. Concept."
+    },
+    {
+      "start": 99.38,
+      "end": 126.2,
+      "text": "Tactic. Realism. Come from. Be associated with. Fantasy. Supernatural. Setting. Critic. Out-of-date. Racism. Genre."
+    },
+    {
+      "start": 126.2,
+      "end": 160.6,
+      "text": "Play an important role. Merge. Light fiction. Day 4. Charlie Chaplin. A serious man. Expressive. Waddle. Nazi. Urge. Antics. Dictator."
+    },
+    {
+      "start": 161.56,
+      "end": 188.31,
+      "text": "Climax. Democracy. Authorities. Harass. Oppose. Ashamed. Day 5. Dissertification."
+    },
+    {
+      "start": 189.11,
+      "end": 214.23,
+      "text": "Agriculture. Biodiversity. Drought. Farm. Erode. Overgrace. Ecosystem. Restore. Do. Degrade."
+    },
+    {
+      "start": 214.23,
+      "end": 243.45,
+      "text": "Reforestation. Solution. Day 6. Look away from the light. Reak. Havoc. Cycle. Give off. Wavelength."
+    },
+    {
+      "start": 243.45,
+      "end": 267.93,
+      "text": "Favor. Match. Brightness. Similarity. Melatonin. Disturb. Shift. Diabetes. Powerless. Block out."
+    }
+  ]
+}

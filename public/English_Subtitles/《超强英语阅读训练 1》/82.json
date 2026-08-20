@@ -1,0 +1,89 @@
+{
+  "source_file": "《超强英语阅读训练 1》/82.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 113.972,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.17,
+      "end": 12.1,
+      "text": "82. Wind power. Around the world, people are looking for new, longer-lasting sources"
+    },
+    {
+      "start": 12.1,
+      "end": 19.06,
+      "text": "of energy. One of these sources is the wind. Wind power has the potential to be an important"
+    },
+    {
+      "start": 19.06,
+      "end": 26.58,
+      "text": "new way to create electricity. Wind power really is clean. Using wind turbines to generate"
+    },
+    {
+      "start": 26.58,
+      "end": 33.66,
+      "text": "electricity creates no air pollution and requires no fuel. Using more wind power would actually"
+    },
+    {
+      "start": 33.66,
+      "end": 40.46,
+      "text": "reduce pollution, as we would use less power from polluting sources. Besides, wind is free."
+    },
+    {
+      "start": 41.18,
+      "end": 47.9,
+      "text": "Building a turbine or mill costs money, but the wind itself costs nothing. In addition to being"
+    },
+    {
+      "start": 47.9,
+      "end": 53.98,
+      "text": "free, wind is sustainable. We won't run out of wind the way we will run out of coal, oil, or other"
+    },
+    {
+      "start": 53.98,
+      "end": 61.02,
+      "text": "fuel sources. In fact, the power wind can create is much greater than the world's current energy"
+    },
+    {
+      "start": 61.02,
+      "end": 67.74,
+      "text": "needs, and the power can help people or small communities be self-reliant. They would rely only"
+    },
+    {
+      "start": 67.74,
+      "end": 75.66,
+      "text": "on their turbine, not a city power grid. However, even wind power has some drawbacks. Some people"
+    },
+    {
+      "start": 75.66,
+      "end": 81.98,
+      "text": "find wind turbines ugly. They think the turbines ruin the landscape. The turbines can also be quite"
+    },
+    {
+      "start": 81.98,
+      "end": 88.38,
+      "text": "loud, which is a problem for people and animals nearby. The turbines may affect animals more than"
+    },
+    {
+      "start": 88.38,
+      "end": 94.7,
+      "text": "people. They can disrupt birds' flight patterns. What's worse, they may frighten other animals away"
+    },
+    {
+      "start": 94.7,
+      "end": 101.98,
+      "text": "from the area. The turbines can also cause problems with TV signals. The key to making wind power work"
+    },
+    {
+      "start": 101.98,
+      "end": 108.3,
+      "text": "seems to be building more and better turbines. If we do that, it seems likely that wind power"
+    },
+    {
+      "start": 108.3,
+      "end": 111.1,
+      "text": "will be more and more important in our future."
+    }
+  ]
+}

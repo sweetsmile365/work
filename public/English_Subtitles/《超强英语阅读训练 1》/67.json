@@ -1,0 +1,64 @@
+{
+  "source_file": "《超强英语阅读训练 1》/67.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 136.856,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.14,
+      "end": 16.34,
+      "text": "67. The Leaning Tower of Pisa. Only 3.99 degrees. That's what turns just a pretty little building into one of the world's most famous sights."
+    },
+    {
+      "start": 16.34,
+      "end": 31.34,
+      "text": "The Torre de Pisa, or the Leaning Tower of Pisa, tilts 3.99 degrees from vertical. That means its top is 3.9 meters away from where it would be if the tower went straight up and down."
+    },
+    {
+      "start": 31.34,
+      "end": 44.34,
+      "text": "The tower wasn't supposed to lean, of course. When it was begun, in 1173, the city of Pisa simply wanted another tower. However, the design of the tower was flawed."
+    },
+    {
+      "start": 44.34,
+      "end": 53.34,
+      "text": "The foundation, the support for the bottom of the building, wasn't large enough. It was also built on soil that was too soft to hold it."
+    },
+    {
+      "start": 53.34,
+      "end": 65.34,
+      "text": "Just five years after the tower was begun, it started to sink. At that time, only three floors were built. The city decided to take some time off from building the tower."
+    },
+    {
+      "start": 65.34,
+      "end": 80.34,
+      "text": "They wanted to give it time to settle. Besides, they were busy fighting a war with a neighboring city. The tower was left alone for nearly 100 years. Beginning in 1272, four more floors were added."
+    },
+    {
+      "start": 80.34,
+      "end": 95.34,
+      "text": "They were built at an angle to try to make up for the tilt of the tower. The last floor, the bell chamber at the top, was added in 1372. Then, it was left alone to sink slowly."
+    },
+    {
+      "start": 95.34,
+      "end": 106.34,
+      "text": "The beautiful white marble tower has been slowly tilting for centuries. In 1934, to try to stop it, architects injected cement into its foundation."
+    },
+    {
+      "start": 107.34,
+      "end": 113.34,
+      "text": "This was a mistake. As it damaged the base even more, it began to lean further."
+    },
+    {
+      "start": 114.34,
+      "end": 123.34,
+      "text": "Architects are working on different ways to keep the tower steady. Lead weights were added to stabilize it, and soil was removed from one side."
+    },
+    {
+      "start": 123.34,
+      "end": 133.34,
+      "text": "The building is now open to the public again and seems to be stable. People can continue to come see the building that is beloved for its greatest flaw."
+    }
+  ]
+}

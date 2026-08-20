@@ -1,0 +1,104 @@
+{
+  "source_file": "《超强英语阅读训练 1》/11.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 134.896,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.33,
+      "end": 12.23,
+      "text": "11. Self-Generated Energy. Imagine a world without batteries or chargers."
+    },
+    {
+      "start": 12.23,
+      "end": 18.31,
+      "text": "What if you could power your electronic devices just by moving around? It's not as crazy as"
+    },
+    {
+      "start": 18.31,
+      "end": 25.55,
+      "text": "it sounds. Movement creates energy, and people move all the time. The trick is to collect"
+    },
+    {
+      "start": 25.55,
+      "end": 33.03,
+      "text": "that energy and direct it. The idea of creating energy with movement isn't new. Many objects"
+    },
+    {
+      "start": 33.03,
+      "end": 39.59,
+      "text": "in the past and the present are charged with cranks, radios, flashlights, or even phone"
+    },
+    {
+      "start": 39.59,
+      "end": 44.87,
+      "text": "chargers. You turn the crank for a certain amount of time, and enough energy is created"
+    },
+    {
+      "start": 44.87,
+      "end": 52.75,
+      "text": "to power the device. The newest idea is a bit different and a bit more difficult. Instead"
+    },
+    {
+      "start": 52.75,
+      "end": 58.77,
+      "text": "of using a specific movement, turning a crank, the idea is to catch and use the energy we"
+    },
+    {
+      "start": 58.77,
+      "end": 65.09,
+      "text": "create with our regular movements in our daily life. One way to get this energy is"
+    },
+    {
+      "start": 65.09,
+      "end": 72.21,
+      "text": "with an energy harvester designed by Max Donilon. The device fits behind your knee and connects"
+    },
+    {
+      "start": 72.21,
+      "end": 78.29,
+      "text": "to the leg muscles. When you walk and move your knee, the movement turns small gears,"
+    },
+    {
+      "start": 78.29,
+      "end": 84.17,
+      "text": "which send energy to a generator. The energy could then be used to charge batteries or"
+    },
+    {
+      "start": 84.17,
+      "end": 91.57,
+      "text": "even power artificial joints. Another object uses energy from walking in a different way."
+    },
+    {
+      "start": 91.57,
+      "end": 98.01,
+      "text": "The e-bag is a snack cooler. You swing the bag as you carry it. The handle collects the"
+    },
+    {
+      "start": 98.01,
+      "end": 105.53,
+      "text": "energy from the swinging motion and uses it to cool the food inside. Some objects have"
+    },
+    {
+      "start": 105.53,
+      "end": 112.09,
+      "text": "to be moved to be used. It makes sense to use the energy from moving them to power them,"
+    },
+    {
+      "start": 112.33,
+      "end": 120.13,
+      "text": "that's the idea behind a new kinetic mouse. Moving the mouse keeps it powered. Self-generated"
+    },
+    {
+      "start": 120.13,
+      "end": 126.53,
+      "text": "and kinetic energy uses are still being developed. As people try to be cleaner and greener,"
+    },
+    {
+      "start": 126.53,
+      "end": 131.17,
+      "text": "we can expect to see more objects that depend on our bodies for power."
+    }
+  ]
+}

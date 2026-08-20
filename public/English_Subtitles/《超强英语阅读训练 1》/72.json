@@ -1,0 +1,109 @@
+{
+  "source_file": "《超强英语阅读训练 1》/72.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 118.361,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 0.98,
+      "end": 11.18,
+      "text": "72. Look away from the light. Smartphones have changed the way we live. We use them"
+    },
+    {
+      "start": 11.18,
+      "end": 16.02,
+      "text": "for just about everything now, communicating, learning, laughing, and even getting around"
+    },
+    {
+      "start": 16.02,
+      "end": 21.66,
+      "text": "our cities. But not all the changes have been good ones. One negative consequence of our"
+    },
+    {
+      "start": 21.66,
+      "end": 27.82,
+      "text": "smartphone use is that it's wreaking havoc on our body's natural cycles. The problem"
+    },
+    {
+      "start": 27.82,
+      "end": 33.42,
+      "text": "has to do with the blue light given off by smartphones and other electronics. Blue light"
+    },
+    {
+      "start": 33.42,
+      "end": 39.58,
+      "text": "has a very short wavelength and produces a higher amount of energy than normal light."
+    },
+    {
+      "start": 39.58,
+      "end": 44.26,
+      "text": "Smartphone producers favor it because it matches the brightness of sunlight. This makes it"
+    },
+    {
+      "start": 44.26,
+      "end": 49.42,
+      "text": "easier to read what's on your smartphone's screen in daylight. But it's this very"
+    },
+    {
+      "start": 49.42,
+      "end": 55.26,
+      "text": "similarity to sunlight that causes our body's problems. The human body normally releases"
+    },
+    {
+      "start": 55.26,
+      "end": 60.98,
+      "text": "a chemical called melatonin after the sun goes down. This chemical tells us it's time"
+    },
+    {
+      "start": 60.98,
+      "end": 66.82,
+      "text": "to go to sleep. But here's where your smartphone comes in. Imagine a normal evening of riding"
+    },
+    {
+      "start": 66.82,
+      "end": 72.14,
+      "text": "the bus home, cooking dinner, and then going to bed. You're probably checking your smartphone"
+    },
+    {
+      "start": 72.14,
+      "end": 77.18,
+      "text": "the whole time, right? Well, all that blue light is tricking your body into thinking"
+    },
+    {
+      "start": 77.18,
+      "end": 82.58,
+      "text": "that it's still daytime. As a result, your natural cycle is disturbed and it's harder"
+    },
+    {
+      "start": 82.58,
+      "end": 88.14,
+      "text": "to get a good night's sleep. A disturbed sleep cycle has been proven to lead to other"
+    },
+    {
+      "start": 88.14,
+      "end": 93.18,
+      "text": "health problems. In one study, researchers linked working a night shift to increase"
+    },
+    {
+      "start": 93.18,
+      "end": 99.54,
+      "text": "chances of diabetes and heart disease. Luckily, we're not totally powerless. There are some"
+    },
+    {
+      "start": 99.54,
+      "end": 105.38,
+      "text": "things we can do to beat blue light. Try to avoid using your smartphone for an hour or"
+    },
+    {
+      "start": 105.38,
+      "end": 111.46,
+      "text": "two before bed. There are also special glasses you can buy to block out blue light. And you"
+    },
+    {
+      "start": 111.46,
+      "end": 116.14,
+      "text": "could always just stop using your smartphone altogether. Good luck with that one."
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "source_file": "《超强英语阅读训练 1》/04.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 134.139,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.46,
+      "end": 11.9,
+      "text": "4. Who stole my money? I remember when a can of coke was 25 cents."
+    },
+    {
+      "start": 11.9,
+      "end": 19.1,
+      "text": "My parents could buy candy for a penny. Today, you might pay a dollar for a soda, and nothing"
+    },
+    {
+      "start": 19.1,
+      "end": 27.02,
+      "text": "costs a penny. So, what happened? Inflation, that's what. Inflation is often called too"
+    },
+    {
+      "start": 27.1,
+      "end": 33.5,
+      "text": "many dollars chasing too few goods. It's when prices in a country rise across the board."
+    },
+    {
+      "start": 34.14,
+      "end": 40.54,
+      "text": "If your favorite snack gets a bit more expensive, that's not inflation. But when the price of your"
+    },
+    {
+      "start": 40.54,
+      "end": 49.26,
+      "text": "snack, bread, sugar, gasoline, and many other things all rise at the same time, that's inflation."
+    },
+    {
+      "start": 50.06,
+      "end": 53.5,
+      "text": "Inflation means your money buys less than it used to."
+    },
+    {
+      "start": 54.46,
+      "end": 61.66,
+      "text": "Experts have different views on why and how inflation happens. One reason for inflation"
+    },
+    {
+      "start": 61.66,
+      "end": 68.38,
+      "text": "is an increase in the supply of money. Generally, when the supply of something goes up, the demand"
+    },
+    {
+      "start": 68.38,
+      "end": 76.3,
+      "text": "for it goes down. In other words, its value goes down. So, when there is a lot of money circulating,"
+    },
+    {
+      "start": 76.3,
+      "end": 83.02,
+      "text": "each piece of money becomes less valuable. Another cause of inflation is a rise in production"
+    },
+    {
+      "start": 83.02,
+      "end": 90.14,
+      "text": "costs. This means it costs more money to make a particular product. The price of a candy bar"
+    },
+    {
+      "start": 90.14,
+      "end": 96.62,
+      "text": "may go up if the nuts in it are suddenly more expensive, or if the workers making it are paid"
+    },
+    {
+      "start": 96.62,
+      "end": 103.82,
+      "text": "higher wages. Higher taxes can also cause inflation. When items are taxed, people who"
+    },
+    {
+      "start": 103.9,
+      "end": 110.94,
+      "text": "produce goods don't want to see their profits go down. Instead, they raise their prices. This is"
+    },
+    {
+      "start": 110.94,
+      "end": 118.06,
+      "text": "called transferring the burden to the consumer. It means that producers make the same in profits,"
+    },
+    {
+      "start": 118.06,
+      "end": 124.54,
+      "text": "and the people buying the products are the ones who suffer. Inflation is complicated. Track the"
+    },
+    {
+      "start": 124.54,
+      "end": 130.62,
+      "text": "prices of some goods you are interested in and see if you can understand why they've changed over time."
+    }
+  ]
+}

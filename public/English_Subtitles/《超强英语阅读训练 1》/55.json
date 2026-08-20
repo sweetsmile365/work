@@ -1,0 +1,104 @@
+{
+  "source_file": "《超强英语阅读训练 1》/55.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 111.726,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 0.82,
+      "end": 6.82,
+      "text": "55. Man or machine. The strange new world of e-skin."
+    },
+    {
+      "start": 7.82,
+      "end": 13.82,
+      "text": "Chances are you own a computer, smartphone or some other device which gives you information on a screen."
+    },
+    {
+      "start": 13.82,
+      "end": 16.82,
+      "text": "But what if you could be such a device yourself?"
+    },
+    {
+      "start": 16.82,
+      "end": 23.82,
+      "text": "With the development of e-skin technology, our path to becoming cyborgs may have just gotten a lot shorter."
+    },
+    {
+      "start": 23.82,
+      "end": 29.82,
+      "text": "Electronic skin, or e-skin, was first created for use on artificial limbs and robots."
+    },
+    {
+      "start": 30.82,
+      "end": 36.82,
+      "text": "Recent improvements, however, have produced a highly flexible plastic film less than two millionths of a meter thick."
+    },
+    {
+      "start": 36.82,
+      "end": 43.82,
+      "text": "This film can be worn directly on human skin and connected to sensors which measure one's heart rate and blood oxygen level."
+    },
+    {
+      "start": 43.82,
+      "end": 48.82,
+      "text": "These measurements are then displayed on the film just as they would be on a computer screen."
+    },
+    {
+      "start": 48.82,
+      "end": 54.82,
+      "text": "And since this new e-skin keeps out water and oxygen, it can be worn for several days."
+    },
+    {
+      "start": 54.82,
+      "end": 58.82,
+      "text": "This allows a person's physical condition to be tracked over time."
+    },
+    {
+      "start": 59.82,
+      "end": 63.82,
+      "text": "But we humans aren't the only ones who could be changed by this strange new technology."
+    },
+    {
+      "start": 63.82,
+      "end": 69.82,
+      "text": "Scientists believe e-skin will soon have the power to give robots an actual sense of touch."
+    },
+    {
+      "start": 69.82,
+      "end": 76.82,
+      "text": "This might enable them to perform surgery and other very delicate tasks without any human involvement at all."
+    },
+    {
+      "start": 77.82,
+      "end": 82.82,
+      "text": "Needless to say, non-medical uses for e-skin are already being planned."
+    },
+    {
+      "start": 82.82,
+      "end": 88.82,
+      "text": "Scientists imagine a time when our feelings and states of mind will be shown right on our bodies."
+    },
+    {
+      "start": 88.82,
+      "end": 96.82,
+      "text": "Tech companies are looking into replacing handheld devices with wearable gadgets whose displays will appear on a person's arm or hand."
+    },
+    {
+      "start": 96.82,
+      "end": 101.82,
+      "text": "The possibilities are amazing, but also more than a little scary."
+    },
+    {
+      "start": 101.82,
+      "end": 104.82,
+      "text": "Right now, we can still believe that people control machines."
+    },
+    {
+      "start": 104.82,
+      "end": 109.82,
+      "text": "But if people are the machines, who will control us?"
+    }
+  ]
+}

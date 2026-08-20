@@ -1,0 +1,114 @@
+{
+  "source_file": "《超强英语阅读训练 1》/09.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 144.849,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.55,
+      "end": 12.66,
+      "text": "9. The Challenger Tragedy. On January 28, 1986, thousands of people watched the launch"
+    },
+    {
+      "start": 12.66,
+      "end": 19.78,
+      "text": "of the Challenger space shuttle on television. Many were students in classrooms, like I was."
+    },
+    {
+      "start": 19.78,
+      "end": 24.86,
+      "text": "Challenger stood on the launch pad, rocket boosters underneath it lit up, and Challenger"
+    },
+    {
+      "start": 24.86,
+      "end": 32.74,
+      "text": "shot up into the blue sky. We students watched. Then, just over a minute after takeoff, Challenger"
+    },
+    {
+      "start": 32.74,
+      "end": 38.22,
+      "text": "broke apart. Streams of smoke spilled from it, and the shuttle fell in pieces into the"
+    },
+    {
+      "start": 38.22,
+      "end": 45.38,
+      "text": "ocean. People experienced a tragedy that day, and at NASA, the National Aeronautics and"
+    },
+    {
+      "start": 45.38,
+      "end": 52.44,
+      "text": "Space Administration, experts wanted to learn what went wrong. Challenger had minor problems"
+    },
+    {
+      "start": 52.44,
+      "end": 58.48,
+      "text": "from the start, but the disaster was caused by something called an O-ring. The O-ring"
+    },
+    {
+      "start": 58.48,
+      "end": 64.12,
+      "text": "was supposed to protect Challenger from the hot gas of a rocket booster. But the cold"
+    },
+    {
+      "start": 64.12,
+      "end": 69.98,
+      "text": "weather on the morning of the launch stopped the O-ring from working. Gases and flames"
+    },
+    {
+      "start": 69.98,
+      "end": 76.32,
+      "text": "burned through one fuel tank as the shuttle lifted off. Stronged winds helped the flames."
+    },
+    {
+      "start": 76.32,
+      "end": 82.28,
+      "text": "A fuel tank and a rocket booster collided. The fuel exploded and tore the Challenger"
+    },
+    {
+      "start": 82.28,
+      "end": 89.36,
+      "text": "apart. Bad mechanics and bad weather both contributed, but humans could have stopped"
+    },
+    {
+      "start": 89.36,
+      "end": 96.44,
+      "text": "this disaster. NASA investigators learned that engineers knew the O-ring was flawed."
+    },
+    {
+      "start": 96.44,
+      "end": 102.36,
+      "text": "It should have been redesigned, but its flaws weren't reported. Instead, the flaws were"
+    },
+    {
+      "start": 102.36,
+      "end": 108.98,
+      "text": "accepted. Investigators found that engineers only told the O-ring designer about its problems,"
+    },
+    {
+      "start": 108.98,
+      "end": 115.18,
+      "text": "not their NASA managers. This was against the rules, but the safety culture at NASA"
+    },
+    {
+      "start": 115.18,
+      "end": 122.94,
+      "text": "discouraged talking about problems. The Challenger disaster teaches us to speak up. Problems"
+    },
+    {
+      "start": 122.94,
+      "end": 129.86,
+      "text": "must be faced, not avoided, even if talking about them is unpopular. When people are afraid"
+    },
+    {
+      "start": 129.86,
+      "end": 137.1,
+      "text": "to say anything but, yes, terrible accidents can happen. NASA's new regulations are designed"
+    },
+    {
+      "start": 137.1,
+      "end": 141.66,
+      "text": "to prevent that. Let's hope we've learned our lesson from Challenger."
+    }
+  ]
+}

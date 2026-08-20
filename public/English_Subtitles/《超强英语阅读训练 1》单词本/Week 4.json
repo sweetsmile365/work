@@ -1,0 +1,69 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 4.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 296.464,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 3.28,
+      "end": 21.68,
+      "text": "Week 4. Day 1. Our Little Green Friends. Appearance. Reduce. Photosynthesis. Carbon"
+    },
+    {
+      "start": 21.68,
+      "end": 44.56,
+      "text": "dioxide. Oxygen. Absorb. Harmful. Chemical. Tropical. Adapt. Survive. Fern. Formaldehyde."
+    },
+    {
+      "start": 44.56,
+      "end": 70.5,
+      "text": "Option. Gerbera daisy. Money plant. Spider plant. Snake plant. Day 2. Bored but never boring."
+    },
+    {
+      "start": 70.5,
+      "end": 95.38,
+      "text": "Tomb. Mention. Document. Alongside. Variety. Path. Roll of dice. Tile. Monopoly. Property."
+    },
+    {
+      "start": 95.38,
+      "end": 122.86,
+      "text": "Trivial. Pursuit. Feature. Theme. Competition. Rent. Face-to-face. Day 3. Playing on the go."
+    },
+    {
+      "start": 122.86,
+      "end": 147.42,
+      "text": "Attached. Along with. Replace. Browser. App. Application. Various. Manage. Potential. Planet."
+    },
+    {
+      "start": 147.42,
+      "end": 175.54,
+      "text": "Disadvantage. Nightmare. Day 4. Plastic surgery. Common. Wealthy. Surprisingly. Surgeon. Horrific."
+    },
+    {
+      "start": 175.54,
+      "end": 197.14,
+      "text": "Injury. Confident. Untrained. Procedure. Result from. Implant. Commit suicide. Devastating."
+    },
+    {
+      "start": 197.14,
+      "end": 231.7,
+      "text": "End up. Day 5. The ancient art of the brush. Dynasty. Highly. Calligraphy. Bronze. Religious. Convey. Authority. Pine."
+    },
+    {
+      "start": 231.7,
+      "end": 262.11,
+      "text": "Smooth. Stroke. Order. Relive. Intimate. Day 6. Free running. Acrobatics. Prop. Interact with."
+    },
+    {
+      "start": 262.11,
+      "end": 291.55,
+      "text": "Obstacle. Parkour. Efficiency. Preservation. Ramp. Element. Scale. Flip. Athletic. Stunt. Dedicate. Solely."
+    },
+    {
+      "start": 291.55,
+      "end": 294.43,
+      "text": "Duck."
+    }
+  ]
+}

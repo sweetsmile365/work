@@ -1,0 +1,64 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 16.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 303.073,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 2.83,
+      "end": 26.17,
+      "text": "Week 16. Day 1. Dylan Thomas. Script. Talented. Asthma. Bronchitis. Prefer. Drop out of school."
+    },
+    {
+      "start": 26.81,
+      "end": 54.48,
+      "text": "Journalist. Fuse. Dominion. Volume. Publish. Smog. Pneumonia. Day 2. The Fall and Rise of Pompeii."
+    },
+    {
+      "start": 55.44,
+      "end": 86.9,
+      "text": "Thriving. Merchant. Fertile. Poisonous. Preserve. Mummy. Destination. Irony. Day 3. Alpacas. Alpaca."
+    },
+    {
+      "start": 86.9,
+      "end": 116.74,
+      "text": "Mass. Fluff. Dart. Slope. Startled. Altitude. Foothill. Hay. Herd. Camelirdy. Llama. Shade."
+    },
+    {
+      "start": 116.74,
+      "end": 145.94,
+      "text": "Chubby. Sheer. Day 4. American football. Gazelle. Smash. Touchdown. Go wild. Elsewhere."
+    },
+    {
+      "start": 145.94,
+      "end": 179.32,
+      "text": "Field. Rugby. League. Championship. Strategy. Root. Day 5. Cats. Lap. Purr. Need. Content."
+    },
+    {
+      "start": 179.32,
+      "end": 206.08,
+      "text": "Paw. Disgusted. Rear up. Hind. Curve. Swish. Indecisive. Aggressive. Wag. Flatten. Trusting."
+    },
+    {
+      "start": 206.08,
+      "end": 235.85,
+      "text": "Day 6. Social Contagion. Contagion. Cough. Keep from. Germ. State of being. Catching. Yawn."
+    },
+    {
+      "start": 235.85,
+      "end": 264.32,
+      "text": "Design. Imitate. Gain weight. Spouse. Sibling. Day 7. Raphlesia. The corpse flower. Raphlesia."
+    },
+    {
+      "start": 264.32,
+      "end": 290.16,
+      "text": "Corpse. Repulsive. Fowl. Stinking. Apply to. Rot. Flesh. Reddish. Wort. Pollinate. Pollen."
+    },
+    {
+      "start": 290.16,
+      "end": 300.0,
+      "text": "Reproduce. Genis. Untouched. Habitat."
+    }
+  ]
+}

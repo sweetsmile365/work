@@ -1,0 +1,109 @@
+{
+  "source_file": "《超强英语阅读训练 1》/90.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 137.509,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.68,
+      "end": 10.46,
+      "text": "90. Danger in the Sea It was the worst environmental disaster in"
+    },
+    {
+      "start": 10.46,
+      "end": 16.82,
+      "text": "American history. Here's how the BP, British Petroleum Oil Spill, and the Gulf of Mexico"
+    },
+    {
+      "start": 16.82,
+      "end": 23.26,
+      "text": "on April 20, 2010 happened. 1. The government wasn't watching. Wouldn't"
+    },
+    {
+      "start": 23.26,
+      "end": 27.9,
+      "text": "it be great if you could make up the rules for every game you played? That's basically"
+    },
+    {
+      "start": 27.9,
+      "end": 34.68,
+      "text": "what BP was allowed to do. The US government generally let BP regulate itself. No one was"
+    },
+    {
+      "start": 34.68,
+      "end": 41.52,
+      "text": "around to tell the company no or force it to maintain safety standards. 2. The offshore"
+    },
+    {
+      "start": 41.52,
+      "end": 46.68,
+      "text": "oil rig involved in the spill was sealing the well it had drilled. Workers tested the"
+    },
+    {
+      "start": 46.68,
+      "end": 52.66,
+      "text": "seal once but didn't do any other more expensive safety tests to be absolutely sure the seal"
+    },
+    {
+      "start": 53.66,
+      "end": 60.9,
+      "text": "3. As we later learned, the cement used for the well was not allowed enough time to set. BP knew"
+    },
+    {
+      "start": 60.9,
+      "end": 67.78,
+      "text": "this but believed it could be strengthened later. 4. A gas bubble escaped from the badly sealed"
+    },
+    {
+      "start": 67.78,
+      "end": 74.34,
+      "text": "well. The gas rose through the pipe and reached the air at the oil rig where it exploded. 11"
+    },
+    {
+      "start": 74.34,
+      "end": 81.58,
+      "text": "workers were killed, the rig burned and slowly sank. 5. A blowout preventer should have come"
+    },
+    {
+      "start": 81.58,
+      "end": 87.22,
+      "text": "on to seal the well automatically. It didn't. The well pipe had been knocked out of place by the"
+    },
+    {
+      "start": 87.22,
+      "end": 94.62,
+      "text": "explosion. That kept the blowout preventer from sealing the well as it should have. 6. BP,"
+    },
+    {
+      "start": 94.62,
+      "end": 101.06,
+      "text": "rushing to fix the well, accidentally opened a bigger hole and the oil started gushing. By"
+    },
+    {
+      "start": 101.06,
+      "end": 109.3,
+      "text": "some estimates, 205.8 million gallons spilled into the Gulf in 87 days. However, a judge later"
+    },
+    {
+      "start": 109.3,
+      "end": 115.74,
+      "text": "ruled that BP was only responsible for about 130 million gallons. Livelihoods were destroyed,"
+    },
+    {
+      "start": 115.74,
+      "end": 121.62,
+      "text": "countless animals and plants were killed. The effects of the oil on the surface and floor of"
+    },
+    {
+      "start": 121.62,
+      "end": 128.3,
+      "text": "the ocean will continue for decades. A study presented in April 2017 showed that the oil"
+    },
+    {
+      "start": 128.3,
+      "end": 135.38,
+      "text": "spill had caused 17.2 billion US dollars in damage to the Gulf of Mexico's natural resources."
+    }
+  ]
+}

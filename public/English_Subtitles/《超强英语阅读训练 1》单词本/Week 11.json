@@ -1,0 +1,49 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 11.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 252.918,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 3.09,
+      "end": 33.6,
+      "text": "Week 11. Day 1. Easter Island. Far away from ... triangle ... territory ... explorer ... inhabit ... canoe ... statue ... stern ... archaeologist ..."
+    },
+    {
+      "start": 34.72,
+      "end": 70.17,
+      "text": "chisel ... transport ... hardy ... day 2 ... skateboarding ... skateboarding ... surf ... plank ... sidewalk ... develop ... vertical ... flip ... lengthwise ..."
+    },
+    {
+      "start": 70.17,
+      "end": 105.9,
+      "text": "slide ... helmet ... surface ... day 3 ... winter blues ... stuck ... blue ... appropriately ... depressed ... sluggishly ... carbohydrate ... significant ..."
+    },
+    {
+      "start": 107.02,
+      "end": 137.86,
+      "text": "irritable ... produce ... melanin ... take medication ... take ... seriously ... day 4 ... concrete ... glowing future ... concrete ... universally ..."
+    },
+    {
+      "start": 138.5,
+      "end": 173.82,
+      "text": "contest ... insert ... cement ... emit ... version ... invention ... architect ... visual ... be coated with ... layer ... retain ... century ... day ..."
+    },
+    {
+      "start": 173.82,
+      "end": 205.74,
+      "text": "5 ... the terracotta army ... chaos ... afterlife ... massive ... craftsman ... torso ... mold ... life-sized ... administrative ... chariot ... tactically ... spring"
+    },
+    {
+      "start": 205.74,
+      "end": 233.23,
+      "text": "into ... defeat ... day 6 ... Paul Gauguin ... founder ... flat ... exotic ... perspective ... subtle ..."
+    },
+    {
+      "start": 233.23,
+      "end": 249.83,
+      "text": "cloisonism ... frustrated ... masterpiece ... depict ... biased ... fall apart ... pay off ..."
+    }
+  ]
+}

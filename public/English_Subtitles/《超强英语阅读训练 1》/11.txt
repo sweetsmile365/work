@@ -1,0 +1,19 @@
+11. Self-Generated Energy. Imagine a world without batteries or chargers.
+What if you could power your electronic devices just by moving around? It's not as crazy as
+it sounds. Movement creates energy, and people move all the time. The trick is to collect
+that energy and direct it. The idea of creating energy with movement isn't new. Many objects
+in the past and the present are charged with cranks, radios, flashlights, or even phone
+chargers. You turn the crank for a certain amount of time, and enough energy is created
+to power the device. The newest idea is a bit different and a bit more difficult. Instead
+of using a specific movement, turning a crank, the idea is to catch and use the energy we
+create with our regular movements in our daily life. One way to get this energy is
+with an energy harvester designed by Max Donilon. The device fits behind your knee and connects
+to the leg muscles. When you walk and move your knee, the movement turns small gears,
+which send energy to a generator. The energy could then be used to charge batteries or
+even power artificial joints. Another object uses energy from walking in a different way.
+The e-bag is a snack cooler. You swing the bag as you carry it. The handle collects the
+energy from the swinging motion and uses it to cool the food inside. Some objects have
+to be moved to be used. It makes sense to use the energy from moving them to power them,
+that's the idea behind a new kinetic mouse. Moving the mouse keeps it powered. Self-generated
+and kinetic energy uses are still being developed. As people try to be cleaner and greener,
+we can expect to see more objects that depend on our bodies for power.

@@ -1,0 +1,49 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 9.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 250.331,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 3.18,
+      "end": 31.44,
+      "text": "Week 9. Day 1. The Shakespeare of Rock and Roll. Literature. Latest. Poet. Career. Record. Release. Trio. Countless."
+    },
+    {
+      "start": 31.44,
+      "end": 60.21,
+      "text": "Switch. Style. Move forward. The Establishment. Day 2. Save our seas. Whale. Vet. Plastic."
+    },
+    {
+      "start": 60.21,
+      "end": 95.01,
+      "text": "Swallow. Spray. Jellyfish. Plantopus. Dying. Minimum. Ban. Petrol. Benefit. Day 3. Wired for love? Engage."
+    },
+    {
+      "start": 95.01,
+      "end": 126.1,
+      "text": "Fall in love with. Liberty. Affair. Personality. Artificial Intelligence. Simulate. Accurately. Barrier. Survey. Day 4."
+    },
+    {
+      "start": 126.1,
+      "end": 155.52,
+      "text": "The Northern Lights. Sweep across. Shake. Inspire. Shield. Paradise. Myth. Predict. Opposite. Aurora. Solar. Particle."
+    },
+    {
+      "start": 155.52,
+      "end": 191.05,
+      "text": "Substance. Inspiration. Capture. Awe. Pin down. Day 5. Unusual taboos. Taboo. Normal. Offensive. Cape. Whereas."
+    },
+    {
+      "start": 191.81,
+      "end": 224.93,
+      "text": "Status. Rank. Senator. Bikini. Stomach. Illegal. Distant. Day 6. Science fiction. Fiction. Advanced."
+    },
+    {
+      "start": 224.93,
+      "end": 247.63,
+      "text": "Possibility. React. Behave. Go beyond. Metaphor. Imaginary. Technological. Represent. Challenge."
+    }
+  ]
+}

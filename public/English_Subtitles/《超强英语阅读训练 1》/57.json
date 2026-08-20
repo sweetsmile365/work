@@ -1,0 +1,109 @@
+{
+  "source_file": "《超强英语阅读训练 1》/57.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 139.442,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.14,
+      "end": 13.3,
+      "text": "Music and mood. Music has charms to soothe the savage breast. Even centuries ago, people"
+    },
+    {
+      "start": 13.3,
+      "end": 20.42,
+      "text": "knew music could change their moods. Generally, loud music makes us feel powerful, soft melodies"
+    },
+    {
+      "start": 20.42,
+      "end": 27.1,
+      "text": "are calming, and happy beats make our feet move and our faces smile. Now, we're figuring"
+    },
+    {
+      "start": 27.1,
+      "end": 32.8,
+      "text": "out why. Scientists have found that music affects how the brain produces the chemical"
+    },
+    {
+      "start": 32.96,
+      "end": 40.52,
+      "text": "dopamine. Dopamine is associated with pleasure. When we listen to music we like, our brains"
+    },
+    {
+      "start": 40.52,
+      "end": 47.12,
+      "text": "make more dopamine. The chemical makes us feel good. Even just thinking about listening"
+    },
+    {
+      "start": 47.12,
+      "end": 54.04,
+      "text": "to a song we love can get the dopamine flowing. In a strange way, this suggests that music"
+    },
+    {
+      "start": 54.04,
+      "end": 61.92,
+      "text": "can be slightly addictive. Researchers at McGill University studied how music affects us. First,"
+    },
+    {
+      "start": 61.92,
+      "end": 66.88,
+      "text": "they measured how people's bodies responded to music. They found that when people listen"
+    },
+    {
+      "start": 66.88,
+      "end": 73.24,
+      "text": "to music they like, their heart, pulse, and breathing rates change. Sometimes they feel"
+    },
+    {
+      "start": 73.24,
+      "end": 80.88,
+      "text": "chills. These changes also happen when people feel strong emotions. Since dopamine is connected"
+    },
+    {
+      "start": 80.88,
+      "end": 86.92,
+      "text": "with emotions, the McGill team guessed that music would cause the production of dopamine."
+    },
+    {
+      "start": 86.92,
+      "end": 91.76,
+      "text": "To test their theory, they asked eight music lovers to bring in some of their favorite"
+    },
+    {
+      "start": 91.76,
+      "end": 97.68,
+      "text": "songs. After the participants had listened to the music for a while, the team injected"
+    },
+    {
+      "start": 97.68,
+      "end": 103.24,
+      "text": "them with a substance that would go to the parts of the brain that collect dopamine."
+    },
+    {
+      "start": 103.24,
+      "end": 109.48,
+      "text": "If those parts were already full of dopamine, the substance would have nowhere to go. Sure"
+    },
+    {
+      "start": 109.48,
+      "end": 116.0,
+      "text": "enough, the participants' brains were already flooded with dopamine. To be sure, they tested"
+    },
+    {
+      "start": 116.0,
+      "end": 123.12,
+      "text": "them again the next day, but with music participants didn't like. That time, the substance did"
+    },
+    {
+      "start": 123.12,
+      "end": 131.2,
+      "text": "flow to the dopamine collectors because participants' brains hadn't made dopamine. Even early humans"
+    },
+    {
+      "start": 131.2,
+      "end": 136.24,
+      "text": "knew how to play good music for a pick-me-up. Now we know why."
+    }
+  ]
+}

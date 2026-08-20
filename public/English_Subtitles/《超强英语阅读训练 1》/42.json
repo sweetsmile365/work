@@ -1,0 +1,109 @@
+{
+  "source_file": "《超强英语阅读训练 1》/42.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 133.512,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 3.76,
+      "end": 12.52,
+      "text": "42. The Large Hadron Collider. In Switzerland, in a huge tunnel deep underground, is a giant"
+    },
+    {
+      "start": 12.52,
+      "end": 18.72,
+      "text": "scientific instrument. It's called the Large Hadron Collider, LHC. It was built with the"
+    },
+    {
+      "start": 18.72,
+      "end": 24.88,
+      "text": "help of more than 10,000 scientists from over 100 different countries to help people learn"
+    },
+    {
+      "start": 24.88,
+      "end": 31.92,
+      "text": "more about how our world began. The LHC was built to make different particles collide,"
+    },
+    {
+      "start": 31.92,
+      "end": 39.28,
+      "text": "crash into each other, at extremely high speeds. The LHC is so big, 17 miles long,"
+    },
+    {
+      "start": 39.28,
+      "end": 44.84,
+      "text": "to allow the particles to build up as much speed as possible. The particles this machine"
+    },
+    {
+      "start": 44.84,
+      "end": 52.08,
+      "text": "uses are called hadrons. They're even smaller than atoms. Scientists believe that by smashing"
+    },
+    {
+      "start": 52.08,
+      "end": 58.2,
+      "text": "them into each other at high speeds, we can learn more about the Big Bang. The Big Bang"
+    },
+    {
+      "start": 58.2,
+      "end": 63.76,
+      "text": "is the name of a theory about how the Earth was formed. The theory guesses that our part"
+    },
+    {
+      "start": 63.76,
+      "end": 70.68,
+      "text": "of the universe used to be only a few centimeters of hot space. Then, for some reason, this"
+    },
+    {
+      "start": 70.68,
+      "end": 79.64,
+      "text": "space began to expand and cool until it eventually became the vast, cold universe we now have."
+    },
+    {
+      "start": 79.64,
+      "end": 86.6,
+      "text": "Scientists want to know why. The LHC tries to recreate the Big Bang. It spins hadrons"
+    },
+    {
+      "start": 86.64,
+      "end": 91.84,
+      "text": "until they are moving at almost the speed of light. The great speed makes them very"
+    },
+    {
+      "start": 91.84,
+      "end": 98.68,
+      "text": "hot like they would have been before the Big Bang. Then, when they collide, they produce"
+    },
+    {
+      "start": 98.68,
+      "end": 105.28,
+      "text": "a soup of other particles. Scientists are very curious about these other particles."
+    },
+    {
+      "start": 105.28,
+      "end": 109.92,
+      "text": "They believe that studying the beginning of the universe can help them understand how"
+    },
+    {
+      "start": 109.92,
+      "end": 116.64,
+      "text": "the universe works now. The LHC will also help scientists try to answer other questions"
+    },
+    {
+      "start": 116.64,
+      "end": 123.6,
+      "text": "like what is most of the universe made of and what makes some things have weight. We"
+    },
+    {
+      "start": 123.6,
+      "end": 129.52,
+      "text": "don't know if the LHC will actually provide answers, but for now, it's as close as we"
+    },
+    {
+      "start": 129.52,
+      "end": 130.32,
+      "text": "can get."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "source_file": "《超强英语阅读训练 1》/38.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 151.066,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.17,
+      "end": 21.62,
+      "text": "38. Sunscreen. Sunscreen or sunblock. SPF 15, SPF 60, UVA, UVB. Sunscreen is covered with strange letters and numbers. Do you know how sunscreen really works?"
+    },
+    {
+      "start": 21.62,
+      "end": 32.62,
+      "text": "First, let's define sunscreen. Sunscreen is different from sunblock. Unlike sunblock, sunscreen allows some light to reach the skin."
+    },
+    {
+      "start": 32.62,
+      "end": 50.62,
+      "text": "The ingredients in sunscreen filter some light, unlike those in sunblock, which block all of it. Some sunscreen ingredients absorb light and turn it into heat. Others bounce it off your skin. Different ingredients act on different kinds of light rays."
+    },
+    {
+      "start": 51.62,
+      "end": 72.62,
+      "text": "Let's move on to SPF. SPF stands for Sun Protection Factor and tells you how much protection a sunscreen provides against UVB rays. The higher the SPF number, the more protection you get. Experts generally recommend SPF 15 or higher."
+    },
+    {
+      "start": 73.62,
+      "end": 90.62,
+      "text": "Most sunscreens don't protect against UVA rays. This is controversial. UVA rays don't cause sunburns, but they are linked to skin cancer. Many people feel safer blocking these rays, too, so they use broad-spectrum sunblock."
+    },
+    {
+      "start": 91.62,
+      "end": 101.62,
+      "text": "On the other hand, sunscreen blocks UVB rays. However, we get vitamin D from UVB rays. Blocking too many of them can be unhealthy."
+    },
+    {
+      "start": 102.62,
+      "end": 117.62,
+      "text": "Choose your sun protection and then use it correctly. Experts recommend putting sunscreen on 15 to 30 minutes before you go out into the sun. Some recommend reapplying sunscreen every hour or so after that."
+    },
+    {
+      "start": 117.62,
+      "end": 146.62,
+      "text": "Others say you should reapply 30 minutes after going out into the sun, but then leave it alone unless you sweat or swim. An average adult in a swimsuit should use about an ounce of sunscreen for his or her whole body. About one quarter to one third of a teaspoon is enough for the face. Using sunscreen correctly can be the difference between healthy or unhealthy skin. Think about what you want and get the right sun protection for you."
+    }
+  ]
+}

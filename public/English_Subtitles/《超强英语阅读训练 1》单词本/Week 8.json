@@ -1,0 +1,64 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 8.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 246.413,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 2.8,
+      "end": 17.12,
+      "text": "Week 8. Day 1. Neat. Acronym. Employment. Refer to."
+    },
+    {
+      "start": 17.12,
+      "end": 31.52,
+      "text": "Psychological. Qualification. Economy. Fierce. Motivation. Vicious circle."
+    },
+    {
+      "start": 33.36,
+      "end": 54.58,
+      "text": "Perform. Index. Look forward to. Shame. Day 2. What are carbon offsets?"
+    },
+    {
+      "start": 56.5,
+      "end": 64.9,
+      "text": "Offset. Scramble. Comply with. Obligation."
+    },
+    {
+      "start": 64.9,
+      "end": 91.9,
+      "text": "Protocol. Emission. Reduction. Entity. Carbon credit. Emit. Tap and force. Day 3."
+    },
+    {
+      "start": 91.9,
+      "end": 114.98,
+      "text": "Parasites. Parasite. Host. Shelter. Harmless. Bookworm. Intestine. Suck. Frightening."
+    },
+    {
+      "start": 114.98,
+      "end": 143.42,
+      "text": "Amoeba. Cavity. Dust mite. Eyelash. Starve. Blindness. Infection. Day 4. A mixed new world."
+    },
+    {
+      "start": 143.42,
+      "end": 175.62,
+      "text": "Mixed. Virtual. Resemble. Palace. Tricky. Shut out. Wrap. Background. Digital. Vast. Day 5."
+    },
+    {
+      "start": 175.62,
+      "end": 194.26,
+      "text": "The world's oldest sports. Cricket. Officially. Monastery. Entertainment. Racket. Evolve."
+    },
+    {
+      "start": 194.26,
+      "end": 226.98,
+      "text": "Establish. Score. Hip. Thigh. Day 6. Victorian art. Era. Outlook. Explosion. Consume. Pre-Raphaelite."
+    },
+    {
+      "start": 226.98,
+      "end": 242.98,
+      "text": "Composition. Explode with. Fascinate. Middle Ages. Monarch. Boundary."
+    }
+  ]
+}

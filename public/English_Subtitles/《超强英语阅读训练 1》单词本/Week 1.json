@@ -1,0 +1,49 @@
+{
+  "source_file": "《超强英语阅读训练 1》单词本/Week 1.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 255.687,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.23,
+      "end": 30.23,
+      "text": "Week one. Day one. Have you seen this? Familiar. Overnight. Social media. Globe. Go viral. Grab. Upload. Clip. Dramatic."
+    },
+    {
+      "start": 30.23,
+      "end": 65.15,
+      "text": "Nationality. Trend. Expert. Day two. E.Q. Stress about. Emotional quotient. Influential. Passion. Be connected to. Solid. Measure."
+    },
+    {
+      "start": 65.15,
+      "end": 99.94,
+      "text": "Improve. Get in touch with. Effect. Identify. Compassion. Day three. The Civil Rights Movement in the United States. Slavery. Discrimination. Segregation. Vote."
+    },
+    {
+      "start": 100.94,
+      "end": 135.93,
+      "text": "Racial. Equality. Civil. Arrest. Boycott. Determined. Mob. Nonviolent. Protest. March. Day four. Who stole my money?"
+    },
+    {
+      "start": 136.93,
+      "end": 165.93,
+      "text": "Inflation. Gasoline. Increase. Supply. Demand. Circulate. Valuable. Cause. Wage. Profit. Raise. Transfer."
+    },
+    {
+      "start": 165.93,
+      "end": 201.3,
+      "text": "Burden. Complicated. Track. Day five. Steve Jobs. Pixar. Adopt. Enroll. Found. Accessible. Computer animated. User friendly."
+    },
+    {
+      "start": 202.3,
+      "end": 237.38,
+      "text": "Beloved. On a roll. Reflect. Vision. Day six. We're animals too, after all. Symbolize. Proverb. Characteristic. Hatch. Opportunity."
+    },
+    {
+      "start": 237.38,
+      "end": 254.38,
+      "text": "Be satisfied with. Give up. Behavior. Compare with. Involve. Moth. Subtle."
+    }
+  ]
+}

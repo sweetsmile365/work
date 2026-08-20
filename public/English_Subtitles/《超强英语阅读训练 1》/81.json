@@ -1,0 +1,34 @@
+{
+  "source_file": "《超强英语阅读训练 1》/81.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 122.018,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 0.78,
+      "end": 29.28,
+      "text": "81. How were dogs domesticated? In the West, dogs are called man's best friend. But how were these best friends domesticated? Gray wolves are the ancestors of modern dogs. Evidence shows that dogs and wolves began to split into separate groups around 100,000 years ago. But dogs were only domesticated much later."
+    },
+    {
+      "start": 29.28,
+      "end": 57.28,
+      "text": "Some scientists believe dog domestication began in China, while others think it was the Middle East. Dog bones and human bones were buried together in Europe, Asia, and North America between 9,000 and 14,000 years ago. Scientists believe that burying dogs with humans was a way to show that the dogs were important. Therefore, those dogs must have been domesticated."
+    },
+    {
+      "start": 57.28,
+      "end": 86.28,
+      "text": "Scientists have a few ideas about how dogs were domesticated. No one is sure which one is correct. One idea is that humans found orphaned wolf cubs and raised them with human babies. Over time, the offspring of the wolf cubs evolved into dogs. Another idea is that wolves domesticated themselves by coming close to human camps for food. Wolves would have wanted the food and bones near the camps."
+    },
+    {
+      "start": 86.28,
+      "end": 100.28,
+      "text": "So they would have wanted to be close to humans. Another possibility is that humans used wolves for food, fur, or work, like pulling sleds, and this eventually led to their domestication."
+    },
+    {
+      "start": 100.28,
+      "end": 118.28,
+      "text": "Interestingly, humans are still domesticating dogs. We continue to breed dogs for different characteristics, like color, size, or personality. In addition to being man's best friend, dogs are probably man's oldest friend as well."
+    }
+  ]
+}

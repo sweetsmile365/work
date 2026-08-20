@@ -1,0 +1,74 @@
+{
+  "source_file": "《超强英语阅读训练 1》/12.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 119.745,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.17,
+      "end": 15.18,
+      "text": "12. You are what you eat. Ancient medical traditions often focus on food. After all, what we put into our body must affect how our body feels."
+    },
+    {
+      "start": 15.18,
+      "end": 23.18,
+      "text": "But what about our minds? Does what we eat affect how we feel and think? Recent research says yes."
+    },
+    {
+      "start": 23.18,
+      "end": 31.18,
+      "text": "Different foods affect different hormones in our brains. Fruits and vegetables generally increase hormones that make us calm."
+    },
+    {
+      "start": 31.18,
+      "end": 36.18,
+      "text": "Foods with a lot of protein, on the other hand, increase hormones that make us alert."
+    },
+    {
+      "start": 36.18,
+      "end": 46.18,
+      "text": "But junk food, fatty, salty, sugary food without much nutrition, has a negative effect. It can make us tired and stressed."
+    },
+    {
+      "start": 46.18,
+      "end": 55.18,
+      "text": "Different ingredients in junk food have different effects. One very important and unhealthy ingredient in junk food is trans fat."
+    },
+    {
+      "start": 55.18,
+      "end": 65.18,
+      "text": "Trans fats are types of fat often found in junk food. Doctors have been studying the effects of trans fats recently, and the results aren't good."
+    },
+    {
+      "start": 65.18,
+      "end": 76.18,
+      "text": "Trans fats seem to be linked to poor memory and depression. An American study found that people remembered fewer words from a list after eating trans fats than before."
+    },
+    {
+      "start": 76.18,
+      "end": 83.18,
+      "text": "Meanwhile, a study in Spain found that eating a lot of trans fats caused people to become depressed."
+    },
+    {
+      "start": 84.18,
+      "end": 93.18,
+      "text": "Doctors don't fully understand why these things happen. Trans fats seem to slow down our normal brain function, making us forgetful."
+    },
+    {
+      "start": 93.18,
+      "end": 102.18,
+      "text": "They also appear to lower serotonin, our body's mood-balancing chemical, making us sad, angry, or even violent."
+    },
+    {
+      "start": 102.18,
+      "end": 109.18,
+      "text": "But the bad news about junk food is good news about healthy food. Eating well, it seems, can make us happier."
+    },
+    {
+      "start": 109.18,
+      "end": 117.18,
+      "text": "So, if you're feeling blue, don't reach for a bag of potato chips. They may make you feel good for the moment, but bad in the long run."
+    }
+  ]
+}

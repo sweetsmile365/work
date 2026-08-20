@@ -1,0 +1,124 @@
+{
+  "source_file": "《超强英语阅读训练 1》/29.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 123.063,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 0.59,
+      "end": 7.51,
+      "text": "29. Say hello to our new mechanical friends."
+    },
+    {
+      "start": 7.51,
+      "end": 12.51,
+      "text": "For years we've been hearing it. The robots are coming. The robots are coming."
+    },
+    {
+      "start": 12.51,
+      "end": 19.51,
+      "text": "Well, the long wait is finally over. The robots are no longer coming. They're already here."
+    },
+    {
+      "start": 19.51,
+      "end": 24.51,
+      "text": "The robotics industry has changed economies and lifestyles around the world."
+    },
+    {
+      "start": 24.51,
+      "end": 29.51,
+      "text": "One area in which these changes are particularly obvious is manufacturing."
+    },
+    {
+      "start": 29.51,
+      "end": 36.51,
+      "text": "Industrial robots, those robot arms that assemble things in factories, are becoming increasingly capable."
+    },
+    {
+      "start": 36.51,
+      "end": 42.51,
+      "text": "Nowadays, these robots can assemble large items like cars with very little input from human workers."
+    },
+    {
+      "start": 42.51,
+      "end": 47.51,
+      "text": "They can also work 24 hours a day without ever making a mistake."
+    },
+    {
+      "start": 47.51,
+      "end": 53.51,
+      "text": "It's no wonder that factory workers around the world are losing their jobs to robots."
+    },
+    {
+      "start": 53.51,
+      "end": 57.51,
+      "text": "Of course, that's not what comes to mind when most of us think of robots."
+    },
+    {
+      "start": 57.51,
+      "end": 63.51,
+      "text": "We imagine personal, human-like machines that can cook our food and do our laundry for us."
+    },
+    {
+      "start": 63.51,
+      "end": 66.51,
+      "text": "Fortunately, they're here as well."
+    },
+    {
+      "start": 66.51,
+      "end": 71.51,
+      "text": "Tech companies are fighting tooth and nail to achieve the first big success in personal robotics."
+    },
+    {
+      "start": 71.51,
+      "end": 76.51,
+      "text": "Japan's Sharp Electronics is betting on simpler, more affordable robots."
+    },
+    {
+      "start": 76.51,
+      "end": 83.51,
+      "text": "For this reason, it has launched RoboHon, a cute little robot that functions similarly to a smartphone."
+    },
+    {
+      "start": 83.51,
+      "end": 86.51,
+      "text": "RoboHon can understand simple voice commands."
+    },
+    {
+      "start": 86.51,
+      "end": 91.51,
+      "text": "It also knows some pretty sweet dance moves, which it shows off whenever it receives a phone call."
+    },
+    {
+      "start": 91.51,
+      "end": 97.51,
+      "text": "Other companies are targeting the high-end market with technologically advanced personal robots."
+    },
+    {
+      "start": 97.51,
+      "end": 101.51,
+      "text": "Two examples are Honda's Asimo and SoftBank's Pepper."
+    },
+    {
+      "start": 101.51,
+      "end": 105.51,
+      "text": "Asimo can run, jump, and climb stairs just like a human being."
+    },
+    {
+      "start": 105.51,
+      "end": 111.51,
+      "text": "It also has sensitive hands that can perform delicate tasks like pouring a cup of coffee."
+    },
+    {
+      "start": 111.51,
+      "end": 115.51,
+      "text": "Pepper, on the other hand, can sense and respond to human emotions."
+    },
+    {
+      "start": 115.51,
+      "end": 120.51,
+      "text": "This could come in handy when dealing with people who have lost their livelihoods to robots."
+    }
+  ]
+}

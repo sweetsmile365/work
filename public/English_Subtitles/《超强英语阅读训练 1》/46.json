@@ -1,0 +1,104 @@
+{
+  "source_file": "《超强英语阅读训练 1》/46.mp3",
+  "language": "en",
+  "language_probability": 1.0,
+  "duration": 131.5,
+  "model": "small.en",
+  "segments": [
+    {
+      "start": 1.26,
+      "end": 10.58,
+      "text": "46. A Mixed New World. It's morning in the not-too-distant future."
+    },
+    {
+      "start": 10.58,
+      "end": 16.62,
+      "text": "You wake up. You shoot some virtual aliens in your kitchen while eating breakfast. Later,"
+    },
+    {
+      "start": 16.62,
+      "end": 21.9,
+      "text": "you take your virtual pet dinosaur out for a walk in the park. And when you get home,"
+    },
+    {
+      "start": 21.9,
+      "end": 26.98,
+      "text": "you realize you don't like the way you've decorated your apartment. Easily fixed. With"
+    },
+    {
+      "start": 26.98,
+      "end": 33.52,
+      "text": "a few waves of your hand, your home now resembles a grand European palace. That's better."
+    },
+    {
+      "start": 33.52,
+      "end": 41.16,
+      "text": "Welcome to the exciting world of mixed reality. Defining exactly what mixed reality, MR is,"
+    },
+    {
+      "start": 41.16,
+      "end": 48.64,
+      "text": "can be tricky. Is it the same as virtual reality, VR? What about augmented reality, AR? How"
+    },
+    {
+      "start": 48.64,
+      "end": 56.28,
+      "text": "is MR different from that? Basically, VR shuts out the real world and wraps the user completely"
+    },
+    {
+      "start": 56.28,
+      "end": 62.72,
+      "text": "in a virtual one. AR, on the other hand, takes the user's view of the real world and adds"
+    },
+    {
+      "start": 62.72,
+      "end": 69.88,
+      "text": "digital information to it. An example of AR is the game Pokemon Go. You can see the creatures"
+    },
+    {
+      "start": 69.88,
+      "end": 76.44,
+      "text": "against a real world background, but they can't interact with it. MR is somewhere in between. As"
+    },
+    {
+      "start": 76.44,
+      "end": 84.04,
+      "text": "an AR, digital images are placed over the real world. But in MR, these images can interact with"
+    },
+    {
+      "start": 84.04,
+      "end": 89.68,
+      "text": "that world as if they themselves were real. Imagine that the Pokemon you were hunting could"
+    },
+    {
+      "start": 89.68,
+      "end": 96.84,
+      "text": "hide behind cars or climb up trees. To make this possible, the real world environment first has to"
+    },
+    {
+      "start": 96.84,
+      "end": 104.64,
+      "text": "be mapped using 3D cameras. This allows the virtual images to know where they are in it. The user"
+    },
+    {
+      "start": 104.64,
+      "end": 112.2,
+      "text": "wearing a headset can then see the two worlds, real and virtual, as one. MR is set to become"
+    },
+    {
+      "start": 112.2,
+      "end": 118.84,
+      "text": "the technology of the near future, and the possible applications are truly vast. Everything"
+    },
+    {
+      "start": 118.84,
+      "end": 125.88,
+      "text": "from gaming to communications to medicine will be changed by MR. So, get ready. Reality, as we"
+    },
+    {
+      "start": 125.88,
+      "end": 128.96,
+      "text": "know it, is about to get a full virtual makeover."
+    }
+  ]
+}
