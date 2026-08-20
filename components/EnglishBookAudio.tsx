@@ -9,6 +9,7 @@ import {
   Headphones,
   Pause,
   Play,
+  Square,
   Volume2,
   X
 } from "lucide-react";
@@ -87,6 +88,14 @@ export default function EnglishBookAudio() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [audioError, setAudioError] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("audio") === "1") {
+      setOpen(true);
+    }
+  }, []);
 
   const items = list?.items ?? [];
 
@@ -275,6 +284,15 @@ export default function EnglishBookAudio() {
     }
   }
 
+  function stopPlayback() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    setCurrentTime(0);
+    setPlaying(false);
+  }
+
   function seekTo(value: number) {
     const audio = audioRef.current;
     if (!audio) return;
@@ -316,11 +334,11 @@ export default function EnglishBookAudio() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-[70] inline-flex min-h-12 items-center gap-2 rounded-full border border-sky-200/20 bg-slate-950/90 px-4 text-sm font-bold text-sky-100 shadow-[0_12px_36px_rgba(0,0,0,0.38)] backdrop-blur-xl transition hover:bg-slate-900"
-        aria-label="英语书音频播放器"
+        className="fixed bottom-5 right-5 z-[70] inline-flex min-h-14 items-center gap-2 rounded-2xl border-2 border-violet-200/35 bg-violet-300 px-5 text-sm font-black text-slate-950 shadow-[0_14px_40px_rgba(139,92,246,0.38)] transition hover:bg-violet-200"
+        aria-label="每日阅读音频播放器"
       >
         <Headphones className="h-5 w-5" />
-        BOOK AUDIO
+        每日阅读 · AUDIO
       </button>
 
       {open ? (
@@ -330,7 +348,7 @@ export default function EnglishBookAudio() {
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-sky-200">
                   <BookOpen className="h-4 w-4" />
-                  ENGLISH BOOK AUDIO
+                  每日阅读 · ENGLISH AUDIO
                 </div>
                 <h2 className="mt-1 text-xl font-bold sm:text-2xl">
                   《超强英语阅读训练 1》
@@ -512,11 +530,11 @@ export default function EnglishBookAudio() {
                         </button>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-center gap-3">
+                      <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
                         <button
                           type="button"
                           onClick={() => seekBy(-10)}
-                          className="min-h-11 rounded-xl bg-white/[0.06] px-4 text-sm font-bold text-slate-200"
+                          className="min-h-12 rounded-xl border border-white/[0.08] bg-white/[0.07] px-4 text-sm font-bold text-slate-100"
                         >
                           −10s
                         </button>
@@ -524,20 +542,31 @@ export default function EnglishBookAudio() {
                         <button
                           type="button"
                           onClick={togglePlay}
-                          className="grid h-14 w-14 place-items-center rounded-full bg-sky-300 text-slate-950"
+                          className="inline-flex min-h-14 min-w-[132px] items-center justify-center gap-2 rounded-xl border-2 border-cyan-100/60 px-5 text-base font-black shadow-[0_0_28px_rgba(103,232,249,0.28)]"
+                          style={{ backgroundColor: "#67e8f9", color: "#07131f" }}
                           aria-label={playing ? "暂停" : "播放"}
                         >
                           {playing ? (
                             <Pause className="h-6 w-6" />
                           ) : (
-                            <Play className="h-6 w-6 pl-0.5" />
+                            <Play className="h-6 w-6" />
                           )}
+                          {playing ? "PAUSE" : "PLAY"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={stopPlayback}
+                          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-rose-200/30 bg-rose-300/15 px-4 text-sm font-black text-rose-100"
+                        >
+                          <Square className="h-4 w-4 fill-current" />
+                          STOP
                         </button>
 
                         <button
                           type="button"
                           onClick={() => seekBy(10)}
-                          className="min-h-11 rounded-xl bg-white/[0.06] px-4 text-sm font-bold text-slate-200"
+                          className="min-h-12 rounded-xl border border-white/[0.08] bg-white/[0.07] px-4 text-sm font-bold text-slate-100"
                         >
                           +10s
                         </button>

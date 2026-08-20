@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
       id: file.id,
       name: file.name,
       viewUrl: `https://drive.google.com/file/d/${file.id}/view`,
-      audioUrl: `https://drive.google.com/uc?export=download&id=${file.id}`,
+      audioUrl: `/api/book-audio/stream?id=${encodeURIComponent(file.id)}`,
       subtitleUrl: subtitleUrl(config.subtitleFolder, file.name)
     }));
 

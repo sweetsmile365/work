@@ -1784,14 +1784,6 @@ export default function DisplayPage() {
                   MEALS
                 </Link>
                 <Link
-                  href="/mealtime"
-                  className="shrink-0 rounded-full bg-violet-300/10 px-3 py-1.5 text-xs font-semibold text-violet-100 active:bg-violet-300/20"
-                  aria-label="ごはん時間のニュースと英語"
-                  title="NEWS + ENGLISH · ごはん時間の英語"
-                >
-                  📰 ENGLISH
-                </Link>
-                <Link
                   href="/calendar"
                   className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100 active:bg-cyan-300/20"
                   aria-label="日程修改"
@@ -1818,6 +1810,27 @@ export default function DisplayPage() {
                 </Link>
               </div>
             </div>
+
+            <Link
+              href="/mealtime?audio=1"
+              className="mt-3 flex min-h-[74px] items-center justify-between gap-3 rounded-2xl border border-violet-200/25 bg-[linear-gradient(135deg,rgba(139,92,246,0.22),rgba(56,189,248,0.12))] px-4 py-3 shadow-[0_10px_28px_rgba(76,29,149,0.20)] active:bg-violet-300/20"
+              aria-label="每日阅读"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-300/20 text-violet-100">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-base font-black text-white">每日阅读</div>
+                  <div className="mt-0.5 truncate text-xs text-violet-100/80">
+                    英语原文 · 音频 · 同步字幕 · 跟读
+                  </div>
+                </div>
+              </div>
+              <span className="shrink-0 rounded-full bg-violet-200 px-3 py-1.5 text-xs font-black text-slate-950">
+                OPEN →
+              </span>
+            </Link>
 
             <div className="mt-3 grid gap-2">
               {data.routineTasks.map((task) => (
@@ -2211,14 +2224,6 @@ export default function DisplayPage() {
                       MEALS
                     </Link>
                     <Link
-                      href="/mealtime"
-                      className="rounded-full bg-violet-300/10 px-2.5 py-1 text-[10px] font-semibold text-violet-100 active:bg-violet-300/20"
-                      aria-label="ごはん時間のニュースと英語"
-                      title="NEWS + ENGLISH · ごはん時間の英語"
-                    >
-                      📰 ENGLISH
-                    </Link>
-                    <Link
                       href="/calendar"
                       className="inline-flex items-center gap-1 rounded-full bg-cyan-300/10 px-2.5 py-1 text-[10px] font-semibold text-cyan-100 active:bg-cyan-300/20"
                       aria-label="日程修改"
@@ -2245,6 +2250,29 @@ export default function DisplayPage() {
                     </Link>
                   </div>
                 </div>
+
+                <Link
+                  href="/mealtime?audio=1"
+                  className="mb-3 flex min-h-16 items-center justify-between gap-3 rounded-2xl border border-violet-200/25 bg-[linear-gradient(135deg,rgba(139,92,246,0.24),rgba(56,189,248,0.12))] px-4 py-3 shadow-[0_10px_28px_rgba(76,29,149,0.20)] transition active:bg-violet-300/20"
+                  aria-label="每日阅读"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-300/20 text-violet-100">
+                      <BookOpen className="h-6 w-6" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[clamp(1rem,1vw,1.2rem)] font-black text-white">
+                        每日阅读
+                      </div>
+                      <div className="mt-0.5 truncate text-[clamp(0.7rem,0.7vw,0.85rem)] text-violet-100/80">
+                        英语原文 · 音频 · 同步字幕 · 跟读
+                      </div>
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-violet-200 px-3 py-1.5 text-[10px] font-black text-slate-950">
+                    OPEN →
+                  </span>
+                </Link>
 
                 <div className="grid grid-cols-2 gap-2">
                   {data.routineTasks.map((task) => (

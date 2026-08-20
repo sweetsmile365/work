@@ -478,15 +478,15 @@ export default function MealTimePage() {
 
             <div className="mt-5 flex items-center gap-2 text-xs font-semibold tracking-[0.15em] text-amber-200">
               <Sparkles size={17} />
-              TODAY'S NEWS & ENGLISH
+              DAILY ENGLISH READING
             </div>
 
             <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
-              ごはん時間の英語
+              每日阅读
             </h1>
 
             <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-300">
-              <span>公式YouTube · ページ内再生 · 自動更新</span>
+              <span>英语阅读 · 音频跟读 · 新闻听力</span>
               <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-xs text-slate-400">
                 {today}
               </span>
