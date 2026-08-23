@@ -1807,6 +1807,23 @@ export default function DisplayPage() {
               <span className="shrink-0 text-xs font-bold text-cyan-200">OPEN →</span>
             </Link>
 
+            <a
+              href="https://dayofai.org/units/ai-foundations-for-middle-grades"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 flex min-h-[68px] items-center justify-between gap-3 rounded-2xl border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(59,130,246,0.10))] px-4 py-3 active:bg-cyan-300/20"
+              aria-label="AI 20 MIN"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-cyan-300/15 text-xl">🤖</div>
+                <div className="min-w-0">
+                  <div className="text-sm font-bold tracking-[0.08em] text-cyan-100">AI 20 MIN</div>
+                  <div className="mt-0.5 truncate text-xs text-slate-300">MIT Day of AI · 零基础 · 免费 · 每天20分钟</div>
+                </div>
+              </div>
+              <span className="shrink-0 text-xs font-bold text-cyan-200">START →</span>
+            </a>
+
             <div className="mt-3 grid gap-2">
               {data.routineTasks.map((task) => (
                 <button
@@ -2240,6 +2257,23 @@ export default function DisplayPage() {
                   </div>
                   <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
                 </Link>
+
+                <a
+                  href="https://dayofai.org/units/ai-foundations-for-middle-grades"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.14),rgba(59,130,246,0.08))] px-3 py-2.5 active:bg-cyan-300/20"
+                  aria-label="AI 20 MIN"
+                >
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-cyan-300/15 text-base">🤖</div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold tracking-[0.08em] text-cyan-100">AI 20 MIN</div>
+                      <div className="truncate text-[10px] text-slate-300">MIT Day of AI · 零基础 · 免费 · 每天20分钟</div>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-[10px] font-bold text-cyan-200">START →</span>
+                </a>
 
                 <div className="grid grid-cols-2 gap-2">
                   {data.routineTasks.map((task) => (
