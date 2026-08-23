@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
+  AlertCircle,
+  Bell,
   BookOpen,
-  CalendarDays,
   CheckCircle2,
   ChevronRight,
   Circle,
@@ -39,10 +40,6 @@ import {
 } from "@/lib/habitStats";
 import type { ChildTask } from "@/types/activities";
 import type { FamilyEvent } from "@/types/events";
-import type {
-  SchoolTimetable,
-  WeekdayKey
-} from "@/types/timetable";
 
 type WeatherPoint = {
   id: string;
@@ -324,11 +321,6 @@ const musicStations: MusicStation[] = [
     url: "https://listen.181fm.com/181-classicalguitar_128k.mp3"
   },
   {
-    id: "awesome-80s",
-    label: "80s Gold · Hits",
-    url: "https://listen.181fm.com/181-awesome80s_128k.mp3"
-  },
-  {
     id: "jazz",
     label: "Jazz",
     url: "https://ice1.somafm.com/sonicuniverse-128-mp3"
@@ -408,37 +400,13 @@ const todayKey = (date = new Date()) => {
   return `${year}-${month}-${day}`;
 };
 
-const lunarDayName = (day: number) => {
-  const names = [
-    "",
-    "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
-    "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
-    "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
-  ];
-  return names[day] ?? String(day);
-};
-
-const formatHeaderDate = (date: Date) => {
-  const parts = new Intl.DateTimeFormat("zh-CN-u-ca-chinese", {
+const formatHeaderDate = (date: Date) =>
+  new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
     month: "long",
     day: "numeric",
-    weekday: "long",
-    timeZone: "Asia/Tokyo"
-  }).formatToParts(date) as Array<{ type: string; value: string }>;
-
-  const yearName =
-    parts.find((part) => part.type === "yearName")?.value ?? "";
-  const month =
-    parts.find((part) => part.type === "month")?.value ?? "";
-  const dayValue = Number(
-    parts.find((part) => part.type === "day")?.value ?? "0"
-  );
-  const weekday =
-    parts.find((part) => part.type === "weekday")?.value ?? "";
-
-  return `农历 ${yearName}年 ${month}${lunarDayName(dayValue)} · ${weekday}`;
-};
+    weekday: "long"
+  }).format(date);
 
 const formatShortDate = (date: string) =>
   new Intl.DateTimeFormat("ja-JP", {
@@ -547,380 +515,6 @@ const categoryColor = (event: FamilyEvent) => {
   if (event.calendar_type.includes("holiday")) return "bg-blue-300";
   return "bg-amber-300";
 };
-
-type TodayClassItem = {
-  period: number;
-  subject: string;
-  short: string;
-  time?: string;
-  changed: boolean;
-};
-
-type TodayClassSummary = {
-  classes: TodayClassItem[];
-  label?: string;
-};
-
-const SCHOOL_DISPLAY_DEFAULT_FROM = "2026-08-24";
-
-const weekdayKeyForSchoolDate = (date: Date): WeekdayKey | null => {
-  const day = date.getDay();
-  if (day === 1) return "mon";
-  if (day === 2) return "tue";
-  if (day === 3) return "wed";
-  if (day === 4) return "thu";
-  if (day === 5) return "fri";
-  return null;
-};
-
-const subjectShortLabel = (subject: string) => {
-  const normalized = subject.trim();
-  const aliases: Record<string, string> = {
-    数学: "数",
-    国語: "国",
-    英語: "英",
-    英TT: "英",
-    体育: "体",
-    生物: "生",
-    化学: "化",
-    地理: "地",
-    歴史: "歴",
-    美術: "美",
-    音楽: "音",
-    家庭: "家",
-    総合: "総",
-    道徳: "道",
-    LHR: "L"
-  };
-
-  return aliases[normalized] ?? normalized.slice(0, 1);
-};
-
-const subjectPillClass = (subject: string) => {
-  if (subject.startsWith("数")) return "border-blue-300/30 bg-blue-300/15 text-blue-100";
-  if (subject.startsWith("国")) return "border-rose-300/30 bg-rose-300/15 text-rose-100";
-  if (subject.startsWith("英")) return "border-emerald-300/30 bg-emerald-300/15 text-emerald-100";
-  if (subject.startsWith("体")) return "border-orange-300/30 bg-orange-300/15 text-orange-100";
-  if (subject.startsWith("生")) return "border-lime-300/30 bg-lime-300/15 text-lime-100";
-  if (subject.startsWith("化")) return "border-cyan-300/30 bg-cyan-300/15 text-cyan-100";
-  if (subject.startsWith("地")) return "border-teal-300/30 bg-teal-300/15 text-teal-100";
-  if (subject.startsWith("歴")) return "border-amber-300/30 bg-amber-300/15 text-amber-100";
-  if (subject.startsWith("美")) return "border-fuchsia-300/30 bg-fuchsia-300/15 text-fuchsia-100";
-  if (subject.startsWith("音")) return "border-violet-300/30 bg-violet-300/15 text-violet-100";
-  if (subject.startsWith("家")) return "border-pink-300/30 bg-pink-300/15 text-pink-100";
-  if (subject.startsWith("総")) return "border-indigo-300/30 bg-indigo-300/15 text-indigo-100";
-  return "border-slate-300/25 bg-slate-300/10 text-slate-100";
-};
-
-const resolveTodayClasses = (
-  timetable: SchoolTimetable | undefined,
-  date: Date,
-  todayEvents: FamilyEvent[]
-): TodayClassSummary | null => {
-  if (!timetable) return null;
-  if (timetable.displayEnabled === false) return null;
-
-  const dateKey = todayKey(date);
-  const displayFrom =
-    timetable.displayFrom || SCHOOL_DISPLAY_DEFAULT_FROM;
-
-  if (dateKey < displayFrom) return null;
-
-  const weekday = weekdayKeyForSchoolDate(date);
-  if (!weekday) return null;
-
-  const schoolDayOff = todayEvents.some(
-    (event) =>
-      event.calendar_type === "school" &&
-      (event.is_day_off || event.event_type === "school_holiday")
-  );
-  if (schoolDayOff) return null;
-
-  const dayOverride = timetable.dailyOverrides?.[dateKey];
-  if (dayOverride?.noSchool) return null;
-
-  const baseSlots = timetable.weekdays?.[weekday] ?? [];
-  const limit =
-    dayOverride?.periodCount !== undefined
-      ? Math.max(0, Math.min(dayOverride.periodCount, baseSlots.length))
-      : baseSlots.length;
-
-  const classes: TodayClassItem[] = [];
-
-  for (let index = 0; index < limit; index += 1) {
-    const key = String(index);
-    const hasOverride = Object.prototype.hasOwnProperty.call(
-      dayOverride?.slots ?? {},
-      key
-    );
-    const overrideSlot = hasOverride
-      ? dayOverride?.slots?.[key]
-      : undefined;
-    const slot = hasOverride
-      ? overrideSlot
-      : baseSlots[index];
-
-    if (!slot?.subject?.trim()) continue;
-
-    classes.push({
-      period: index + 1,
-      subject: slot.subject,
-      short: subjectShortLabel(slot.subject),
-      time: timetable.dayTimes?.[index],
-      changed: hasOverride
-    });
-  }
-
-  if (classes.length === 0) return null;
-
-  return {
-    classes,
-    label: dayOverride?.label
-  };
-};
-
-function TodayClassesStrip({
-  summary,
-  compact = false
-}: {
-  summary: TodayClassSummary | null;
-  compact?: boolean;
-}) {
-  if (!summary) return null;
-
-  return (
-    <Link
-      href="/timetable"
-      className={`block rounded-xl border border-sky-200/15 bg-slate-950/35 backdrop-blur-sm ${
-        compact ? "px-2.5 py-2" : "px-3 py-2.5"
-      }`}
-      title="学校時間割を開く"
-    >
-      <div className="flex flex-wrap items-center gap-2">
-        <span
-          className={`font-semibold text-sky-100 ${
-            compact ? "text-[10px]" : "text-xs"
-          }`}
-        >
-          今日の授業 · {summary.classes.length}科目
-        </span>
-
-        <div className="flex flex-wrap items-center gap-1.5">
-          {summary.classes.map((item) => (
-            <span
-              key={`${item.period}-${item.subject}`}
-              className={`relative grid place-items-center rounded-lg border font-bold ${subjectPillClass(
-                item.subject
-              )} ${
-                compact
-                  ? "h-7 min-w-7 px-1 text-xs"
-                  : "h-8 min-w-8 px-1.5 text-sm"
-              }`}
-              title={`${item.period}限 ${item.subject}${
-                item.time ? ` · ${item.time}` : ""
-              }${item.changed ? " · 臨時変更" : ""}`}
-            >
-              {item.short}
-              {item.changed ? (
-                <sup className="absolute -right-1 -top-1 text-[9px] text-amber-200">
-                  ↻
-                </sup>
-              ) : null}
-            </span>
-          ))}
-        </div>
-
-        {summary.label ? (
-          <span
-            className={`truncate text-amber-100 ${
-              compact ? "text-[9px]" : "text-[10px]"
-            }`}
-          >
-            {summary.label}
-          </span>
-        ) : null}
-      </div>
-    </Link>
-  );
-}
-
-type TwoDayFlash = {
-  category: string;
-  kind: "考试" | "常识";
-  title: string;
-  keyPoint: string;
-  hint: string;
-  question?: string;
-  answer?: string;
-};
-
-type TwoDayFlashView = TwoDayFlash & {
-  rangeLabel: string;
-};
-
-const TWO_DAY_FLASH_START = "2026-08-16";
-
-const twoDayFlashes: TwoDayFlash[] = [
-  {
-    category: "地理",
-    kind: "考试",
-    title: "时差",
-    keyPoint: "15° = 1小时",
-    hint: "往东算 → ＋　往西算 → －",
-    question: "日本18:00时，伦敦几点？",
-    answer: "9:00"
-  },
-  {
-    category: "数学",
-    kind: "考试",
-    title: "一次方程式",
-    keyPoint: "x + 7 = 15 → x = 8",
-    hint: "等式两边要做相同的运算",
-    question: "x - 5 = 9，x是多少？",
-    answer: "14"
-  },
-  {
-    category: "英语",
-    kind: "考试",
-    title: "三单现",
-    keyPoint: "He / She / It → 动词通常 + s",
-    hint: "I play. / She plays.",
-    question: "He (play) tennis. 怎么写？",
-    answer: "He plays tennis."
-  },
-  {
-    category: "理科",
-    kind: "考试",
-    title: "气体的性质",
-    keyPoint: "先看：颜色・气味・水溶性・比空气轻重",
-    hint: "做题时按固定顺序确认，不要凭印象猜",
-    question: "收集气体时，为什么要先看它是否溶于水？",
-    answer: "因为是否溶于水会影响能不能用排水法收集。"
-  },
-  {
-    category: "历史",
-    kind: "考试",
-    title: "文明",
-    keyPoint: "古代文明常在大河流域发展",
-    hint: "河流提供水、农业条件和交通便利",
-    question: "为什么早期文明常出现在大河附近？",
-    answer: "因为水源、灌溉、农业和交通条件较好。"
-  },
-  {
-    category: "常识",
-    kind: "常识",
-    title: "为什么有四季？",
-    keyPoint: "地轴倾斜 + 地球公转",
-    hint: "不是因为夏天地球离太阳更近",
-    question: "南半球和北半球的季节一样吗？",
-    answer: "相反。北半球是夏季时，南半球通常是冬季。"
-  }
-];
-
-const flashDateFromKey = (dateKey: string) => {
-  const [year, month, day] = dateKey.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day));
-};
-
-const flashDateLabel = (date: Date) =>
-  `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
-
-const twoDayFlashForDate = (date: Date): TwoDayFlashView => {
-  const dateKey = todayKey(date);
-  const start = flashDateFromKey(TWO_DAY_FLASH_START);
-  const current = flashDateFromKey(dateKey);
-  const dayOffset = Math.max(
-    0,
-    Math.floor((current.getTime() - start.getTime()) / 86_400_000)
-  );
-  const blockIndex = Math.floor(dayOffset / 2);
-  const flash = twoDayFlashes[blockIndex % twoDayFlashes.length];
-  const blockStart = new Date(start.getTime() + blockIndex * 2 * 86_400_000);
-  const blockEnd = new Date(blockStart.getTime() + 86_400_000);
-
-  return {
-    ...flash,
-    rangeLabel: `${flashDateLabel(blockStart)}–${flashDateLabel(blockEnd)}`
-  };
-};
-
-function TwoDayFlashCard({
-  flash,
-  mode = "full"
-}: {
-  flash: TwoDayFlashView;
-  mode?: "full" | "compact" | "tiny";
-}) {
-  if (mode === "tiny") {
-    return (
-      <div className="rounded-xl border border-cyan-200/10 bg-cyan-300/[0.07] px-3 py-2.5">
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0 truncate text-xs font-semibold text-cyan-100">
-            ⚡ 今日知识点 · {flash.category}｜{flash.title}
-          </div>
-          <div className="shrink-0 text-[10px] text-slate-400">
-            {flash.rangeLabel}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (mode === "compact") {
-    return (
-      <div className="rounded-xl border border-cyan-200/10 bg-cyan-300/[0.07] px-3 py-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-[10px] font-bold tracking-[0.12em] text-cyan-200">
-            ⚡ 2-DAY FLASH · {flash.category}
-          </div>
-          <div className="text-[10px] text-slate-400">{flash.rangeLabel}</div>
-        </div>
-        <div className="mt-1 text-sm font-bold text-white">{flash.title}</div>
-        <div className="mt-1 text-sm font-semibold text-emerald-100">
-          {flash.keyPoint}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="rounded-2xl border border-cyan-200/12 bg-[linear-gradient(145deg,rgba(34,211,238,0.08),rgba(16,185,129,0.05))] p-3.5">
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-[10px] font-bold tracking-[0.12em] text-cyan-200">
-          ⚡ 2-DAY FLASH · {flash.kind}
-        </div>
-        <div className="rounded-full bg-white/[0.06] px-2 py-1 text-[9px] text-slate-300">
-          {flash.rangeLabel}
-        </div>
-      </div>
-
-      <div className="mt-2 flex items-center gap-2">
-        <span className="rounded-full bg-emerald-300/10 px-2 py-1 text-[10px] font-semibold text-emerald-100">
-          {flash.category}
-        </span>
-        <div className="text-base font-bold text-white">{flash.title}</div>
-      </div>
-
-      <div className="mt-2 text-[clamp(1rem,1vw,1.2rem)] font-bold text-cyan-100">
-        {flash.keyPoint}
-      </div>
-      <div className="mt-1 text-xs leading-relaxed text-slate-300">
-        {flash.hint}
-      </div>
-
-      {flash.question && flash.answer ? (
-        <details className="mt-2 rounded-lg bg-slate-950/28 px-3 py-2">
-          <summary className="cursor-pointer list-none text-xs font-semibold text-amber-100">
-            Q. {flash.question}　<span className="text-slate-400">答えを見る</span>
-          </summary>
-          <div className="mt-2 text-sm font-bold text-white">
-            A. {flash.answer}
-          </div>
-        </details>
-      ) : null}
-    </div>
-  );
-}
 
 const weatherLabel = (code?: number) => {
   if (code === undefined) return "取得不可";
@@ -1404,7 +998,6 @@ export default function DisplayPage() {
   const [bookPicks, setBookPicks] = useState<BookPick[]>([]);
   const activeDayRef = useRef(todayKey(new Date()));
   const currentTodayBackground = todayCardBackgroundForDate(now);
-  const twoDayFlash = twoDayFlashForDate(now);
 
   useEffect(() => {
     let disposed = false;
@@ -1489,11 +1082,6 @@ export default function DisplayPage() {
     );
 
     const primaryEvent = selectPrimaryTodayEvent(todayEvents, now);
-    const todayClasses = resolveTodayClasses(
-      state?.schoolTimetable,
-      now,
-      todayEvents
-    );
 
     const upcomingEvents = events
       .filter((event) => {
@@ -1503,6 +1091,14 @@ export default function DisplayPage() {
         return event.all_day || !hasEventEnded(event, now);
       })
       .slice(0, 5);
+
+    const notices = events
+      .filter(
+        (event) =>
+          event.date >= today &&
+          (event.need_parent_action || event.parent_task)
+      )
+      .slice(0, 3);
 
     const learningTasks = (state?.tasks ?? [])
       .filter(
@@ -1517,9 +1113,20 @@ export default function DisplayPage() {
         )
       );
 
-    const mainTasks = learningTasks.filter(
-      (task) => !task.due_date || task.due_date <= today
-    );
+    const mainTasks = learningTasks
+      .filter(
+        (task) =>
+          !task.due_date || task.due_date <= today
+      )
+      .slice(0, 5);
+
+    const nextTasks = learningTasks
+      .filter(
+        (task) =>
+          Boolean(task.due_date) &&
+          (task.due_date ?? "") > today
+      )
+      .slice(0, 2);
 
     const routineTasks = (state?.tasks ?? [])
       .filter(
@@ -1554,9 +1161,10 @@ export default function DisplayPage() {
     return {
       todayEvents,
       primaryEvent,
-      todayClasses,
       upcomingEvents,
+      notices,
       mainTasks,
+      nextTasks,
       routineTasks,
       childEventsToday,
       streaks,
@@ -1666,12 +1274,6 @@ export default function DisplayPage() {
                 ))}
               </div>
             ) : null}
-
-            {data.todayClasses ? (
-              <div className="mt-3">
-                <TodayClassesStrip summary={data.todayClasses} />
-              </div>
-            ) : null}
           </section>
 
           <section className="rounded-2xl bg-emerald-300/[0.12] p-4">
@@ -1701,7 +1303,7 @@ export default function DisplayPage() {
             ) : null}
 
             <div className="mt-3 grid gap-2">
-              {data.mainTasks.slice(0, 3).map((task) => (
+              {data.mainTasks.map((task) => (
                 <button
                   key={task.id}
                   type="button"
@@ -1734,29 +1336,6 @@ export default function DisplayPage() {
                   今日の学習タスクはありません
                 </div>
               ) : null}
-
-              {data.mainTasks.length > 3 ? (
-                <Link
-                  href="/learning"
-                  className="flex min-h-11 items-center justify-between rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 text-sm font-semibold text-slate-300"
-                >
-                  <span>还有 {data.mainTasks.length - 3} 项</span>
-                  <span>Learning →</span>
-                </Link>
-              ) : null}
-            </div>
-
-            <div className="mt-3">
-              <TwoDayFlashCard
-                flash={twoDayFlash}
-                mode={
-                  data.mainTasks.length >= 4
-                    ? "tiny"
-                    : data.mainTasks.length === 3
-                      ? "compact"
-                      : "full"
-                }
-              />
             </div>
           </section>
 
@@ -1784,13 +1363,12 @@ export default function DisplayPage() {
                   MEALS
                 </Link>
                 <Link
-                  href="/calendar"
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100 active:bg-cyan-300/20"
-                  aria-label="日程修改"
-                  title="Calendar · 日程修改"
+                  href="/mealtime"
+                  className="shrink-0 rounded-full bg-violet-300/10 px-3 py-1.5 text-xs font-semibold text-violet-100 active:bg-violet-300/20"
+                  aria-label="ごはん時間のニュースと英語"
+                  title="NEWS + ENGLISH · ごはん時間の英語"
                 >
-                  <CalendarDays className="h-4 w-4" />
-                  日程修改
+                  📰 ENGLISH
                 </Link>
                 <Link
                   href="/badminton"
@@ -1800,37 +1378,8 @@ export default function DisplayPage() {
                 >
                   🏸
                 </Link>
-                <Link
-                  href="/meditation"
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-violet-300/10 text-base active:bg-violet-300/20"
-                  aria-label="冥想"
-                  title="Meditation · 冥想"
-                >
-                  🧘
-                </Link>
               </div>
             </div>
-
-            <Link
-              href="/mealtime?audio=1"
-              className="mt-3 flex min-h-[74px] items-center justify-between gap-3 rounded-2xl border border-violet-200/25 bg-[linear-gradient(135deg,rgba(139,92,246,0.22),rgba(56,189,248,0.12))] px-4 py-3 shadow-[0_10px_28px_rgba(76,29,149,0.20)] active:bg-violet-300/20"
-              aria-label="每日阅读"
-            >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-300/20 text-violet-100">
-                  <BookOpen className="h-6 w-6" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-base font-black text-white">每日阅读</div>
-                  <div className="mt-0.5 truncate text-xs text-violet-100/80">
-                    英语原文 · 音频 · 同步字幕 · 跟读
-                  </div>
-                </div>
-              </div>
-              <span className="shrink-0 rounded-full bg-violet-200 px-3 py-1.5 text-xs font-black text-slate-950">
-                OPEN →
-              </span>
-            </Link>
 
             <div className="mt-3 grid gap-2">
               {data.routineTasks.map((task) => (
@@ -1925,6 +1474,35 @@ export default function DisplayPage() {
               ))}
             </div>
           </section>
+
+          {data.notices.length > 0 ? (
+            <section className="rounded-2xl bg-amber-300/[0.12] p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-amber-100">
+                <Bell className="h-5 w-5" />
+                QUICK NOTICE
+              </div>
+              <div className="mt-3 grid gap-2">
+                {data.notices.slice(0, 2).map((event) => (
+                  <div
+                    key={event.id}
+                    className="rounded-xl bg-amber-200/10 px-3 py-2.5"
+                  >
+                    <div className="text-xs text-amber-100">
+                      {formatShortDate(event.date)} {eventTimeRange(event)}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-white">
+                      {event.title}
+                    </div>
+                    {event.parent_task ? (
+                      <div className="mt-1 text-xs text-slate-300">
+                        {event.parent_task}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="rounded-2xl bg-sky-300/[0.06] p-4">
             <div className="flex items-center justify-between gap-3">
@@ -2029,24 +1607,20 @@ export default function DisplayPage() {
                     ) : null}
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
-                        <span className="text-cyan-200">▣</span>
-                        今日の予定 {data.todayEvents.length}件
-                      </div>
-                      <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
-                        <span className="text-cyan-200">◎</span>
-                        学校・子ども関連 {data.childEventsToday}件
-                      </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
+                      <span className="text-cyan-200">▣</span>
+                      今日の予定 {data.todayEvents.length}件
+                    </div>
+                    <div className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.07] bg-slate-950/35 backdrop-blur-sm px-3 text-[clamp(0.95rem,0.95vw,1.1rem)] text-slate-200">
+                      <span className="text-cyan-200">◎</span>
+                      学校・子ども関連 {data.childEventsToday}件
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="relative z-10 grid h-[calc(100%-3rem)] content-center gap-4">
-                  <div className="text-center text-[clamp(1.3rem,1.4vw,1.8rem)] text-slate-300">
-                    {data.todayEvents.length > 0 ? "今日の予定は終了しました" : "今日の大きな予定はありません"}
-                  </div>
+                <div className="relative z-10 grid h-[calc(100%-3rem)] place-items-center text-center text-[clamp(1.3rem,1.4vw,1.8rem)] text-slate-300">
+                  {data.todayEvents.length > 0 ? "今日の予定は終了しました" : "今日の大きな予定はありません"}
                 </div>
               )}
             </article>
@@ -2122,82 +1696,95 @@ export default function DisplayPage() {
                 </div>
               ) : null}
 
-              <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_0.38fr] gap-4">
-                <div className="grid min-h-0 content-start gap-2">
-                  {data.mainTasks.slice(0, 3).map((task) => (
-                    <div
-                      key={task.id}
-                      className="grid min-h-14 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/[0.05] bg-slate-950/24 px-3 py-2"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => completeTaskFromScreen(task)}
-                        className="grid h-10 w-10 place-items-center rounded-full border-2 border-emerald-200/90 bg-emerald-300/[0.05] text-emerald-100 transition active:scale-95 active:bg-emerald-300/25"
-                        aria-label={`${task.title} を完了にする`}
-                        title="タップして完了"
+              {data.mainTasks.length > 0 ? (
+                <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_0.34fr] gap-4">
+                  <div className="grid min-h-0 content-start gap-2">
+                    {data.mainTasks.slice(0, 3).map((task) => (
+                      <div
+                        key={task.id}
+                        className="grid min-h-14 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/[0.05] bg-slate-950/24 px-3 py-2"
                       >
-                        <Circle className="h-5 w-5" />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => completeTaskFromScreen(task)}
+                          className="grid h-10 w-10 place-items-center rounded-full border-2 border-emerald-200/90 bg-emerald-300/[0.05] text-emerald-100 transition active:scale-95 active:bg-emerald-300/25"
+                          aria-label={`${task.title} を完了にする`}
+                          title="タップして完了"
+                        >
+                          <Circle className="h-5 w-5" />
+                        </button>
 
-                      <div className="min-w-0">
-                        <div className="line-clamp-2 text-[clamp(1.05rem,1.05vw,1.3rem)] font-medium leading-snug text-white">
-                          {task.title}
+                        <div className="min-w-0">
+                          <div className="line-clamp-2 text-[clamp(1.05rem,1.05vw,1.3rem)] font-medium leading-snug text-white">
+                            {task.title}
+                          </div>
+                          {task.note ? (
+                            <div className="mt-0.5 truncate text-[clamp(0.8rem,0.75vw,0.9rem)] text-slate-300">
+                              {task.note}
+                            </div>
+                          ) : null}
                         </div>
-                        {task.note ? (
-                          <div className="mt-0.5 truncate text-[clamp(0.8rem,0.75vw,0.9rem)] text-slate-300">
-                            {task.note}
+
+                        {task.due_date ? (
+                          <div
+                            className={`text-[clamp(0.8rem,0.78vw,0.95rem)] ${
+                              task.due_date < todayKey(now)
+                                ? "font-semibold text-amber-200"
+                                : "text-slate-300"
+                            }`}
+                          >
+                            {task.due_date < todayKey(now)
+                              ? `期限超過 ${dueText(task.due_date)}`
+                              : dueText(task.due_date)}
                           </div>
                         ) : null}
                       </div>
+                    ))}
 
-                      {task.due_date ? (
+                    <Link
+                      href="/learning"
+                      className="flex min-h-10 items-center rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 text-sm font-semibold text-slate-300 transition active:bg-white/[0.08]"
+                    >
+                      ＋ 学習ページを開く
+                    </Link>
+                  </div>
+
+                  <div className="min-h-0">
+                    <div className="mb-2 text-xs font-semibold tracking-[0.12em] text-emerald-100">
+                      NEXT
+                    </div>
+
+                    <div className="grid gap-2">
+                      {data.nextTasks.slice(0, 1).map((task) => (
                         <div
-                          className={`text-[clamp(0.8rem,0.78vw,0.95rem)] ${
-                            task.due_date < todayKey(now)
-                              ? "font-semibold text-amber-200"
-                              : "text-slate-300"
-                          }`}
+                          key={task.id}
+                          className="rounded-xl border border-emerald-200/[0.08] bg-emerald-300/10 px-3 py-3"
                         >
-                          {task.due_date < todayKey(now)
-                            ? `期限超過 ${dueText(task.due_date)}`
-                            : dueText(task.due_date)}
+                          <div className="line-clamp-3 text-[clamp(1rem,1vw,1.2rem)] font-medium leading-snug text-white">
+                            → {task.title}
+                          </div>
+
+                          {task.due_date ? (
+                            <div className="mt-2 text-sm text-slate-300">
+                              {dueText(task.due_date)}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+
+                      {data.nextTasks.length === 0 ? (
+                        <div className="text-sm text-slate-300">
+                          次の学習タスクはありません
                         </div>
                       ) : null}
                     </div>
-                  ))}
-
-                  {data.mainTasks.length === 0 ? (
-                    <div className="grid min-h-[110px] place-items-center rounded-xl bg-slate-950/30 text-center text-[clamp(1.1rem,1.1vw,1.4rem)] text-slate-300">
-                      今日の学習タスクはありません
-                    </div>
-                  ) : null}
-
-                  <Link
-                    href="/learning"
-                    className="flex min-h-10 items-center justify-between rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 text-sm font-semibold text-slate-300 transition active:bg-white/[0.08]"
-                  >
-                    <span>
-                      {data.mainTasks.length > 3
-                        ? `还有 ${data.mainTasks.length - 3} 项`
-                        : "＋ 学習ページを開く"}
-                    </span>
-                    <span>Learning →</span>
-                  </Link>
+                  </div>
                 </div>
-
-                <div className="min-h-0">
-                  <TwoDayFlashCard
-                    flash={twoDayFlash}
-                    mode={
-                      data.mainTasks.length >= 4
-                        ? "tiny"
-                        : data.mainTasks.length === 3
-                          ? "compact"
-                          : "full"
-                    }
-                  />
+              ) : (
+                <div className="grid min-h-[160px] place-items-center rounded-2xl bg-slate-950/30 text-center text-[clamp(1.25rem,1.3vw,1.65rem)] text-slate-300">
+                  今日の学習タスクはありません
                 </div>
-              </div>
+              )}
             </article>
 
             <div className="grid min-h-0 grid-rows-[1fr_auto] gap-3">
@@ -2224,13 +1811,12 @@ export default function DisplayPage() {
                       MEALS
                     </Link>
                     <Link
-                      href="/calendar"
-                      className="inline-flex items-center gap-1 rounded-full bg-cyan-300/10 px-2.5 py-1 text-[10px] font-semibold text-cyan-100 active:bg-cyan-300/20"
-                      aria-label="日程修改"
-                      title="Calendar · 日程修改"
+                      href="/mealtime"
+                      className="rounded-full bg-violet-300/10 px-2.5 py-1 text-[10px] font-semibold text-violet-100 active:bg-violet-300/20"
+                      aria-label="ごはん時間のニュースと英語"
+                      title="NEWS + ENGLISH · ごはん時間の英語"
                     >
-                      <CalendarDays className="h-3.5 w-3.5" />
-                      日程修改
+                      📰 ENGLISH
                     </Link>
                     <Link
                       href="/badminton"
@@ -2240,39 +1826,8 @@ export default function DisplayPage() {
                     >
                       🏸
                     </Link>
-                    <Link
-                      href="/meditation"
-                      className="grid h-7 w-7 place-items-center rounded-full bg-violet-300/10 text-sm active:bg-violet-300/20"
-                      aria-label="冥想"
-                      title="Meditation · 冥想"
-                    >
-                      🧘
-                    </Link>
                   </div>
                 </div>
-
-                <Link
-                  href="/mealtime?audio=1"
-                  className="mb-3 flex min-h-16 items-center justify-between gap-3 rounded-2xl border border-violet-200/25 bg-[linear-gradient(135deg,rgba(139,92,246,0.24),rgba(56,189,248,0.12))] px-4 py-3 shadow-[0_10px_28px_rgba(76,29,149,0.20)] transition active:bg-violet-300/20"
-                  aria-label="每日阅读"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-300/20 text-violet-100">
-                      <BookOpen className="h-6 w-6" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[clamp(1rem,1vw,1.2rem)] font-black text-white">
-                        每日阅读
-                      </div>
-                      <div className="mt-0.5 truncate text-[clamp(0.7rem,0.7vw,0.85rem)] text-violet-100/80">
-                        英语原文 · 音频 · 同步字幕 · 跟读
-                      </div>
-                    </div>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-violet-200 px-3 py-1.5 text-[10px] font-black text-slate-950">
-                    OPEN →
-                  </span>
-                </Link>
 
                 <div className="grid grid-cols-2 gap-2">
                   {data.routineTasks.map((task) => (
@@ -2298,9 +1853,23 @@ export default function DisplayPage() {
                 </div>
               </article>
 
-              {data.todayClasses ? (
-                <TodayClassesStrip summary={data.todayClasses} compact />
-              ) : null}
+              {data.notices.length > 0 ? (
+                <article className="rounded-2xl border border-amber-200/10 bg-amber-200/[0.09] px-4 py-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.1em] text-amber-100">
+                    <Bell className="h-4 w-4" />
+                    QUICK NOTICE
+                  </div>
+                  <div className="mt-1 truncate text-[clamp(0.9rem,0.9vw,1.05rem)] font-semibold text-white">
+                    {formatShortDate(data.notices[0].date)}{" "}
+                    {data.notices[0].title}
+                  </div>
+                </article>
+              ) : (
+                <article className="flex items-center gap-2 rounded-2xl border border-white/[0.05] bg-slate-950/30 px-4 py-3 text-xs text-slate-300">
+                  <AlertCircle className="h-4 w-4 text-amber-200" />
+                  確認が必要な予定はありません
+                </article>
+              )}
             </div>
 
             <article className="min-h-0 overflow-hidden rounded-3xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
