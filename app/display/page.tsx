@@ -59,6 +59,7 @@ type MusicStation = {
   id: string;
   label: string;
   url: string;
+  group: "focus" | "radio";
 };
 
 type BookPick = {
@@ -305,40 +306,80 @@ const weatherLocations: WeatherPoint[] = [
 ];
 
 const musicStations: MusicStation[] = [
+  // FOCUS / STUDY
   {
-    id: "classical",
-    label: "Classical",
-    url: "https://ycradio.stream.publicradio.org/ycradio.aac"
+    id: "relax-classical",
+    label: "Relax Classical",
+    url: "https://relax.stream.publicradio.org/relax.aac",
+    group: "focus"
   },
   {
-    id: "piano",
-    label: "Piano",
-    url: "https://pianosolo.streamguys1.com/live"
+    id: "cello-chamber",
+    label: "Cello / Chamber",
+    url: "https://chambermusic.stream.publicradio.org/chambermusic.aac",
+    group: "focus"
+  },
+  {
+    id: "peaceful-piano",
+    label: "Peaceful Piano",
+    url: "https://peacefulpiano.stream.publicradio.org/peacefulpiano.aac",
+    group: "focus"
+  },
+  {
+    id: "drone-zone",
+    label: "Drone Zone · Focus",
+    url: "https://ice5.somafm.com/dronezone-128-mp3",
+    group: "focus"
+  },
+  {
+    id: "groove-salad",
+    label: "Groove Salad · Study",
+    url: "https://ice.somafm.com/groovesalad",
+    group: "focus"
+  },
+  {
+    id: "deep-space-one",
+    label: "Deep Space · Ambient",
+    url: "https://ice5.somafm.com/deepspaceone-128-mp3",
+    group: "focus"
   },
   {
     id: "peaceful-guitar",
     label: "Guitar · Peaceful",
-    url: "https://listen.181fm.com/181-classicalguitar_128k.mp3"
+    url: "https://listen.181fm.com/181-classicalguitar_128k.mp3",
+    group: "focus"
+  },
+
+  // RADIO / NEWS
+  {
+    id: "classical",
+    label: "Classical",
+    url: "https://ycradio.stream.publicradio.org/ycradio.aac",
+    group: "radio"
   },
   {
     id: "jazz",
     label: "Jazz",
-    url: "https://ice1.somafm.com/sonicuniverse-128-mp3"
+    url: "https://ice1.somafm.com/sonicuniverse-128-mp3",
+    group: "radio"
   },
   {
-    id: "study",
-    label: "Study / Relax",
-    url: "https://relax.stream.publicradio.org/relax.aac"
+    id: "awesome-80s",
+    label: "80s Gold · Hits",
+    url: "https://listen.181fm.com/181-awesome80s_128k.mp3",
+    group: "radio"
   },
   {
     id: "abc-news",
     label: "ABC NewsRadio",
-    url: "https://mediaserviceslive.akamaized.net/hls/live/2038311/newsradio/master.m3u8"
+    url: "https://mediaserviceslive.akamaized.net/hls/live/2038311/newsradio/master.m3u8",
+    group: "radio"
   },
   {
     id: "bbc-world",
     label: "BBC World Service",
-    url: "https://as-hls-ww-live.akamaized.net/pool_87948813/live/ww/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio=96000.norewind.m3u8"
+    url: "https://as-hls-ww-live.akamaized.net/pool_87948813/live/ww/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio=96000.norewind.m3u8",
+    group: "radio"
   }
 ];
 
@@ -932,7 +973,7 @@ function MusicControl() {
 
       <div className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-slate-300">
         <Music2 className="h-4 w-4 text-violet-200" />
-        MUSIC / NEWS
+        MUSIC · FOCUS / RADIO
       </div>
 
       <div className="flex items-center gap-2">
@@ -955,11 +996,24 @@ function MusicControl() {
           className="h-10 max-w-[190px] rounded-xl border border-white/10 bg-slate-950/75 px-3 text-sm text-white outline-none"
           aria-label="音楽・ニュースステーション"
         >
-          {musicStations.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
-            </option>
-          ))}
+          <optgroup label="FOCUS / STUDY">
+            {musicStations
+              .filter((item) => item.group === "focus")
+              .map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+          </optgroup>
+          <optgroup label="RADIO / NEWS">
+            {musicStations
+              .filter((item) => item.group === "radio")
+              .map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+          </optgroup>
         </select>
 
         <Volume2 className="h-4 w-4 text-slate-300" />
