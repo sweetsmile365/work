@@ -1374,6 +1374,182 @@ function MusicControl() {
   );
 }
 
+
+type AiDailyLesson = {
+  day: number;
+  title: string;
+  focus: string;
+  activity: string;
+};
+
+const aiDailyLessons: AiDailyLesson[] = [
+  { day: 1, title: "What Is AI?", focus: "AI 是什么？什么不是 AI？", activity: "找出家里或手机里的 3 个 AI 例子。" },
+  { day: 2, title: "Five Big Ideas of AI", focus: "感知・推理・学习・互动・影响", activity: "把昨天找到的 AI 分到 5 个类别中。" },
+  { day: 3, title: "Can Machines Learn?", focus: "机器不是“理解”，而是从数据中找规律", activity: "想一想：AI 要分辨猫和狗，需要看到什么数据？" },
+  { day: 4, title: "Data & Prediction", focus: "训练数据、预测与错误", activity: "写出 3 个会让训练数据不公平的例子。" },
+  { day: 5, title: "What Is an Algorithm?", focus: "算法就是清楚、可执行的一组步骤", activity: "写一个“做三明治”的 5 步算法。" },
+  { day: 6, title: "Debug an Algorithm", focus: "发现步骤中的漏洞并修正", activity: "故意删掉上节算法的一步，再判断会发生什么。" },
+  { day: 7, title: "How Machines Learn", focus: "输入 → 训练 → 模型 → 预测", activity: "用自己的话解释“训练”和“测试”的区别。" },
+  { day: 8, title: "Supervised Learning", focus: "带标签的数据如何帮助机器学习", activity: "设计 2 类图片，每类至少列出 5 个训练样本。" },
+  { day: 9, title: "Why AI Makes Mistakes", focus: "数据不足、偏差和环境变化都会导致错误", activity: "举 2 个 AI 可能判断错误的真实场景。" },
+  { day: 10, title: "Bias & Fairness", focus: "AI 的偏差往往来自数据和人的选择", activity: "想一想：什么叫“公平”的 AI？写 2 句话。" },
+  { day: 11, title: "Generative AI", focus: "生成式 AI 根据学到的模式生成新内容", activity: "比较：搜索答案 vs 生成答案，有什么不同？" },
+  { day: 12, title: "AI Smart User", focus: "核对事实、保护隐私、自己做最终判断", activity: "写下自己的 3 条 AI 使用规则。" }
+];
+
+function AiDailyCourse() {
+  const [open, setOpen] = useState(false);
+  const [lessonIndex, setLessonIndex] = useState(0);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("family-ai-daily-lesson");
+    const parsed = Number(saved);
+    if (Number.isInteger(parsed) && parsed >= 0 && parsed < aiDailyLessons.length) {
+      setLessonIndex(parsed);
+    }
+  }, []);
+
+  const lesson = aiDailyLessons[lessonIndex];
+
+  const setLesson = (next: number) => {
+    const normalized = Math.max(0, Math.min(aiDailyLessons.length - 1, next));
+    setLessonIndex(normalized);
+    window.localStorage.setItem("family-ai-daily-lesson", String(normalized));
+  };
+
+  const markDone = () => {
+    if (lessonIndex < aiDailyLessons.length - 1) {
+      setLesson(lessonIndex + 1);
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-2 flex w-full min-h-[68px] items-center justify-between gap-3 rounded-2xl border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(59,130,246,0.10))] px-4 py-3 text-left active:bg-cyan-300/20"
+        aria-label="AI 20 MIN"
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-cyan-300/15 text-xl">🤖</div>
+          <div className="min-w-0">
+            <div className="text-sm font-bold tracking-[0.08em] text-cyan-100">
+              AI 20 MIN · DAY {lesson.day}
+            </div>
+            <div className="mt-0.5 truncate text-xs text-slate-300">
+              {lesson.title} · 免费 · 零基础 · 每天20分钟
+            </div>
+          </div>
+        </div>
+        <span className="shrink-0 text-xs font-bold text-cyan-200">START →</span>
+      </button>
+
+      {open ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 p-3 backdrop-blur-md">
+          <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-cyan-200/20 bg-[#071523] shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-6">
+              <div>
+                <div className="text-xs font-bold tracking-[0.18em] text-cyan-200">
+                  AI DAILY · 20 MIN
+                </div>
+                <div className="mt-1 text-xl font-bold text-white">
+                  Day {lesson.day} · {lesson.title}
+                </div>
+                <div className="mt-1 text-xs text-slate-300">
+                  MIT Day of AI · Middle Grades · 在首页内学习
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-2xl leading-none text-white active:bg-white/20"
+                aria-label="关闭 AI 课程"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="overflow-y-auto p-4 sm:p-6">
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.85fr)]">
+                <div>
+                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-black">
+                    <div className="aspect-video">
+                      <iframe
+                        className="h-full w-full"
+                        src="https://www.youtube-nocookie.com/embed/videoseries?list=PLDVXRQw6p68sPfA08_gcJS_AwapOTUs4v"
+                        title="MIT Day of AI video playlist"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-xl bg-cyan-300/10 px-2 py-3">
+                      <div className="text-lg font-bold text-cyan-100">5 min</div>
+                      <div className="text-[10px] text-slate-300">WATCH</div>
+                    </div>
+                    <div className="rounded-xl bg-violet-300/10 px-2 py-3">
+                      <div className="text-lg font-bold text-violet-100">10 min</div>
+                      <div className="text-[10px] text-slate-300">THINK / TRY</div>
+                    </div>
+                    <div className="rounded-xl bg-emerald-300/10 px-2 py-3">
+                      <div className="text-lg font-bold text-emerald-100">5 min</div>
+                      <div className="text-[10px] text-slate-300">EXPLAIN</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-cyan-200/15 bg-cyan-300/[0.08] p-4">
+                    <div className="text-[10px] font-bold tracking-[0.15em] text-cyan-200">TODAY'S IDEA</div>
+                    <div className="mt-2 text-base font-bold leading-relaxed text-white">{lesson.focus}</div>
+                  </div>
+
+                  <div className="rounded-2xl border border-violet-200/15 bg-violet-300/[0.08] p-4">
+                    <div className="text-[10px] font-bold tracking-[0.15em] text-violet-200">10-MIN ACTIVITY</div>
+                    <div className="mt-2 text-sm font-semibold leading-relaxed text-slate-100">{lesson.activity}</div>
+                  </div>
+
+                  <div className="rounded-2xl border border-emerald-200/15 bg-emerald-300/[0.08] p-4">
+                    <div className="text-[10px] font-bold tracking-[0.15em] text-emerald-200">LAST 5 MIN</div>
+                    <div className="mt-2 text-sm leading-relaxed text-slate-200">
+                      不看答案，用自己的话说明今天学到的内容。能给家长讲清楚，就算完成。
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={lessonIndex === 0}
+                      onClick={() => setLesson(lessonIndex - 1)}
+                      className="min-h-11 flex-1 rounded-xl bg-white/10 px-3 text-sm font-bold text-white disabled:opacity-30"
+                    >
+                      ← PREV
+                    </button>
+                    <button
+                      type="button"
+                      onClick={markDone}
+                      className="min-h-11 flex-[1.4] rounded-xl bg-cyan-300 px-3 text-sm font-black text-slate-950 active:bg-cyan-200"
+                    >
+                      {lessonIndex === aiDailyLessons.length - 1 ? "DONE ✓" : "完成今天 →"}
+                    </button>
+                  </div>
+
+                  <div className="text-center text-[10px] text-slate-500">
+                    Progress {lesson.day} / {aiDailyLessons.length}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 export default function DisplayPage() {
   const [state, setState] = useState<AppState | null>(null);
   const [now, setNow] = useState(() => new Date());
@@ -1807,22 +1983,7 @@ export default function DisplayPage() {
               <span className="shrink-0 text-xs font-bold text-cyan-200">OPEN →</span>
             </Link>
 
-            <a
-              href="https://dayofai.org/units/ai-foundations-for-middle-grades"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 flex min-h-[68px] items-center justify-between gap-3 rounded-2xl border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(59,130,246,0.10))] px-4 py-3 active:bg-cyan-300/20"
-              aria-label="AI 20 MIN"
-            >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-cyan-300/15 text-xl">🤖</div>
-                <div className="min-w-0">
-                  <div className="text-sm font-bold tracking-[0.08em] text-cyan-100">AI 20 MIN</div>
-                  <div className="mt-0.5 truncate text-xs text-slate-300">MIT Day of AI · 零基础 · 免费 · 每天20分钟</div>
-                </div>
-              </div>
-              <span className="shrink-0 text-xs font-bold text-cyan-200">START →</span>
-            </a>
+            <AiDailyCourse />
 
             <div className="mt-3 grid gap-2">
               {data.routineTasks.map((task) => (
@@ -2258,22 +2419,7 @@ export default function DisplayPage() {
                   <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
                 </Link>
 
-                <a
-                  href="https://dayofai.org/units/ai-foundations-for-middle-grades"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.14),rgba(59,130,246,0.08))] px-3 py-2.5 active:bg-cyan-300/20"
-                  aria-label="AI 20 MIN"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-cyan-300/15 text-base">🤖</div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold tracking-[0.08em] text-cyan-100">AI 20 MIN</div>
-                      <div className="truncate text-[10px] text-slate-300">MIT Day of AI · 零基础 · 免费 · 每天20分钟</div>
-                    </div>
-                  </div>
-                  <span className="shrink-0 text-[10px] font-bold text-cyan-200">START →</span>
-                </a>
+                <AiDailyCourse />
 
                 <div className="grid grid-cols-2 gap-2">
                   {data.routineTasks.map((task) => (
