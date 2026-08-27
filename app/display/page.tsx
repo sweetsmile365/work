@@ -1809,6 +1809,25 @@ export default function DisplayPage() {
             </Link>
 
             <Link
+              href="/english-song"
+              className="mt-2 flex min-h-[68px] items-center justify-between gap-3 rounded-2xl border border-fuchsia-200/20 bg-[linear-gradient(135deg,rgba(217,70,239,0.16),rgba(59,130,246,0.10))] px-4 py-3 active:bg-fuchsia-300/20"
+              aria-label="English Song 一句一句学英文歌"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-fuchsia-300/15 text-xl">🎵</div>
+                <div className="min-w-0">
+                  <div className="text-sm font-bold tracking-[0.08em] text-fuchsia-100">
+                    English Song
+                  </div>
+                  <div className="mt-0.5 truncate text-xs text-slate-300">
+                    一句一句学英文歌
+                  </div>
+                </div>
+              </div>
+              <span className="shrink-0 text-xs font-bold text-cyan-200">OPEN →</span>
+            </Link>
+
+            <Link
               href="/ai-learning"
               className="mt-2 flex min-h-[68px] items-center justify-between gap-3 rounded-2xl border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(59,130,246,0.10))] px-4 py-3 active:bg-cyan-300/20"
               aria-label="AI 20 MIN"
@@ -2256,6 +2275,25 @@ export default function DisplayPage() {
                     <div className="min-w-0">
                       <div className="text-xs font-bold tracking-[0.08em] text-violet-100">每日阅读</div>
                       <div className="truncate text-[10px] text-slate-300">英语原文 · 音频 · 同步字幕 · 跟读</div>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
+                </Link>
+
+                <Link
+                  href="/english-song"
+                  className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-fuchsia-200/20 bg-[linear-gradient(135deg,rgba(217,70,239,0.14),rgba(59,130,246,0.08))] px-3 py-2.5 active:bg-fuchsia-300/20"
+                  aria-label="English Song 一句一句学英文歌"
+                >
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-fuchsia-300/15 text-base">🎵</div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold tracking-[0.08em] text-fuchsia-100">
+                        English Song
+                      </div>
+                      <div className="truncate text-[10px] text-slate-300">
+                        一句一句学英文歌
+                      </div>
                     </div>
                   </div>
                   <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
