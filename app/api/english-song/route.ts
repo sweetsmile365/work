@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 type DriveFile = { id: string; name: string };
 
+const ENGLISH_SONGS_FOLDER_ID = "1o-lHvil47zKPIeB802xDCH4oekvXVx1Q";
+
 function decodeHtml(value: string) {
   return value
     .replace(/&amp;/g, "&")
@@ -74,16 +76,7 @@ async function readFolder(folderId: string) {
 }
 
 export async function GET(request: NextRequest) {
-  const folderId = process.env.ENGLISH_SONGS_FOLDER_ID;
-
-  if (!folderId) {
-    return NextResponse.json({
-      ok: false,
-      items: [],
-      error: "ENGLISH_SONGS_FOLDER_ID is not configured."
-    });
-  }
-
+  const folderId = ENGLISH_SONGS_FOLDER_ID;
   const lyricId = request.nextUrl.searchParams.get("lyrics");
 
   if (lyricId) {
