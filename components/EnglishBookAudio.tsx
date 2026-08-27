@@ -143,7 +143,54 @@ const EIKEN_STUDY_WORDS: Record<string, Omit<StudyWord, "word">> = {
   strategy: { ja: "戦略", zh: "策略；战略", level: "2級" },
   sufficient: { ja: "十分な", zh: "足够的", level: "準1級" },
   transform: { ja: "変える・変換する", zh: "转变；转换", level: "2級" },
-  unique: { ja: "独特の", zh: "独特的", level: "2級" }
+  unique: { ja: "独特の", zh: "独特的", level: "2級" },
+  accept: { ja: "受け入れる", zh: "接受", level: "2級" },
+  action: { ja: "行動", zh: "行动", level: "2級" },
+  activity: { ja: "活動", zh: "活动", level: "2級" },
+  ancient: { ja: "古代の", zh: "古代的", level: "2級" },
+  appear: { ja: "現れる", zh: "出现", level: "2級" },
+  avoid: { ja: "避ける", zh: "避免", level: "2級" },
+  behavior: { ja: "行動・ふるまい", zh: "行为", level: "2級" },
+  cause: { ja: "原因・引き起こす", zh: "原因；导致", level: "2級" },
+  change: { ja: "変化・変える", zh: "变化；改变", level: "2級" },
+  common: { ja: "一般的な", zh: "常见的", level: "2級" },
+  community: { ja: "地域社会・共同体", zh: "社区；共同体", level: "2級" },
+  create: { ja: "作り出す", zh: "创造", level: "2級" },
+  culture: { ja: "文化", zh: "文化", level: "2級" },
+  decision: { ja: "決定", zh: "决定", level: "2級" },
+  describe: { ja: "説明する・描写する", zh: "描述", level: "2級" },
+  difference: { ja: "違い", zh: "差异", level: "2級" },
+  discover: { ja: "発見する", zh: "发现", level: "2級" },
+  education: { ja: "教育", zh: "教育", level: "2級" },
+  effect: { ja: "効果・影響", zh: "效果；影响", level: "2級" },
+  experience: { ja: "経験", zh: "经验", level: "2級" },
+  explain: { ja: "説明する", zh: "解释", level: "2級" },
+  future: { ja: "未来", zh: "未来", level: "2級" },
+  government: { ja: "政府", zh: "政府", level: "2級" },
+  habit: { ja: "習慣", zh: "习惯", level: "2級" },
+  history: { ja: "歴史", zh: "历史", level: "2級" },
+  imagine: { ja: "想像する", zh: "想象", level: "2級" },
+  include: { ja: "含む", zh: "包括", level: "2級" },
+  information: { ja: "情報", zh: "信息", level: "2級" },
+  knowledge: { ja: "知識", zh: "知识", level: "2級" },
+  language: { ja: "言語", zh: "语言", level: "2級" },
+  local: { ja: "地域の・地元の", zh: "当地的", level: "2級" },
+  modern: { ja: "現代の", zh: "现代的", level: "2級" },
+  natural: { ja: "自然の", zh: "自然的", level: "2級" },
+  necessary: { ja: "必要な", zh: "必要的", level: "2級" },
+  opinion: { ja: "意見", zh: "意见", level: "2級" },
+  organize: { ja: "整理する・組織する", zh: "组织；整理", level: "2級" },
+  possible: { ja: "可能な", zh: "可能的", level: "2級" },
+  problem: { ja: "問題", zh: "问题", level: "2級" },
+  protect: { ja: "守る", zh: "保护", level: "2級" },
+  public: { ja: "公共の・公の", zh: "公共的", level: "2級" },
+  reason: { ja: "理由", zh: "理由", level: "2級" },
+  relationship: { ja: "関係", zh: "关系", level: "2級" },
+  society: { ja: "社会", zh: "社会", level: "2級" },
+  solution: { ja: "解決策", zh: "解决方案", level: "2級" },
+  traditional: { ja: "伝統的な", zh: "传统的", level: "2級" },
+  understand: { ja: "理解する", zh: "理解", level: "2級" },
+  value: { ja: "価値", zh: "价值", level: "2級" }
 };
 
 const SPEEDS = [0.75, 0.9, 1, 1.15, 1.25, 1.5];
@@ -173,6 +220,10 @@ function knownWordsKey(itemId: string) {
   return `english-book-known-words:${itemId}`;
 }
 
+function readCountKey(itemId: string) {
+  return `english-book-read-count:${itemId}`;
+}
+
 function normalizeWord(value: string) {
   return value.toLowerCase().replace(/^[^a-z]+|[^a-z]+$/g, "");
 }
@@ -196,6 +247,7 @@ export default function EnglishBookAudio() {
   const [duration, setDuration] = useState(0);
   const [audioError, setAudioError] = useState(false);
   const [knownWords, setKnownWords] = useState<string[]>([]);
+  const [readCount, setReadCount] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -244,7 +296,9 @@ export default function EnglishBookAudio() {
       }
     }
 
-    return result.filter((item) => !knownWords.includes(item.word));
+    return result
+      .filter((item) => !knownWords.includes(item.word))
+      .slice(0, 15);
   }, [knownWords, subtitle]);
 
   const activeWords = useMemo(() => {
@@ -305,6 +359,16 @@ export default function EnglishBookAudio() {
       cancelled = true;
     };
   }, [kind, open]);
+
+  useEffect(() => {
+    if (!selected || typeof window === "undefined") {
+      setReadCount(0);
+      return;
+    }
+
+    const saved = Number(window.localStorage.getItem(readCountKey(selected.id)));
+    setReadCount(Number.isFinite(saved) && saved > 0 ? Math.floor(saved) : 0);
+  }, [selected?.id]);
 
   useEffect(() => {
     if (!selected || typeof window === "undefined") {
@@ -658,7 +722,17 @@ export default function EnglishBookAudio() {
                   }}
                   onPlay={() => setPlaying(true)}
                   onPause={() => setPlaying(false)}
-                  onEnded={() => setPlaying(false)}
+                  onEnded={() => {
+                    setPlaying(false);
+                    if (selected && typeof window !== "undefined") {
+                      const next = readCount + 1;
+                      setReadCount(next);
+                      window.localStorage.setItem(
+                        readCountKey(selected.id),
+                        String(next)
+                      );
+                    }
+                  }}
                   onError={() => {
                     setAudioError(true);
                     setPlaying(false);
@@ -675,6 +749,10 @@ export default function EnglishBookAudio() {
                           </div>
                           <div className="mt-1 truncate text-lg font-bold">
                             {selected.name.replace(/\.mp3$/i, "")}
+                          </div>
+
+                          <div className="mt-2 inline-flex items-center rounded-full border border-emerald-200/15 bg-emerald-300/10 px-3 py-1 text-[11px] font-bold text-emerald-100">
+                            この文章を {readCount} 回読了 · 已完整读了 {readCount} 遍
                           </div>
                         </div>
 
@@ -927,7 +1005,7 @@ export default function EnglishBookAudio() {
                                   </div>
 
                                   <div className="mt-2 text-[10px] text-slate-500">
-                                    {studyWords.length} words · 「覚えた」で非表示
+                                    {studyWords.length} words · 目標 10〜15語 · 「覚えた」で非表示
                                   </div>
                                 </div>
 
