@@ -47,6 +47,105 @@ type SubtitlePayload = {
   segments?: SubtitleSegment[];
 };
 
+type StudyWord = {
+  word: string;
+  ja: string;
+  zh: string;
+  level: "2級" | "準1級";
+};
+
+const EIKEN_STUDY_WORDS: Record<string, Omit<StudyWord, "word">> = {
+  achieve: { ja: "達成する", zh: "实现；达成", level: "2級" },
+  advantage: { ja: "利点", zh: "优点；优势", level: "2級" },
+  affect: { ja: "影響を与える", zh: "影响", level: "2級" },
+  apply: { ja: "適用する・申し込む", zh: "应用；申请", level: "2級" },
+  approach: { ja: "方法・接近する", zh: "方法；接近", level: "2級" },
+  appropriate: { ja: "適切な", zh: "适当的；合适的", level: "準1級" },
+  available: { ja: "利用できる", zh: "可获得的；可利用的", level: "2級" },
+  benefit: { ja: "利益・恩恵", zh: "好处；受益", level: "2級" },
+  challenge: { ja: "課題・挑戦", zh: "挑战；难题", level: "2級" },
+  communicate: { ja: "意思疎通する", zh: "沟通", level: "2級" },
+  compare: { ja: "比較する", zh: "比较", level: "2級" },
+  concern: { ja: "懸念・関係する", zh: "担忧；涉及", level: "2級" },
+  consider: { ja: "考慮する", zh: "考虑", level: "2級" },
+  contribute: { ja: "貢献する", zh: "贡献", level: "2級" },
+  decrease: { ja: "減少する", zh: "减少", level: "2級" },
+  demand: { ja: "需要・要求する", zh: "需求；要求", level: "2級" },
+  determine: { ja: "決定する・判断する", zh: "决定；确定", level: "2級" },
+  develop: { ja: "発達する・開発する", zh: "发展；开发", level: "2級" },
+  environment: { ja: "環境", zh: "环境", level: "2級" },
+  establish: { ja: "設立する・確立する", zh: "建立；确立", level: "2級" },
+  evidence: { ja: "証拠", zh: "证据", level: "2級" },
+  factor: { ja: "要因", zh: "因素", level: "2級" },
+  feature: { ja: "特徴", zh: "特征；功能", level: "2級" },
+  generate: { ja: "生み出す", zh: "产生；生成", level: "2級" },
+  identify: { ja: "特定する", zh: "识别；确定", level: "2級" },
+  impact: { ja: "影響", zh: "影响", level: "2級" },
+  improve: { ja: "改善する", zh: "改善", level: "2級" },
+  increase: { ja: "増加する", zh: "增加", level: "2級" },
+  individual: { ja: "個人・個々の", zh: "个人；个体的", level: "2級" },
+  influence: { ja: "影響を与える", zh: "影响", level: "2級" },
+  involve: { ja: "含む・関与させる", zh: "涉及；包含", level: "2級" },
+  issue: { ja: "問題・論点", zh: "问题；议题", level: "2級" },
+  maintain: { ja: "維持する", zh: "维持", level: "2級" },
+  occur: { ja: "起こる", zh: "发生", level: "2級" },
+  opportunity: { ja: "機会", zh: "机会", level: "2級" },
+  participate: { ja: "参加する", zh: "参加", level: "2級" },
+  particular: { ja: "特定の・特に", zh: "特定的；特别的", level: "2級" },
+  perform: { ja: "行う・演じる", zh: "执行；表演", level: "2級" },
+  prevent: { ja: "防ぐ", zh: "防止", level: "2級" },
+  process: { ja: "過程・処理する", zh: "过程；处理", level: "2級" },
+  provide: { ja: "提供する", zh: "提供", level: "2級" },
+  require: { ja: "必要とする", zh: "需要；要求", level: "2級" },
+  research: { ja: "研究", zh: "研究", level: "2級" },
+  respond: { ja: "応答する", zh: "回应", level: "2級" },
+  significant: { ja: "重要な・かなりの", zh: "重要的；显著的", level: "2級" },
+  specific: { ja: "具体的な・特定の", zh: "具体的；特定的", level: "2級" },
+  suggest: { ja: "提案する・示唆する", zh: "建议；表明", level: "2級" },
+  support: { ja: "支援する", zh: "支持；支援", level: "2級" },
+  technology: { ja: "技術", zh: "技术", level: "2級" },
+  tend: { ja: "～する傾向がある", zh: "倾向于", level: "2級" },
+  theory: { ja: "理論", zh: "理论", level: "2級" },
+  therefore: { ja: "したがって", zh: "因此", level: "2級" },
+  various: { ja: "さまざまな", zh: "各种各样的", level: "2級" },
+  ability: { ja: "能力", zh: "能力", level: "2級" },
+  accurate: { ja: "正確な", zh: "准确的", level: "2級" },
+  adapt: { ja: "適応する", zh: "适应", level: "準1級" },
+  analyze: { ja: "分析する", zh: "分析", level: "2級" },
+  artificial: { ja: "人工の", zh: "人工的", level: "2級" },
+  assumption: { ja: "仮定", zh: "假设", level: "準1級" },
+  awareness: { ja: "認識・意識", zh: "意识；认知", level: "準1級" },
+  capable: { ja: "能力がある", zh: "有能力的", level: "2級" },
+  circumstance: { ja: "状況・事情", zh: "情况；环境", level: "準1級" },
+  complex: { ja: "複雑な", zh: "复杂的", level: "2級" },
+  consequence: { ja: "結果・重大な影響", zh: "后果；结果", level: "準1級" },
+  context: { ja: "文脈・状況", zh: "语境；背景", level: "準1級" },
+  crucial: { ja: "極めて重要な", zh: "至关重要的", level: "準1級" },
+  efficient: { ja: "効率的な", zh: "高效的", level: "2級" },
+  eliminate: { ja: "取り除く", zh: "消除", level: "準1級" },
+  evaluate: { ja: "評価する", zh: "评估", level: "準1級" },
+  essential: { ja: "不可欠な", zh: "必不可少的", level: "2級" },
+  estimate: { ja: "見積もる", zh: "估计", level: "2級" },
+  frequently: { ja: "頻繁に", zh: "频繁地", level: "2級" },
+  fundamental: { ja: "基本的な・根本的な", zh: "基本的；根本的", level: "準1級" },
+  indicate: { ja: "示す", zh: "表明；指示", level: "2級" },
+  interpret: { ja: "解釈する", zh: "解释；理解", level: "準1級" },
+  likely: { ja: "可能性が高い", zh: "很可能的", level: "2級" },
+  obtain: { ja: "得る", zh: "获得", level: "2級" },
+  perceive: { ja: "認識する", zh: "感知；察觉", level: "準1級" },
+  potential: { ja: "潜在的な・可能性", zh: "潜在的；潜力", level: "2級" },
+  principle: { ja: "原則", zh: "原则", level: "2級" },
+  recognize: { ja: "認識する", zh: "识别；认识到", level: "2級" },
+  relevant: { ja: "関連のある", zh: "相关的", level: "準1級" },
+  reliable: { ja: "信頼できる", zh: "可靠的", level: "2級" },
+  resource: { ja: "資源・資料", zh: "资源；资料", level: "2級" },
+  restrict: { ja: "制限する", zh: "限制", level: "2級" },
+  strategy: { ja: "戦略", zh: "策略；战略", level: "2級" },
+  sufficient: { ja: "十分な", zh: "足够的", level: "準1級" },
+  transform: { ja: "変える・変換する", zh: "转变；转换", level: "2級" },
+  unique: { ja: "独特の", zh: "独特的", level: "2級" }
+};
+
 const SPEEDS = [0.75, 0.9, 1, 1.15, 1.25, 1.5];
 
 const KIND_LABELS: Record<AudioKind, string> = {
@@ -70,6 +169,14 @@ function lastItemKey(kind: AudioKind) {
   return `english-book-audio-last:${kind}`;
 }
 
+function knownWordsKey(itemId: string) {
+  return `english-book-known-words:${itemId}`;
+}
+
+function normalizeWord(value: string) {
+  return value.toLowerCase().replace(/^[^a-z]+|[^a-z]+$/g, "");
+}
+
 export default function EnglishBookAudio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const subtitleRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -88,20 +195,17 @@ export default function EnglishBookAudio() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [audioError, setAudioError] = useState(false);
+  const [knownWords, setKnownWords] = useState<string[]>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("audio") === "1") {
-      setOpen(true);
-    }
+    if (params.get("audio") === "1") setOpen(true);
   }, []);
 
   const items = list?.items ?? [];
-
   const selected =
     items.find((item) => item.id === selectedId) ?? items[0] ?? null;
-
   const selectedIndex = selected
     ? items.findIndex((item) => item.id === selected.id)
     : -1;
@@ -124,6 +228,35 @@ export default function EnglishBookAudio() {
 
     return -1;
   }, [currentTime, subtitle]);
+
+  const studyWords = useMemo(() => {
+    const seen = new Set<string>();
+    const result: StudyWord[] = [];
+
+    for (const segment of subtitle?.segments ?? []) {
+      for (const token of segment.text.match(/[A-Za-z][A-Za-z'-]*/g) ?? []) {
+        const word = normalizeWord(token);
+        if (!word || seen.has(word)) continue;
+        const entry = EIKEN_STUDY_WORDS[word];
+        if (!entry) continue;
+        seen.add(word);
+        result.push({ word, ...entry });
+      }
+    }
+
+    return result.filter((item) => !knownWords.includes(item.word));
+  }, [knownWords, subtitle]);
+
+  const activeWords = useMemo(() => {
+    const activeText =
+      activeSegmentIndex >= 0
+        ? subtitle?.segments?.[activeSegmentIndex]?.text ?? ""
+        : "";
+
+    return new Set(
+      (activeText.match(/[A-Za-z][A-Za-z'-]*/g) ?? []).map(normalizeWord)
+    );
+  }, [activeSegmentIndex, subtitle]);
 
   useEffect(() => {
     if (!open) return;
@@ -174,6 +307,22 @@ export default function EnglishBookAudio() {
   }, [kind, open]);
 
   useEffect(() => {
+    if (!selected || typeof window === "undefined") {
+      setKnownWords([]);
+      return;
+    }
+
+    try {
+      const saved = JSON.parse(
+        window.localStorage.getItem(knownWordsKey(selected.id)) ?? "[]"
+      );
+      setKnownWords(Array.isArray(saved) ? saved : []);
+    } catch {
+      setKnownWords([]);
+    }
+  }, [selected?.id]);
+
+  useEffect(() => {
     if (!selected) {
       setSubtitle(null);
       return;
@@ -189,9 +338,7 @@ export default function EnglishBookAudio() {
 
     void fetch(selected.subtitleUrl, { cache: "force-cache" })
       .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`Subtitle ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Subtitle ${response.status}`);
         const value = (await response.json()) as SubtitlePayload;
         if (!cancelled) setSubtitle(value);
       })
@@ -248,7 +395,8 @@ export default function EnglishBookAudio() {
     if (
       Number.isFinite(saved) &&
       saved > 0 &&
-      saved < Math.max(audioRef.current.duration || 0, subtitle?.duration || 0) - 2
+      saved <
+        Math.max(audioRef.current.duration || 0, subtitle?.duration || 0) - 2
     ) {
       audioRef.current.currentTime = saved;
       setCurrentTime(saved);
@@ -322,6 +470,19 @@ export default function EnglishBookAudio() {
     void audioRef.current?.play().catch(() => setAudioError(true));
   }
 
+  function markWordKnown(word: string) {
+    if (!selected || typeof window === "undefined") return;
+    const next = Array.from(new Set([...knownWords, word]));
+    setKnownWords(next);
+    window.localStorage.setItem(knownWordsKey(selected.id), JSON.stringify(next));
+  }
+
+  function restoreKnownWords() {
+    if (!selected || typeof window === "undefined") return;
+    setKnownWords([]);
+    window.localStorage.removeItem(knownWordsKey(selected.id));
+  }
+
   const progressMax = Math.max(
     duration || 0,
     subtitle?.duration || 0,
@@ -343,7 +504,7 @@ export default function EnglishBookAudio() {
 
       {open ? (
         <div className="fixed inset-0 z-[100] bg-slate-950/82 p-3 backdrop-blur-md sm:p-5">
-          <div className="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-[28px] border border-white/[0.08] bg-[linear-gradient(145deg,#0b1724,#0b1f2b_52%,#0b1724)] text-white shadow-2xl">
+          <div className="mx-auto flex h-full max-w-[1480px] flex-col overflow-hidden rounded-[28px] border border-white/[0.08] bg-[linear-gradient(145deg,#0b1724,#0b1f2b_52%,#0b1724)] text-white shadow-2xl">
             <header className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.07] px-4 py-4 sm:px-6">
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-sky-200">
@@ -354,7 +515,7 @@ export default function EnglishBookAudio() {
                   《超强英语阅读训练 1》
                 </h2>
                 <div className="mt-1 text-xs text-slate-400">
-                  Google Drive Audio · Sync Subtitle · Speed Control
+                  Google Drive Audio · Sync Subtitle · EIKEN 2+ Vocabulary
                 </div>
               </div>
 
@@ -543,7 +704,10 @@ export default function EnglishBookAudio() {
                           type="button"
                           onClick={togglePlay}
                           className="inline-flex min-h-14 min-w-[132px] items-center justify-center gap-2 rounded-xl border-2 border-cyan-100/60 px-5 text-base font-black shadow-[0_0_28px_rgba(103,232,249,0.28)]"
-                          style={{ backgroundColor: "#67e8f9", color: "#07131f" }}
+                          style={{
+                            backgroundColor: "#67e8f9",
+                            color: "#07131f"
+                          }}
                           aria-label={playing ? "暂停" : "播放"}
                         >
                           {playing ? (
@@ -579,7 +743,9 @@ export default function EnglishBookAudio() {
                           max={progressMax}
                           step="0.1"
                           value={Math.min(currentTime, progressMax)}
-                          onChange={(event) => seekTo(Number(event.target.value))}
+                          onChange={(event) =>
+                            seekTo(Number(event.target.value))
+                          }
                           className="w-full accent-sky-300"
                           aria-label="播放进度"
                         />
@@ -606,7 +772,10 @@ export default function EnglishBookAudio() {
                                   : "bg-white/[0.06] text-slate-300"
                               }`}
                             >
-                              {value.toFixed(value === 1 ? 1 : 2).replace(/0$/, "")}×
+                              {value
+                                .toFixed(value === 1 ? 1 : 2)
+                                .replace(/0$/, "")}
+                              ×
                             </button>
                           ))}
                         </div>
@@ -639,6 +808,7 @@ export default function EnglishBookAudio() {
                               大屏字幕 · 当前句高亮 · 点击句子重新播放
                             </div>
                           </div>
+
                           {subtitle?.model ? (
                             <span className="text-[9px] text-slate-500">
                               {subtitle.model}
@@ -654,7 +824,13 @@ export default function EnglishBookAudio() {
                           <>
                             <div className="mt-4 rounded-2xl border-2 border-cyan-200/35 bg-[linear-gradient(135deg,rgba(34,211,238,0.18),rgba(99,102,241,0.14))] px-5 py-4 shadow-[0_0_34px_rgba(34,211,238,0.12)]">
                               <div className="flex items-center gap-2 text-[11px] font-black tracking-[0.16em] text-cyan-200 sm:text-xs">
-                                <span className={`h-2.5 w-2.5 rounded-full ${playing ? "animate-pulse bg-cyan-300" : "bg-slate-500"}`} />
+                                <span
+                                  className={`h-2.5 w-2.5 rounded-full ${
+                                    playing
+                                      ? "animate-pulse bg-cyan-300"
+                                      : "bg-slate-500"
+                                  }`}
+                                />
                                 NOW READING
                               </div>
 
@@ -667,59 +843,153 @@ export default function EnglishBookAudio() {
                               <div className="mt-2 text-sm font-bold tabular-nums text-cyan-200/80 sm:text-base">
                                 {formatTime(
                                   activeSegmentIndex >= 0
-                                    ? subtitle!.segments![activeSegmentIndex]?.start ?? 0
+                                    ? subtitle!.segments![activeSegmentIndex]
+                                        ?.start ?? 0
                                     : subtitle!.segments![0]?.start ?? 0
                                 )}
                               </div>
                             </div>
 
-                            <div className="mt-4 max-h-[50vh] space-y-2 overflow-y-auto pr-1">
-                              {subtitle!.segments!.map((segment, index) => {
-                                const active = index === activeSegmentIndex;
-                                const near =
-                                  activeSegmentIndex >= 0 &&
-                                  Math.abs(index - activeSegmentIndex) <= 1;
+                            <div className="mt-4 grid min-h-0 gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
+                              <div className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
+                                {subtitle!.segments!.map((segment, index) => {
+                                  const active =
+                                    index === activeSegmentIndex;
+                                  const near =
+                                    activeSegmentIndex >= 0 &&
+                                    Math.abs(index - activeSegmentIndex) <= 1;
 
-                                return (
-                                  <button
-                                    key={`${segment.start}-${index}`}
-                                    ref={(element) => {
-                                      subtitleRefs.current[index] = element;
-                                    }}
-                                    type="button"
-                                    onClick={() => jumpToSegment(segment)}
-                                    className={`block w-full rounded-2xl border px-4 py-3 text-left transition-all duration-200 ${
-                                      active
-                                        ? "border-cyan-100/70 bg-cyan-300 text-slate-950 shadow-[0_0_26px_rgba(103,232,249,0.28)]"
-                                        : near
-                                          ? "border-white/[0.07] bg-slate-900/70 text-white"
-                                          : "border-transparent bg-slate-950/28 text-slate-300 hover:bg-white/[0.06]"
-                                    }`}
-                                  >
-                                    <div className="flex items-start gap-3">
-                                      <span
-                                        className={`mt-1 shrink-0 text-xs font-bold tabular-nums sm:text-sm ${
-                                          active ? "text-slate-700" : "text-slate-500"
-                                        }`}
-                                      >
-                                        {formatTime(segment.start)}
-                                      </span>
+                                  return (
+                                    <button
+                                      key={`${segment.start}-${index}`}
+                                      ref={(element) => {
+                                        subtitleRefs.current[index] = element;
+                                      }}
+                                      type="button"
+                                      onClick={() => jumpToSegment(segment)}
+                                      className={`block w-full rounded-2xl border px-4 py-3 text-left transition-all duration-200 ${
+                                        active
+                                          ? "border-cyan-100/70 bg-cyan-300 text-slate-950 shadow-[0_0_26px_rgba(103,232,249,0.28)]"
+                                          : near
+                                            ? "border-white/[0.07] bg-slate-900/70 text-white"
+                                            : "border-transparent bg-slate-950/28 text-slate-300 hover:bg-white/[0.06]"
+                                      }`}
+                                    >
+                                      <div className="flex items-start gap-3">
+                                        <span
+                                          className={`mt-1 shrink-0 text-xs font-bold tabular-nums sm:text-sm ${
+                                            active
+                                              ? "text-slate-700"
+                                              : "text-slate-500"
+                                          }`}
+                                        >
+                                          {formatTime(segment.start)}
+                                        </span>
 
-                                      <span
-                                        className={`min-w-0 text-[clamp(1.08rem,1.15vw,1.35rem)] leading-[1.65] ${
-                                          active
-                                            ? "font-black"
-                                            : near
-                                              ? "font-bold"
-                                              : "font-medium"
-                                        }`}
-                                      >
-                                        {segment.text}
-                                      </span>
+                                        <span
+                                          className={`min-w-0 text-[clamp(1.08rem,1.15vw,1.35rem)] leading-[1.65] ${
+                                            active
+                                              ? "font-black"
+                                              : near
+                                                ? "font-bold"
+                                                : "font-medium"
+                                          }`}
+                                        >
+                                          {segment.text}
+                                        </span>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              <aside className="max-h-[50vh] overflow-hidden rounded-2xl border border-amber-200/15 bg-amber-200/[0.045]">
+                                <div className="border-b border-white/[0.06] bg-[#111d26]/95 px-4 py-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div>
+                                      <div className="text-[10px] font-black tracking-[0.14em] text-amber-200">
+                                        VOCAB · 英検2級+
+                                      </div>
+                                      <div className="mt-1 text-xs leading-relaxed text-slate-400">
+                                        本文の難しい単語 · 日語 + 中文
+                                      </div>
                                     </div>
-                                  </button>
-                                );
-                              })}
+
+                                    {knownWords.length > 0 ? (
+                                      <button
+                                        type="button"
+                                        onClick={restoreKnownWords}
+                                        className="shrink-0 rounded-lg bg-white/[0.06] px-2 py-1 text-[9px] font-bold text-slate-400"
+                                      >
+                                        RESET
+                                      </button>
+                                    ) : null}
+                                  </div>
+
+                                  <div className="mt-2 text-[10px] text-slate-500">
+                                    {studyWords.length} words · 「覚えた」で非表示
+                                  </div>
+                                </div>
+
+                                <div className="max-h-[calc(50vh-82px)] space-y-2 overflow-y-auto p-3">
+                                  {studyWords.length > 0 ? (
+                                    studyWords.map((item) => {
+                                      const active = activeWords.has(item.word);
+
+                                      return (
+                                        <div
+                                          key={item.word}
+                                          className={`rounded-xl border p-3 transition ${
+                                            active
+                                              ? "border-amber-200/60 bg-amber-200/15 shadow-[0_0_18px_rgba(253,230,138,0.10)]"
+                                              : "border-white/[0.06] bg-slate-950/30"
+                                          }`}
+                                        >
+                                          <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                              <div className="flex flex-wrap items-center gap-2">
+                                                <span className="text-base font-black text-white">
+                                                  {item.word}
+                                                </span>
+                                                <span
+                                                  className={`rounded-full px-2 py-0.5 text-[9px] font-black ${
+                                                    item.level === "準1級"
+                                                      ? "bg-rose-300/15 text-rose-200"
+                                                      : "bg-sky-300/15 text-sky-200"
+                                                  }`}
+                                                >
+                                                  英検{item.level}
+                                                </span>
+                                              </div>
+
+                                              <div className="mt-2 text-sm font-bold text-amber-100">
+                                                🇯🇵 {item.ja}
+                                              </div>
+                                              <div className="mt-1 text-sm font-semibold text-cyan-100">
+                                                🇨🇳 {item.zh}
+                                              </div>
+                                            </div>
+
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                markWordKnown(item.word)
+                                              }
+                                              className="shrink-0 rounded-lg bg-emerald-300/10 px-2 py-1.5 text-[9px] font-bold text-emerald-200"
+                                            >
+                                              覚えた
+                                            </button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })
+                                  ) : (
+                                    <div className="rounded-xl bg-slate-950/30 p-4 text-center text-xs leading-relaxed text-slate-400">
+                                      この文章では、登録済みの英検2級以上の単語は見つかりませんでした。
+                                    </div>
+                                  )}
+                                </div>
+                              </aside>
                             </div>
                           </>
                         ) : (
