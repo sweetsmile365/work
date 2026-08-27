@@ -527,12 +527,15 @@ export default function EnglishSongPage() {
                     return (
                       <div
                         key={`${line.start}-${index}`}
-                        className={`rounded-2xl border p-3 sm:p-4 ${
+                        className={`relative overflow-hidden rounded-2xl border p-3 transition-all duration-200 sm:p-4 ${
                           active
-                            ? "border-cyan-200/60 bg-cyan-300/12"
-                            : "border-white/7 bg-white/[0.025]"
+                            ? "scale-[1.01] border-cyan-200/80 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(59,130,246,0.12))] shadow-[0_0_28px_rgba(34,211,238,0.18)]"
+                            : "border-white/7 bg-white/[0.025] opacity-70"
                         }`}
                       >
+                        {active ? (
+                          <div className="absolute inset-y-0 left-0 w-1.5 bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,0.9)]" />
+                        ) : null}
                         <button
                           ref={(el) => {
                             lineRefs.current[index] = el;
@@ -548,12 +551,17 @@ export default function EnglishSongPage() {
 
                             <div className="min-w-0">
                               <div
-                                className={`text-[clamp(1.15rem,1.7vw,1.65rem)] leading-[1.55] ${
+                                className={`text-[clamp(1.15rem,1.7vw,1.65rem)] leading-[1.55] transition-all duration-150 ${
                                   active
-                                    ? "font-black text-white"
-                                    : "font-bold text-slate-200"
+                                    ? "font-black text-cyan-50 drop-shadow-[0_0_12px_rgba(103,232,249,0.55)]"
+                                    : "font-bold text-slate-300"
                                 }`}
                               >
+                                {active ? (
+                                  <span className="mr-2 inline-flex rounded-md bg-cyan-300 px-2 py-0.5 align-middle text-[10px] font-black tracking-[0.12em] text-slate-950">
+                                    NOW
+                                  </span>
+                                ) : null}
                                 {line.text}
                               </div>
 
