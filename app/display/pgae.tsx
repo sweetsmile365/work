@@ -1828,6 +1828,25 @@ export default function DisplayPage() {
             </Link>
 
             <Link
+              href="/ted-learning"
+              className="mt-2 flex min-h-[68px] items-center justify-between gap-3 rounded-2xl border border-rose-200/20 bg-[linear-gradient(135deg,rgba(244,63,94,0.15),rgba(249,115,22,0.08))] px-4 py-3 active:bg-rose-300/20"
+              aria-label="TED English 英語学習"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-rose-300/15 text-xl">🎤</div>
+                <div className="min-w-0">
+                  <div className="text-sm font-bold tracking-[0.08em] text-rose-100">
+                    TED English
+                  </div>
+                  <div className="mt-0.5 truncate text-xs text-slate-300">
+                    英日字幕 · 单词 · 3问输出
+                  </div>
+                </div>
+              </div>
+              <span className="shrink-0 text-xs font-bold text-cyan-200">OPEN →</span>
+            </Link>
+
+            <Link
               href="/ai-learning"
               className="mt-2 flex min-h-[68px] items-center justify-between gap-3 rounded-2xl border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(59,130,246,0.10))] px-4 py-3 active:bg-cyan-300/20"
               aria-label="AI 20 MIN"
@@ -2293,6 +2312,25 @@ export default function DisplayPage() {
                       </div>
                       <div className="truncate text-[10px] text-slate-300">
                         一句一句学英文歌
+                      </div>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
+                </Link>
+
+                <Link
+                  href="/ted-learning"
+                  className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-rose-200/20 bg-[linear-gradient(135deg,rgba(244,63,94,0.14),rgba(249,115,22,0.07))] px-3 py-2.5 active:bg-rose-300/20"
+                  aria-label="TED English 英語学習"
+                >
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-rose-300/15 text-base">🎤</div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold tracking-[0.08em] text-rose-100">
+                        TED English
+                      </div>
+                      <div className="truncate text-[10px] text-slate-300">
+                        英日字幕 · 单词 · 3问输出
                       </div>
                     </div>
                   </div>
