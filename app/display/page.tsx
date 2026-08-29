@@ -1211,7 +1211,7 @@ function WeeklyBookCard({
         adult
           ? "border-amber-200/15 bg-amber-300/[0.045]"
           : "border-emerald-200/15 bg-emerald-300/[0.045]"
-      } ${compact ? "p-3" : "p-4"}`}
+      } ${compact ? "h-full p-3" : "p-4"}`}
     >
       <div className="flex items-start gap-3">
         <BookCover book={book} compact={compact} />
@@ -1243,32 +1243,36 @@ function WeeklyBookCard({
 
       <div className="mt-3 rounded-xl bg-slate-950/30 p-3">
         <div className="text-[10px] font-black tracking-[0.1em] text-sky-200">
-          为什么这周读
+          {adult ? "为什么这周读" : "今週この本を読む理由"}
         </div>
-        <p className={`${compact ? "mt-1.5 text-[11px]" : "mt-2 text-xs"} leading-relaxed text-slate-200`}>
+        <p
+          className={`${compact ? "mt-1.5 line-clamp-4 text-[11px]" : "mt-2 text-xs"} leading-relaxed text-slate-200`}
+        >
           {adult ? book.description : childReasonJa(book)}
         </p>
       </div>
 
-      <div className="mt-3">
-        <div className="text-[10px] font-black tracking-[0.1em] text-violet-200">
-          读完希望得到
+      {!compact ? (
+        <div className="mt-3">
+          <div className="text-[10px] font-black tracking-[0.1em] text-violet-200">
+            {adult ? "读完希望得到" : "読んでほしいポイント"}
+          </div>
+          <div className="mt-2 grid gap-1.5">
+            {takeaways.map((item) => (
+              <div key={item} className="flex gap-2 text-[11px] leading-relaxed text-slate-300">
+                <span className={adult ? "text-amber-200" : "text-emerald-200"}>•</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="mt-2 grid gap-1.5">
-          {takeaways.map((item) => (
-            <div key={item} className="flex gap-2 text-[11px] leading-relaxed text-slate-300">
-              <span className={adult ? "text-amber-200" : "text-emerald-200"}>•</span>
-              <span>{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      ) : null}
 
-      <div className="mt-3 border-t border-white/7 pt-3">
+      <div className="mt-3 border-t border-white/7 pt-2.5">
         <div className="text-[10px] font-black tracking-[0.1em] text-cyan-200">
-          建议读法
+          {adult ? "建议读法" : "おすすめの読み方"}
         </div>
-        <div className="mt-1.5 text-[11px] leading-relaxed text-slate-400">
+        <div className={`${compact ? "mt-1 line-clamp-2" : "mt-1.5"} text-[11px] leading-relaxed text-slate-400`}>
           {readingAdvice(book, audience)}
         </div>
       </div>
@@ -1280,7 +1284,7 @@ function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
   const pair = weeklyBookPair(books);
 
   return (
-    <div className="grid min-h-0 grid-cols-2 gap-3">
+    <div className="grid h-full min-h-0 grid-cols-2 gap-3">
       <WeeklyBookCard book={pair.adult} audience="adult" compact />
       <WeeklyBookCard book={pair.child} audience="child" compact />
     </div>
@@ -2037,9 +2041,9 @@ export default function DisplayPage() {
         </div>
       </section>
 
-      <section className="relative mx-auto hidden h-[100dvh] max-w-[1920px] grid-rows-[auto_minmax(0,1fr)_auto] gap-3 px-6 py-4 lg:grid lg:px-8">
-        <header className="grid min-h-[132px] grid-cols-[minmax(250px,0.9fr)_minmax(0,1.35fr)_minmax(0,1fr)_minmax(170px,0.7fr)] items-stretch gap-4 border-b border-white/10 pb-3">
-          <div className="flex min-w-0 flex-col justify-center">
+      <section className="relative mx-auto hidden h-[100dvh] max-w-[1920px] grid-rows-[132px_minmax(0,1fr)_48px] gap-4 px-6 py-4 lg:grid lg:px-8">
+        <header className="grid h-[132px] grid-cols-[1.05fr_1.35fr_1.12fr_0.78fr] items-stretch gap-4">
+          <div className="flex min-w-0 flex-col justify-center rounded-2xl border border-white/[0.06] bg-white/[0.055] px-5 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.12)]">
             <div className="flex items-center gap-3">
               <div className="text-[clamp(0.95rem,1vw,1.2rem)] font-semibold tracking-[0.16em] text-cyan-200">
                 Family Dashboard
@@ -2079,8 +2083,8 @@ export default function DisplayPage() {
           </div>
         </header>
 
-        <div className="grid min-h-0 grid-rows-[1.02fr_0.98fr] gap-4">
-          <section className="grid min-h-0 grid-cols-[0.95fr_1.25fr] gap-4">
+        <div className="grid min-h-0 grid-rows-[0.96fr_1.04fr] gap-4">
+          <section className="grid min-h-0 grid-cols-[0.92fr_1.28fr] gap-4">
             <article
               className="relative min-h-0 overflow-hidden rounded-3xl border border-cyan-200/20 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.24)]"
               style={{
@@ -2180,8 +2184,8 @@ export default function DisplayPage() {
             </article>
           </section>
 
-          <section className="grid min-h-0 grid-cols-[1.5fr_0.82fr_0.72fr] gap-4">
-            <article className="min-h-0 overflow-hidden rounded-3xl border border-emerald-200/15 bg-[linear-gradient(145deg,rgba(4,74,71,0.88),rgba(5,50,61,0.94))] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+          <section className="grid min-h-0 grid-cols-[1.12fr_0.98fr_1.10fr] gap-4">
+            <article className="h-full min-h-0 overflow-hidden rounded-3xl border border-emerald-200/15 bg-[linear-gradient(145deg,rgba(4,74,71,0.88),rgba(5,50,61,0.94))] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <SectionTitle
                   title="LEARNING ・ 今日やること"
@@ -2289,8 +2293,8 @@ export default function DisplayPage() {
               </div>
             </article>
 
-            <div className="grid min-h-0 grid-rows-[1fr_auto] gap-3">
-              <article className="min-h-0 rounded-3xl border border-emerald-200/15 bg-[linear-gradient(145deg,rgba(15,78,66,0.9),rgba(10,58,55,0.95))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
+            <div className="min-h-0">
+              <article className="flex h-full min-h-0 flex-col rounded-3xl border border-emerald-200/15 bg-[linear-gradient(145deg,rgba(15,78,66,0.9),rgba(10,58,55,0.95))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
                     <Dumbbell className="h-5 w-5 shrink-0 text-emerald-200" />
@@ -2340,77 +2344,55 @@ export default function DisplayPage() {
                   </div>
                 </div>
 
-                <Link
-                  href="/mealtime?audio=1"
-                  className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-violet-200/20 bg-[linear-gradient(135deg,rgba(139,92,246,0.18),rgba(56,189,248,0.10))] px-3 py-2.5 active:bg-violet-300/20"
-                  aria-label="每日阅读"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-violet-300/15 text-base">📖</div>
+                <div className="mb-3 grid grid-cols-2 gap-2">
+                  <Link
+                    href="/mealtime?audio=1"
+                    className="flex min-h-12 items-center gap-2 rounded-xl border border-violet-200/15 bg-violet-300/10 px-3 active:bg-violet-300/20"
+                    aria-label="每日阅读"
+                  >
+                    <span className="text-base">📖</span>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold tracking-[0.08em] text-violet-100">每日阅读</div>
-                      <div className="truncate text-[10px] text-slate-300">英语原文 · 音频 · 同步字幕 · 跟读</div>
+                      <div className="truncate text-[11px] font-bold text-violet-100">每日阅读</div>
+                      <div className="truncate text-[9px] text-slate-400">音频 · 字幕 · 跟读</div>
                     </div>
-                  </div>
-                  <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
-                </Link>
+                  </Link>
 
-                <Link
-                  href="/english-song"
-                  className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-fuchsia-200/20 bg-[linear-gradient(135deg,rgba(217,70,239,0.14),rgba(59,130,246,0.08))] px-3 py-2.5 active:bg-fuchsia-300/20"
-                  aria-label="English Song 一句一句学英文歌"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-fuchsia-300/15 text-base">🎵</div>
+                  <Link
+                    href="/english-song"
+                    className="flex min-h-12 items-center gap-2 rounded-xl border border-fuchsia-200/15 bg-fuchsia-300/10 px-3 active:bg-fuchsia-300/20"
+                    aria-label="English Song 一句一句学英文歌"
+                  >
+                    <span className="text-base">🎵</span>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold tracking-[0.08em] text-fuchsia-100">
-                        English Song
-                      </div>
-                      <div className="truncate text-[10px] text-slate-300">
-                        一句一句学英文歌
-                      </div>
+                      <div className="truncate text-[11px] font-bold text-fuchsia-100">English Song</div>
+                      <div className="truncate text-[9px] text-slate-400">一句一句学英文歌</div>
                     </div>
-                  </div>
-                  <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
-                </Link>
+                  </Link>
 
-                <Link
-                  href="/ted-learning"
-                  className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-rose-200/20 bg-[linear-gradient(135deg,rgba(244,63,94,0.14),rgba(249,115,22,0.07))] px-3 py-2.5 active:bg-rose-300/20"
-                  aria-label="TED English 英語学習"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-rose-300/15 text-base">🎤</div>
+                  <Link
+                    href="/ted-learning"
+                    className="flex min-h-12 items-center gap-2 rounded-xl border border-rose-200/15 bg-rose-300/10 px-3 active:bg-rose-300/20"
+                    aria-label="TED English 英語学習"
+                  >
+                    <span className="text-base">🎤</span>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold tracking-[0.08em] text-rose-100">
-                        TED English
-                      </div>
-                      <div className="truncate text-[10px] text-slate-300">
-                        英日字幕 · 单词 · 3问输出
-                      </div>
+                      <div className="truncate text-[11px] font-bold text-rose-100">TED English</div>
+                      <div className="truncate text-[9px] text-slate-400">英日字幕 · 单词 · 输出</div>
                     </div>
-                  </div>
-                  <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
-                </Link>
+                  </Link>
 
-                <Link
-                  href="/ai-learning"
-                  className="mb-3 flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.14),rgba(59,130,246,0.08))] px-3 py-2.5 active:bg-cyan-300/20"
-                  aria-label="AI 20 MIN"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-cyan-300/15 text-base">🤖</div>
+                  <Link
+                    href="/ai-learning"
+                    className="flex min-h-12 items-center gap-2 rounded-xl border border-cyan-200/15 bg-cyan-300/10 px-3 active:bg-cyan-300/20"
+                    aria-label="AI 20 MIN"
+                  >
+                    <span className="text-base">🤖</span>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold tracking-[0.08em] text-cyan-100">
-                        AI 20 MIN
-                      </div>
-                      <div className="truncate text-[10px] text-slate-300">
-                        AI学習 · AI学习 · AI Learning
-                      </div>
+                      <div className="truncate text-[11px] font-bold text-cyan-100">AI 20 MIN</div>
+                      <div className="truncate text-[9px] text-slate-400">AI学習 · AI Learning</div>
                     </div>
-                  </div>
-                  <span className="shrink-0 text-[10px] font-bold text-cyan-200">OPEN →</span>
-                </Link>
+                  </Link>
+                </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   {data.routineTasks.map((task) => (
@@ -2434,14 +2416,15 @@ export default function DisplayPage() {
                     </div>
                   ) : null}
                 </div>
+                {data.todayClasses ? (
+                  <div className="mt-auto pt-3">
+                    <TodayClassesStrip summary={data.todayClasses} compact />
+                  </div>
+                ) : null}
               </article>
-
-              {data.todayClasses ? (
-                <TodayClassesStrip summary={data.todayClasses} compact />
-              ) : null}
             </div>
 
-            <article className="min-h-0 overflow-hidden rounded-3xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
+            <article className="h-full min-h-0 overflow-hidden rounded-3xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <BookOpen className="h-5 w-5 shrink-0 text-sky-200" />
