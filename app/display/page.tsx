@@ -1127,15 +1127,74 @@ function BookCover({
   );
 }
 
-function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+function weeklyBookPair(books: BookPick[]) {
+  const adultPool = books.filter((book) =>
+    ["management", "technology", "chinaManagement"].includes(book.category)
+  );
+  const childPool = books.filter((book) =>
+    ["junior", "chinaReading"].includes(book.category)
+  );
 
-  const activeBook =
-    books.find((book) => book.category === selectedCategory) ??
-    books[0] ??
-    null;
+  const week = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
 
-  if (!activeBook) {
+  return {
+    adult:
+      adultPool.length > 0
+        ? adultPool[week % adultPool.length]
+        : books[0] ?? null,
+    child:
+      childPool.length > 0
+        ? childPool[week % childPool.length]
+        : books.find((book) => book.category === "junior") ?? books[1] ?? null
+  };
+}
+
+function bookTakeaways(book: BookPick, audience: "adult" | "child") {
+  if (audience === "adult") {
+    if (book.category === "management") {
+      return ["建立更清晰的管理判断框架", "重新思考团队、组织与决策", "把书中的方法连接到实际工作"];
+    }
+    if (book.category === "technology") {
+      return ["理解技术变化背后的长期趋势", "判断AI与科技对工作和社会的影响", "减少只追热点、不看底层逻辑的判断"];
+    }
+    return ["理解中国商业与科技环境", "比较不同市场的管理与创新方式", "拓展投资与经营判断的视角"];
+  }
+
+  if (book.category === "junior") {
+    return ["扩大科学、人文或社会知识面", "练习提出问题而不是只记答案", "把阅读内容和学校学习连接起来"];
+  }
+
+  return ["建立中文长文阅读习惯", "理解人物、社会和世界的不同视角", "练习用自己的话总结和表达观点"];
+}
+
+function childReasonJa(book: BookPick) {
+  if (book.category === "junior") {
+    return `この本は、中学生が「知っていること」を増やすだけではなく、自分で疑問を持ち、考えるきっかけを作ってくれる本です。${book.description} 学校の勉強だけでは出会いにくいテーマにも触れられるので、視野を広げる読書として今週読む価値があります。`;
+  }
+
+  return `この本は、物語や人物の気持ちを追いながら、長い文章を読み続ける力と、自分の考えを言葉にする力を育てるのに向いています。${book.description} 12歳の今だからこそ、登場人物の選択や考え方について家族で話し合う材料にもなります。`;
+}
+
+function readingAdvice(book: BookPick, audience: "adult" | "child") {
+  if (audience === "adult") {
+    return "每天15–20分钟。不要急着读完；每次只记1个值得改变判断或行动的观点。";
+  }
+
+  return book.category === "chinaReading"
+    ? "每天10–15分钟。读完一小段后，用2–3句话讲给家人听：发生了什么、为什么重要、自己怎么看。"
+    : "每天10–15分钟。遇到不懂的地方先做标记，不要求全文查词；读完后说出1个新知识和1个问题。";
+}
+
+function WeeklyBookCard({
+  book,
+  audience,
+  compact = false
+}: {
+  book: BookPick | null;
+  audience: "adult" | "child";
+  compact?: boolean;
+}) {
+  if (!book) {
     return (
       <div className="grid min-h-[150px] place-items-center rounded-xl bg-slate-950/30 text-sm text-slate-300">
         今週の本を取得中…
@@ -1143,100 +1202,99 @@ function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
     );
   }
 
+  const adult = audience === "adult";
+  const takeaways = bookTakeaways(book, audience);
+
   return (
-    <div className="grid min-h-0 gap-2">
-      <div className="grid min-h-0 grid-cols-[4.6rem_minmax(0,1fr)] gap-3 rounded-xl border border-white/[0.06] bg-slate-950/34 p-3">
-        <BookCover book={activeBook} />
+    <div
+      className={`rounded-2xl border ${
+        adult
+          ? "border-amber-200/15 bg-amber-300/[0.045]"
+          : "border-emerald-200/15 bg-emerald-300/[0.045]"
+      } ${compact ? "p-3" : "p-4"}`}
+    >
+      <div className="flex items-start gap-3">
+        <BookCover book={book} compact={compact} />
 
-        <div className="min-w-0">
-          <div className="text-[9px] font-bold tracking-[0.08em] text-sky-200">
-            {activeBook.categoryLabel}
-            {activeBook.rank ? ` · #${activeBook.rank}` : ""}
+        <div className="min-w-0 flex-1">
+          <div
+            className={`text-[10px] font-black tracking-[0.12em] ${
+              adult ? "text-amber-200" : "text-emerald-200"
+            }`}
+          >
+            {adult ? "👤 FOR ADULT · 40岁" : "🧒 FOR CHILD · 12岁"}
           </div>
 
-          <div className="mt-1 line-clamp-2 text-[clamp(1rem,1vw,1.2rem)] font-bold leading-snug text-white">
-            {activeBook.title}
+          <div className={`${compact ? "mt-1 text-sm" : "mt-1.5 text-base"} font-bold leading-snug text-white`}>
+            {book.title}
           </div>
 
-          {activeBook.author ? (
-            <div className="mt-1 truncate text-[10px] text-slate-300">
-              {activeBook.author}
-            </div>
+          {book.author ? (
+            <div className="mt-1 text-[10px] text-slate-400">{book.author}</div>
           ) : null}
 
-          <div className="mt-2 line-clamp-3 text-[10px] leading-relaxed text-slate-300">
-            {activeBook.description}
+          <div className="mt-1 text-[9px] text-slate-500">
+            {book.categoryLabel}
+            {book.rank ? ` · #${book.rank}` : ""}
+            {book.source ? ` · ${book.source}` : ""}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-1.5">
-        {books.slice(0, 5).map((book, index) => {
-          const active = book.category === activeBook.category;
-          return (
-            <button
-              key={book.category}
-              type="button"
-              onClick={() => setSelectedCategory(book.category)}
-              className={`min-w-0 rounded-lg border px-1.5 py-1.5 text-center transition active:scale-[0.97] ${
-                active
-                  ? "border-sky-300/35 bg-sky-300/15"
-                  : "border-white/[0.05] bg-white/[0.035]"
-              }`}
-              aria-label={`${book.title} を表示`}
-              title={book.title}
-            >
-              <div className="text-[8px] font-bold text-sky-200">
-                {index + 1}
-              </div>
-              <div className="mt-0.5 truncate text-[8px] text-slate-300">
-                {book.market ?? "JP"}
-              </div>
-            </button>
-          );
-        })}
+      <div className="mt-3 rounded-xl bg-slate-950/30 p-3">
+        <div className="text-[10px] font-black tracking-[0.1em] text-sky-200">
+          为什么这周读
+        </div>
+        <p className={`${compact ? "mt-1.5 text-[11px]" : "mt-2 text-xs"} leading-relaxed text-slate-200`}>
+          {adult ? book.description : childReasonJa(book)}
+        </p>
+      </div>
+
+      <div className="mt-3">
+        <div className="text-[10px] font-black tracking-[0.1em] text-violet-200">
+          读完希望得到
+        </div>
+        <div className="mt-2 grid gap-1.5">
+          {takeaways.map((item) => (
+            <div key={item} className="flex gap-2 text-[11px] leading-relaxed text-slate-300">
+              <span className={adult ? "text-amber-200" : "text-emerald-200"}>•</span>
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 border-t border-white/7 pt-3">
+        <div className="text-[10px] font-black tracking-[0.1em] text-cyan-200">
+          建议读法
+        </div>
+        <div className="mt-1.5 text-[11px] leading-relaxed text-slate-400">
+          {readingAdvice(book, audience)}
+        </div>
       </div>
     </div>
   );
 }
 
-function MobileBookPickCard({ book }: { book: BookPick }) {
-  return (
-    <details className="group rounded-xl bg-slate-950/34">
-      <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-2.5">
-        <BookCover book={book} compact />
-        <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-bold tracking-[0.06em] text-sky-200">
-            {book.categoryLabel}
-            {book.rank ? ` · #${book.rank}` : ""}
-          </div>
-          <div className="mt-0.5 truncate text-sm font-semibold text-white">
-            {book.title}
-          </div>
-          <div className="mt-0.5 truncate text-[11px] text-slate-300">
-            {book.author ? `${book.author} · ` : ""}
-            {book.reason}
-          </div>
-        </div>
-        <span className="text-xs text-slate-300 transition group-open:rotate-180">
-          ▾
-        </span>
-      </summary>
+function DesktopBookPickPanel({ books }: { books: BookPick[] }) {
+  const pair = weeklyBookPair(books);
 
-      <div className="border-t border-white/5 px-3 pb-3 pt-3">
-        <div className="flex gap-3">
-          <BookCover book={book} />
-          <div className="min-w-0 flex-1">
-            <div className="text-sm leading-relaxed text-slate-200">
-              {book.description}
-            </div>
-            <div className="mt-2 text-[10px] text-slate-300">
-              {book.source} · 每周更新
-            </div>
-          </div>
-        </div>
-      </div>
-    </details>
+  return (
+    <div className="grid min-h-0 grid-cols-2 gap-3">
+      <WeeklyBookCard book={pair.adult} audience="adult" compact />
+      <WeeklyBookCard book={pair.child} audience="child" compact />
+    </div>
+  );
+}
+
+function MobileBookPickPanel({ books }: { books: BookPick[] }) {
+  const pair = weeklyBookPair(books);
+
+  return (
+    <div className="grid gap-3">
+      <WeeklyBookCard book={pair.adult} audience="adult" />
+      <WeeklyBookCard book={pair.child} audience="child" />
+    </div>
   );
 }
 
@@ -1964,7 +2022,7 @@ export default function DisplayPage() {
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-sky-200" />
                 <div className="font-semibold tracking-[0.08em] text-sky-100">
-                  BOOK PICK
+                  BOOK OF THE WEEK
                 </div>
               </div>
               <span className="text-[10px] text-slate-300">
@@ -1972,10 +2030,8 @@ export default function DisplayPage() {
               </span>
             </div>
 
-            <div className="mt-3 grid gap-2">
-              {bookPicks.slice(0, 5).map((book) => (
-                <MobileBookPickCard key={book.category} book={book} />
-              ))}
+            <div className="mt-3">
+              <MobileBookPickPanel books={bookPicks.slice(0, 5)} />
             </div>
           </section>
         </div>
@@ -2390,11 +2446,11 @@ export default function DisplayPage() {
                 <div className="flex min-w-0 items-center gap-2">
                   <BookOpen className="h-5 w-5 shrink-0 text-sky-200" />
                   <div className="truncate text-[clamp(0.95rem,0.95vw,1.15rem)] font-semibold tracking-[0.08em] text-sky-100">
-                    BOOK PICK · 今週のおすすめ
+                    BOOK OF THE WEEK · 今週の2冊
                   </div>
                 </div>
                 <span className="shrink-0 text-[9px] text-slate-400">
-                  JP + CN
+                  ADULT + CHILD
                 </span>
               </div>
 
