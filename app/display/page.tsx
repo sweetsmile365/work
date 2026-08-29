@@ -734,6 +734,134 @@ type TwoDayFlashView = TwoDayFlash & {
   rangeLabel: string;
 };
 
+
+type TodayInHistoryItem = {
+  year: string;
+  titleJa: string;
+  whyJa: string;
+  thinkJa: string;
+};
+
+const todayInHistoryByMonthDay: Record<string, TodayInHistoryItem> = {
+  "08-29": {
+    year: "1949",
+    titleJa: "ソ連が初の原子爆弾実験に成功",
+    whyJa:
+      "アメリカだけが核兵器を持つ時代が終わり、冷戦期の核軍拡競争が本格化する大きな転換点になりました。",
+    thinkJa:
+      "「一つの国だけが強い兵器を持つ場合」と「複数の国が持つ場合」、どちらが安全だと思う？"
+  },
+  "09-01": {
+    year: "1923",
+    titleJa: "関東大震災",
+    whyJa:
+      "東京・横浜を中心に大きな被害が出て、防災・都市計画・災害対応のあり方を考える重要な出来事になりました。",
+    thinkJa:
+      "大きな災害のあと、町づくりで最初に変えるべきことは何だと思う？"
+  },
+  "09-02": {
+    year: "1945",
+    titleJa: "第二次世界大戦の降伏文書に署名",
+    whyJa:
+      "日本の降伏文書への署名により、第二次世界大戦が正式に終結しました。",
+    thinkJa:
+      "戦争を終わらせるために、国どうしにはどんな仕組みが必要だと思う？"
+  },
+  "09-11": {
+    year: "2001",
+    titleJa: "アメリカ同時多発テロ事件",
+    whyJa:
+      "国際社会の安全保障やテロ対策、外交政策に大きな影響を与えた出来事です。",
+    thinkJa:
+      "安全を守ることと自由を守ることは、どう両立できると思う？"
+  },
+  "09-15": {
+    year: "1945",
+    titleJa: "第二次世界大戦後の新しい国際秩序へ",
+    whyJa:
+      "戦後の国際協力や復興を考える流れが強まり、国際機関の役割がより重要になっていきました。",
+    thinkJa:
+      "国どうしが協力するとき、一番大事なルールは何だと思う？"
+  },
+  "09-23": {
+    year: "1846",
+    titleJa: "海王星が観測で確認される",
+    whyJa:
+      "計算による予測と実際の観測が一致し、科学で「見えないもの」を推理できることを示した象徴的な出来事です。",
+    thinkJa:
+      "まだ見えていないものを、データだけから予測するには何が必要？"
+  },
+  "09-29": {
+    year: "1829",
+    titleJa: "ロンドンの都市警察制度が始まる",
+    whyJa:
+      "近代的な警察制度の発展につながり、都市の安全をどう守るかという社会制度のモデルになりました。",
+    thinkJa:
+      "安全な町に必要なのは、ルール・教育・警察のどれだと思う？"
+  }
+};
+
+function todayInHistoryForDate(date: Date): TodayInHistoryItem {
+  const key = `${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate()
+  ).padStart(2, "0")}`;
+
+  return (
+    todayInHistoryByMonthDay[key] ?? {
+      year: "TODAY",
+      titleJa: "今日はどんな歴史があった日？",
+      whyJa:
+        "毎日ひとつだけ歴史の出来事を覚えると、歴史を「年号」ではなく「流れ」で理解しやすくなります。",
+      thinkJa:
+        "今日の出来事を一つ調べるなら、政治・科学・文化のどれを選ぶ？"
+    }
+  );
+}
+
+function TodayInHistoryCard({
+  date,
+  compact = false
+}: {
+  date: Date;
+  compact?: boolean;
+}) {
+  const item = todayInHistoryForDate(date);
+
+  return (
+    <div
+      className={`rounded-xl border border-amber-200/15 bg-amber-300/[0.07] ${
+        compact ? "px-3 py-2.5" : "px-3 py-3"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[10px] font-black tracking-[0.12em] text-amber-200">
+          📜 TODAY IN HISTORY
+        </div>
+        <div className="shrink-0 text-[10px] font-bold text-amber-100">
+          {item.year}
+        </div>
+      </div>
+
+      <div className={`${compact ? "mt-1 text-xs" : "mt-1.5 text-sm"} font-bold leading-snug text-white`}>
+        {item.titleJa}
+      </div>
+
+      {!compact ? (
+        <>
+          <div className="mt-2 text-[11px] leading-relaxed text-slate-300">
+            <span className="font-bold text-amber-100">なぜ重要？ </span>
+            {item.whyJa}
+          </div>
+          <div className="mt-2 text-[11px] leading-relaxed text-cyan-100">
+            <span className="font-bold">Think: </span>
+            {item.thinkJa}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 const TWO_DAY_FLASH_START = "2026-08-16";
 
 const twoDayFlashes: TwoDayFlash[] = [
@@ -1801,6 +1929,10 @@ export default function DisplayPage() {
                       : "full"
                 }
               />
+            </div>
+
+            <div className="mt-3">
+              <TodayInHistoryCard date={now} />
             </div>
           </section>
 
