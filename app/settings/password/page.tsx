@@ -4,29 +4,31 @@ import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
 import { updateLoginPassword } from "@/lib/db";
+import type { UserRole } from "@/types/permissions";
 
 export default function PasswordSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [nextPassword, setNextPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [targetRole, setTargetRole] = useState<UserRole>("admin");
   const [message, setMessage] = useState("");
   const [saved, setSaved] = useState(false);
 
-  function savePassword() {
+  async function savePassword() {
     setSaved(false);
     if (!currentPassword.trim()) {
-      setMessage("現在のパスワードを入力してください。初期設定のままなら 1234 です。");
+      setMessage("現在の管理者パスワードを入力してください。");
       return;
     }
-    if (nextPassword.trim().length < 4) {
-      setMessage("新しいパスワードは4文字以上にしてください。");
+    if (nextPassword.trim().length < 8) {
+      setMessage("新しいパスワードは8文字以上にしてください。");
       return;
     }
     if (nextPassword !== confirmPassword) {
       setMessage("新しいパスワードが一致しません。");
       return;
     }
-    const result = updateLoginPassword(currentPassword, nextPassword);
+    const result = await updateLoginPassword(currentPassword, nextPassword, targetRole);
     setMessage(result.message);
     setSaved(result.ok);
     if (result.ok) {
@@ -42,13 +44,21 @@ export default function PasswordSettingsPage() {
       <AppShell title="パスワード設定">
         <section className="max-w-xl rounded-lg bg-white p-5 shadow-soft">
           <div className="mb-4 rounded-lg bg-blue-50 p-4 text-base text-blue-900">
-            <div className="font-semibold">初期パスワードは 1234 です。</div>
-            <div className="mt-1 text-sm">まだ変更していない端末では、現在のパスワード欄に 1234 を入力してください。</div>
+            <div className="font-semibold">パスワードはクラウドで管理されます。</div>
+            <div className="mt-1 text-sm">ここで変更すると、すべての iPhone / iPad / PC に反映されます。</div>
           </div>
 
           <div className="grid gap-4">
-            <PasswordField label="現在のパスワード" value={currentPassword} onChange={setCurrentPassword} autoComplete="current-password" placeholder="例：1234" />
-            <PasswordField label="新しいパスワード" value={nextPassword} onChange={setNextPassword} autoComplete="new-password" placeholder="4文字以上" />
+            <label className="block">
+              <span className="mb-2 block text-base font-semibold text-slate-800">変更するアカウント</span>
+              <select className="h-12 w-full rounded-lg border border-slate-300 px-4 text-base" value={targetRole} onChange={(event) => setTargetRole(event.target.value as UserRole)}>
+                <option value="admin">ママ（管理者）</option>
+                <option value="parent">パパ（保護者）</option>
+                <option value="child_editor">子ども</option>
+              </select>
+            </label>
+            <PasswordField label="現在の管理者パスワード" value={currentPassword} onChange={setCurrentPassword} autoComplete="current-password" placeholder="現在のパスワード" />
+            <PasswordField label="新しいパスワード" value={nextPassword} onChange={setNextPassword} autoComplete="new-password" placeholder="8文字以上" />
             <PasswordField label="新しいパスワード確認" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" placeholder="もう一度入力" />
           </div>
 
@@ -62,7 +72,7 @@ export default function PasswordSettingsPage() {
             {saved ? "保存しました" : "保存"}
           </button>
 
-          <p className="mt-4 text-sm text-slate-500">このパスワードは、この端末のブラウザ内に保存されます。別の iPhone / iPad では、その端末でも同じように変更してください。</p>
+          <p className="mt-4 text-sm text-slate-500">初回だけ Vercel の環境変数で各アカウントのパスワードを設定してください。ここで変更した後は、環境変数の変更は不要です。</p>
         </section>
       </AppShell>
     </RoleGuard>

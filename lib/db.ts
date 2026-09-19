@@ -7,7 +7,7 @@ import type { ImportCandidate, ImportRecord, BusTimetableCandidate } from "@/typ
 import type { UserRole } from "@/types/permissions";
 import type { RoutePath } from "@/types/routes";
 import type { SchoolTimetable } from "@/types/timetable";
-import { pullCloudStateToLocal, queueCloudStateSave, subscribeToCloudStateUpdates, syncCloudStateNow } from "./cloudState";
+import { queueCloudStateSave, subscribeToCloudStateUpdates, syncCloudStateNow } from "./cloudState";
 import { parseImportText } from "./importParser";
 import { zhText } from "./displayText";
 import { dedupeEvents, eventDedupeKey } from "./eventDedupe";
@@ -36,6 +36,7 @@ export type AppState = {
   tasks: ChildTask[];
   schoolTimetable: SchoolTimetable;
   cloud_updated_at?: string;
+  cloud_revision?: string;
 };
 
 const today = new Date();
@@ -571,8 +572,6 @@ const initialState: AppState = {
 };
 
 const key = "family-schedule-hub-state";
-const passwordKey = "family-schedule-hub-login-password";
-const defaultPassword = "1234";
 
 function mergeDefaultData(state: AppState): AppState {
   const existingEventIds = new Set(state.events.map((event) => event.id));
@@ -588,7 +587,6 @@ function mergeDefaultData(state: AppState): AppState {
     ...existingUsers.filter((user) => !defaultUserById.has(user.id))
   ];
   const defaultBadmintonEvents = createBadmintonClubCalendarEvents();
-  const defaultBadmintonById = new Map(defaultBadmintonEvents.map((event) => [event.id, event]));
   const isMissingEvent = (event: FamilyEvent) => !existingEventIds.has(event.id) && !existingEventKeys.has(eventDedupeKey(event));
   const missingCompanyEvents = createDadCompanyCalendarEvents().filter(isMissingEvent);
   const missingSchoolEvents = createSchoolYearCalendarEvents().filter(isMissingEvent);
@@ -598,9 +596,9 @@ function mergeDefaultData(state: AppState): AppState {
   const mergedEvents = [...missingCompanyEvents, ...missingSchoolEvents, ...missingBadmintonEvents, ...missingMomEvents, ...missingZkaiReviewEvents, ...state.events]
     .map((event) => ({
       ...event,
-      start_datetime: defaultBadmintonById.get(event.id)?.start_datetime ?? event.start_datetime,
-      end_datetime: defaultBadmintonById.get(event.id)?.end_datetime ?? event.end_datetime,
-      all_day: defaultBadmintonById.has(event.id) ? defaultBadmintonById.get(event.id)?.all_day : event.all_day,
+      start_datetime: event.start_datetime,
+      end_datetime: event.end_datetime,
+      all_day: event.all_day,
       title: zhText(event.title),
       location: zhText(event.location)
     }));
@@ -642,16 +640,16 @@ export function loadState(): AppState {
   try {
     const stored = window.localStorage.getItem(key);
     if (!stored) {
-      void pullCloudStateToLocal(initialState, key, mergeDefaultData);
+      void syncCloudStateNow(initialState, key, mergeDefaultData);
       return initialState;
     }
     const state = mergeDefaultData(JSON.parse(stored));
     window.localStorage.setItem(key, JSON.stringify(state));
-    void pullCloudStateToLocal(state, key, mergeDefaultData);
+    void syncCloudStateNow(state, key, mergeDefaultData);
     return state;
   } catch {
     window.localStorage.removeItem(key);
-    void pullCloudStateToLocal(initialState, key, mergeDefaultData);
+    void syncCloudStateNow(initialState, key, mergeDefaultData);
     return initialState;
   }
 }
@@ -672,7 +670,7 @@ export function saveState(state: AppState) {
   if (typeof window === "undefined") return;
   const next = { ...state, events: dedupeEvents(state.events), cloud_updated_at: new Date().toISOString() };
   window.localStorage.setItem(key, JSON.stringify(next));
-  queueCloudStateSave(next);
+  queueCloudStateSave(next, key);
 }
 
 export function saveSchoolTimetable(schoolTimetable: SchoolTimetable) {
@@ -689,32 +687,33 @@ export function loginAs(role: UserRole) {
   const state = loadState();
   const currentUser = state.users.find((user) => user.role === role) ?? state.users[0];
   const next = { ...state, currentUser };
-  saveState(next);
+  if (typeof window !== "undefined") window.localStorage.setItem(key, JSON.stringify(next));
   return next;
 }
 
-export function verifyLoginPassword(password: string) {
-  if (typeof window === "undefined") return false;
-  return password === (window.localStorage.getItem(passwordKey) ?? defaultPassword);
-}
-
-export function updateLoginPassword(currentPassword: string, nextPassword: string) {
+export async function updateLoginPassword(currentPassword: string, nextPassword: string, targetRole: UserRole) {
   if (typeof window === "undefined") return { ok: false, message: "ブラウザで操作してください。" };
-  if (!verifyLoginPassword(currentPassword.trim())) return { ok: false, message: "現在のパスワードが違います。初期設定のままなら 1234 を入力してください。" };
-  const trimmed = nextPassword.trim();
-  if (trimmed.length < 4) return { ok: false, message: "新しいパスワードは4文字以上にしてください。" };
-  window.localStorage.setItem(passwordKey, trimmed);
-  return { ok: true, message: "パスワードを保存しました。" };
-}
-
-export function hasCustomLoginPassword() {
-  if (typeof window === "undefined") return false;
-  return Boolean(window.localStorage.getItem(passwordKey));
+  try {
+    const response = await fetch("/api/auth/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword, nextPassword, targetRole })
+    });
+    const payload = await response.json().catch(() => null);
+    return response.ok
+      ? { ok: true, message: "クラウドにパスワードを保存しました。" }
+      : { ok: false, message: payload?.error ?? "パスワードを保存できませんでした。" };
+  } catch {
+    return { ok: false, message: "通信できませんでした。ネットワークを確認してください。" };
+  }
 }
 
 export function logout() {
   const next = { ...loadState(), currentUser: null };
-  saveState(next);
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(key, JSON.stringify(next));
+    void fetch("/api/auth/logout", { method: "POST" });
+  }
 }
 
 export function addEvent(draft: EventDraft) {

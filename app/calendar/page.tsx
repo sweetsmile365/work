@@ -10,6 +10,7 @@ import { MobileEventEditorSheet } from "@/components/responsive/MobileEventEdito
 import { TabletSplitView } from "@/components/responsive/TabletSplitView";
 import { loadState, saveState, softDeleteEvent, type AppState } from "@/lib/db";
 import { normalizeTransportOwner } from "@/lib/transport";
+import { canEditEvent } from "@/lib/permissions";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
 import type { FamilyEvent } from "@/types/events";
 
@@ -108,6 +109,7 @@ export default function CalendarPage() {
 
   function saveEditedEvent() {
     if (!state || !editingEvent?.title.trim()) return;
+    if (!state.currentUser || !canEditEvent(state.currentUser.role, editingEvent)) return;
     const owner = normalizeTransportOwner(editingEvent.transport_owner);
     const nextEvent: FamilyEvent = {
       ...editingEvent,
@@ -128,11 +130,13 @@ export default function CalendarPage() {
 
   function deleteEditedEvent() {
     if (!state || !editingEvent) return;
+    if (!state.currentUser || !canEditEvent(state.currentUser.role, editingEvent)) return;
     setState(softDeleteEvent(editingEvent.id, state.currentUser?.id));
     setEditingEvent(null);
   }
 
   function openEditor(event: FamilyEvent) {
+    if (!state?.currentUser || !canEditEvent(state.currentUser.role, event)) return;
     setSaveStatus("idle");
     setEditingEvent(event);
   }
@@ -240,7 +244,7 @@ export default function CalendarPage() {
   return (
     <RoleGuard>
       <AppShell title="カレンダー">
-        {isMobile ? mobileContent : isTablet ? tabletContent : <CalendarView events={state.events} onDelete={(id) => setState(softDeleteEvent(id, state.currentUser?.id))} />}
+        {isMobile ? mobileContent : isTablet ? tabletContent : <CalendarView events={state.events} onDelete={(id) => setState(softDeleteEvent(id, state.currentUser?.id))} canDelete={(event) => Boolean(state.currentUser && canEditEvent(state.currentUser.role, event))} />}
       </AppShell>
     </RoleGuard>
   );

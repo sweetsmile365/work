@@ -14,7 +14,22 @@ export function eventDedupeKey(event: FamilyEvent) {
     event.start_datetime ?? "",
     event.end_datetime ?? "",
     text(event.location),
-    event.all_day ? "all_day" : ""
+    event.all_day ? "all_day" : "",
+    event.visibility,
+    event.is_day_off ? "day_off" : "",
+    event.need_parent_action ? "parent_action" : "",
+    text(event.parent_task),
+    text(event.child_note),
+    event.route_id ?? "",
+    event.bus_timetable_id ?? "",
+    event.need_transport ? "transport" : "",
+    event.transport_owner ?? "",
+    event.planned_departure_time ?? "",
+    event.planned_arrival_time ?? "",
+    event.pickup_required ? "pickup" : "",
+    event.dropoff_required ? "dropoff" : "",
+    event.created_by ?? "",
+    event.deleted_at ?? ""
   ].join("|");
 }
 

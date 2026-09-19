@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { loadState } from "@/lib/db";
+import { refreshCloudStateNow } from "@/lib/db";
 
 const syncIntervalMs = 30000;
 
@@ -9,18 +9,19 @@ export function CloudSyncRegister() {
   useEffect(() => {
     let stopped = false;
 
-    const sync = () => {
+    const sync = async () => {
       if (stopped) return;
-      loadState();
+      const result = await refreshCloudStateNow();
+      if (!stopped && result === "downloaded") window.location.reload();
     };
 
-    const handleFocus = () => sync();
+    const handleFocus = () => { void sync(); };
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") sync();
+      if (document.visibilityState === "visible") void sync();
     };
 
-    sync();
-    const timer = window.setInterval(sync, syncIntervalMs);
+    void sync();
+    const timer = window.setInterval(() => { void sync(); }, syncIntervalMs);
     window.addEventListener("focus", handleFocus);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 

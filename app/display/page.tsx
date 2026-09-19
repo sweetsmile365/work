@@ -21,8 +21,6 @@ import {
   loadState,
   onStateSynced,
   refreshCloudStateNow,
-  saveState,
-  toggleTask,
   type AppState
 } from "@/lib/db";
 import {
@@ -37,7 +35,6 @@ import {
   statusForDate,
   todayDoneCount
 } from "@/lib/habitStats";
-import type { ChildTask } from "@/types/activities";
 import type { FamilyEvent } from "@/types/events";
 import type {
   SchoolTimetable,
@@ -1571,8 +1568,6 @@ export default function DisplayPage() {
   const [weather, setWeather] = useState<
     Record<string, WeatherValue>
   >({});
-  const [recentlyCompleted, setRecentlyCompleted] =
-    useState<ChildTask | null>(null);
   const [bookPicks, setBookPicks] = useState<BookPick[]>([]);
   const activeDayRef = useRef(todayKey(new Date()));
   const currentTodayBackground = todayCardBackgroundForDate(now);
@@ -1583,14 +1578,20 @@ export default function DisplayPage() {
 
     const applyDailyTasks = (baseState: AppState, date = new Date()) => {
       const ensured = ensureDailyTasks(baseState, date);
-      if (ensured !== baseState) {
-        saveState(ensured);
-      }
       if (!disposed) setState(ensured);
       return ensured;
     };
 
     const initialize = async () => {
+      const token = new URLSearchParams(window.location.hash.slice(1)).get("displayToken");
+      if (token) {
+        const response = await fetch("/api/auth/display", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        if (response.ok) window.history.replaceState({}, "", window.location.pathname);
+      }
       setState(loadState());
       await refreshCloudStateNow();
       if (disposed) return;
@@ -1736,19 +1737,6 @@ export default function DisplayPage() {
     };
   }, [state, now]);
 
-  const completeTaskFromScreen = (task: ChildTask) => {
-    const next = toggleTask(task.id);
-    setState(next);
-    setRecentlyCompleted(task);
-  };
-
-  const undoCompletedTask = () => {
-    if (!recentlyCompleted) return;
-    const next = toggleTask(recentlyCompleted.id);
-    setState(next);
-    setRecentlyCompleted(null);
-  };
-
   return (
     <main className="min-h-[100dvh] bg-[#06101f] text-white lg:h-[100dvh] lg:overflow-hidden">
       <SeasonalBackdrop date={now} />
@@ -1853,31 +1841,16 @@ export default function DisplayPage() {
                 accent="bg-emerald-300"
               />
               <span className="text-xs text-emerald-100/80">
-                タップで完了
+                完了状況はスマホで更新
               </span>
             </div>
-
-            {recentlyCompleted ? (
-              <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-emerald-300/15 px-3 py-2 text-sm text-emerald-50">
-                <div className="min-w-0 truncate">
-                  完了: {recentlyCompleted.title}
-                </div>
-                <button
-                  type="button"
-                  onClick={undoCompletedTask}
-                  className="shrink-0 rounded-lg bg-white/10 px-3 py-2 font-semibold text-white"
-                >
-                  取消
-                </button>
-              </div>
-            ) : null}
 
             <div className="mt-3 grid gap-2">
               {data.mainTasks.slice(0, 3).map((task) => (
                 <button
                   key={task.id}
                   type="button"
-                  onClick={() => completeTaskFromScreen(task)}
+                  disabled
                   className="flex min-h-14 items-center gap-3 rounded-xl bg-slate-950/38 px-3 text-left active:bg-emerald-300/15"
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 border-emerald-200/80 text-emerald-100">
@@ -2064,7 +2037,7 @@ export default function DisplayPage() {
                 <button
                   key={task.id}
                   type="button"
-                  onClick={() => completeTaskFromScreen(task)}
+                  disabled
                   className="flex min-h-12 items-center gap-3 rounded-xl bg-emerald-300/10 px-3 text-left active:bg-emerald-300/25"
                 >
                   <Circle className="h-5 w-5 shrink-0 text-emerald-200" />
@@ -2325,27 +2298,9 @@ export default function DisplayPage() {
                 />
 
                 <span className="text-[clamp(0.85rem,0.8vw,1rem)] text-emerald-100/80">
-                  ○ をタップして完了
+                  完了状況はスマホで更新
                 </span>
               </div>
-
-              {recentlyCompleted ? (
-                <div className="mb-2 flex items-center justify-between rounded-xl bg-emerald-300/15 px-3 py-2 text-sm text-emerald-50">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-300" />
-                    <span className="truncate">
-                      完了: {recentlyCompleted.title}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={undoCompletedTask}
-                    className="ml-3 min-h-9 shrink-0 rounded-lg bg-white/10 px-3 font-semibold text-white transition active:scale-95 active:bg-white/20"
-                  >
-                    取消
-                  </button>
-                </div>
-              ) : null}
 
               <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_0.38fr] gap-4">
                 <div className="grid min-h-0 content-start gap-2">
@@ -2356,7 +2311,7 @@ export default function DisplayPage() {
                     >
                       <button
                         type="button"
-                        onClick={() => completeTaskFromScreen(task)}
+                        disabled
                         className="grid h-10 w-10 place-items-center rounded-full border-2 border-emerald-200/90 bg-emerald-300/[0.05] text-emerald-100 transition active:scale-95 active:bg-emerald-300/25"
                         aria-label={`${task.title} を完了にする`}
                         title="タップして完了"
@@ -2531,7 +2486,7 @@ export default function DisplayPage() {
                     <button
                       key={task.id}
                       type="button"
-                      onClick={() => completeTaskFromScreen(task)}
+                      disabled
                       className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.05] bg-emerald-300/10 px-3 text-left text-[clamp(0.85rem,0.82vw,1rem)] font-semibold text-emerald-50 transition active:scale-[0.98] active:bg-emerald-300/25"
                     >
                       <Circle className="h-5 w-5 shrink-0 text-emerald-200" />

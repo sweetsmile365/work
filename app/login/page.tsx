@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, LockKeyhole } from "lucide-react";
-import { loginAs, verifyLoginPassword } from "@/lib/db";
+import { loginAs } from "@/lib/db";
 import type { UserRole } from "@/types/permissions";
 
 const roles: { role: UserRole; label: string; note: string }[] = [
@@ -18,16 +18,27 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [submittingRole, setSubmittingRole] = useState<UserRole | null>(null);
 
-  function handleLogin(role: UserRole) {
+  async function handleLogin(role: UserRole) {
     setSubmittingRole(role);
     setError("");
-    if (!verifyLoginPassword(password)) {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role, password })
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(payload?.error ?? "ログインできませんでした。");
+        return;
+      }
+      loginAs(payload.role as UserRole);
+      router.push("/dashboard");
+    } catch {
+      setError("通信できませんでした。ネットワークを確認してください。");
+    } finally {
       setSubmittingRole(null);
-      setError("パスワードが違います。");
-      return;
     }
-    loginAs(role);
-    router.push("/dashboard");
   }
 
   return (

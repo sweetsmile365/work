@@ -12,6 +12,7 @@ import { checkConflicts } from "@/lib/conflictChecker";
 import { defaultChecklists, loadState, saveState, softDeleteEvent, type AppState } from "@/lib/db";
 import { zhText } from "@/lib/displayText";
 import { isParentTransport, normalizeTransportOwner, transportOwnerOptions } from "@/lib/transport";
+import { canEditEvent } from "@/lib/permissions";
 import { useResponsiveLayout } from "@/lib/useResponsiveLayout";
 import type { CalendarType, EventType, FamilyEvent } from "@/types/events";
 
@@ -210,6 +211,7 @@ export default function DashboardPage() {
 
   function saveEvent() {
     if (!state || !editingEvent?.title.trim()) return;
+    if (!state.currentUser || !canEditEvent(state.currentUser.role, editingEvent)) return;
     const owner = normalizeTransportOwner(editingEvent.transport_owner);
     const exists = state.events.some((event) => event.id === editingEvent.id);
     const nextEvent: FamilyEvent = {
@@ -235,6 +237,8 @@ export default function DashboardPage() {
 
   function removeEvent(id: string) {
     if (!state) return;
+    const event = state.events.find((item) => item.id === id);
+    if (!event || !state.currentUser || !canEditEvent(state.currentUser.role, event)) return;
     setState(softDeleteEvent(id, state.currentUser?.id));
     setEditingEvent(null);
   }

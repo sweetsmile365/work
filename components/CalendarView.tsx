@@ -13,7 +13,7 @@ const typeColor: Record<string, string> = {
   china_reference_holiday: "bg-red-50 text-red-800"
 };
 
-export function CalendarView({ events, onDelete }: { events: FamilyEvent[]; onDelete?: (id: string) => void }) {
+export function CalendarView({ events, onDelete, canDelete }: { events: FamilyEvent[]; onDelete?: (id: string) => void; canDelete?: (event: FamilyEvent) => boolean }) {
   const active = events.filter((event) => !event.deleted_at).sort((a, b) => `${a.date}${a.start_datetime ?? ""}`.localeCompare(`${b.date}${b.start_datetime ?? ""}`));
   return (
     <div className="rounded-md bg-white shadow-soft">
@@ -34,7 +34,7 @@ export function CalendarView({ events, onDelete }: { events: FamilyEvent[]; onDe
             <div className="text-sm text-black/55">{zhText(event.location)} {event.need_parent_action ? "保護者対応が必要" : ""}</div>
           </div>
           <div className="flex items-center justify-end">
-            {onDelete ? <button className="focus-ring rounded-md border border-black/10 px-3 py-2 text-sm hover:bg-black/5" onClick={() => onDelete(event.id)}>削除</button> : null}
+            {onDelete && (!canDelete || canDelete(event)) ? <button className="focus-ring rounded-md border border-black/10 px-3 py-2 text-sm hover:bg-black/5" onClick={() => onDelete(event.id)}>削除</button> : null}
           </div>
         </div>
       ))}

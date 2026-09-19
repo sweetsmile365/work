@@ -8,7 +8,7 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null;
 let pullInFlight = false;
 let lastPullAt = 0;
 
-export type CloudSyncResult = "uploaded" | "downloaded" | "fresh" | "empty" | "failed";
+export type CloudSyncResult = "uploaded" | "downloaded" | "fresh" | "empty" | "conflict" | "failed";
 
 async function waitForIdle(maxWaitMs = 3000) {
   const startedAt = Date.now();
@@ -29,6 +29,16 @@ function sharedState(state: AppState): AppState {
       avatar: typeof user.avatar === "string" && user.avatar.startsWith("data:image") && user.avatar.length > 250_000 ? "👤" : user.avatar
     }))
   };
+}
+
+function withCloudRevision(state: AppState, updatedAt: string): AppState {
+  return { ...state, cloud_revision: updatedAt, cloud_updated_at: updatedAt };
+}
+
+function stateFingerprint(state: AppState) {
+  const shared = sharedState(state);
+  const { cloud_revision: _revision, cloud_updated_at: _updatedAt, ...fingerprint } = shared;
+  return JSON.stringify(fingerprint);
 }
 
 function isEmptyCloudState(state: AppState | null | undefined) {
@@ -55,27 +65,37 @@ export function subscribeToCloudStateUpdates(callback: (state: AppState) => void
   return () => window.removeEventListener(syncEventName, handler);
 }
 
-export function queueCloudStateSave(state: AppState) {
+export function queueCloudStateSave(state: AppState, storageKey: string) {
   if (typeof window === "undefined") return;
   if (saveTimer) clearTimeout(saveTimer);
 
   saveTimer = setTimeout(async () => {
-    const result = await saveCloudStateNow(state);
-    if (result !== "uploaded") console.warn("Cloud sync save failed");
+    const result = await saveCloudStateNow(state, storageKey);
+    if (result !== "uploaded") console.warn("Cloud sync save did not complete", result);
   }, 250);
 }
 
-export async function saveCloudStateNow(state: AppState): Promise<CloudSyncResult> {
+export async function saveCloudStateNow(state: AppState, storageKey?: string): Promise<CloudSyncResult> {
   if (typeof window === "undefined") return "failed";
   try {
     const response = await fetch("/api/sync/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state: sharedState(state) })
+      body: JSON.stringify({ state: sharedState(state), baseUpdatedAt: state.cloud_revision ?? null })
     });
+    if (response.status === 409) {
+      console.warn("Cloud sync conflict", await response.text());
+      return "conflict";
+    }
     if (!response.ok) {
       console.warn("Cloud sync save failed", response.status, await response.text());
       return "failed";
+    }
+    const payload = await response.json().catch(() => null);
+    if (typeof payload?.updated_at === "string" && storageKey) {
+      state.cloud_revision = payload.updated_at;
+      state.cloud_updated_at = payload.updated_at;
+      window.localStorage.setItem(storageKey, JSON.stringify(withCloudRevision(state, payload.updated_at)));
     }
     return "uploaded";
   } catch (error) {
@@ -103,10 +123,13 @@ export async function pullCloudStateToLocal(
     if (!payload?.state) return "empty";
     if (isEmptyCloudState(payload.state as AppState)) return "empty";
 
-    const nextState = normalize({
+    const nextState = withCloudRevision(normalize({
       ...(payload.state as AppState),
       currentUser: localState.currentUser
-    });
+    }), payload.updated_at ?? new Date().toISOString());
+    const localTime = Date.parse(localState.cloud_updated_at ?? "1970-01-01T00:00:00.000Z");
+    const cloudTime = Date.parse(payload.updated_at ?? "1970-01-01T00:00:00.000Z");
+    if (localTime > cloudTime) return "fresh";
     const nextJson = JSON.stringify(nextState);
     if (window.localStorage.getItem(storageKey) === nextJson) return "fresh";
 
@@ -141,26 +164,23 @@ export async function syncCloudStateNow(
     const cloudRawState = payload?.state as AppState | null;
 
     if (!cloudRawState || isEmptyCloudState(cloudRawState)) {
-      return await saveCloudStateNow(localState);
+      return await saveCloudStateNow(localState, storageKey);
     }
 
-    const cloudTime = Date.parse(cloudRawState.cloud_updated_at ?? payload.updated_at ?? "1970-01-01T00:00:00.000Z");
-    const nextState = normalize({ ...cloudRawState, currentUser: localState.currentUser });
-    const nextJson = JSON.stringify(nextState);
-    const localJson = window.localStorage.getItem(storageKey);
+    const cloudTime = Date.parse(payload.updated_at ?? cloudRawState.cloud_updated_at ?? "1970-01-01T00:00:00.000Z");
+    const nextState = withCloudRevision(normalize({ ...cloudRawState, currentUser: localState.currentUser }), payload.updated_at ?? cloudRawState.cloud_updated_at ?? new Date().toISOString());
 
-    if (cloudTime > localTime && localJson !== nextJson) {
-      window.localStorage.setItem(storageKey, nextJson);
+    if (cloudTime > localTime) {
+      window.localStorage.setItem(storageKey, JSON.stringify(nextState));
       dispatchStateUpdate(nextState);
-      window.location.reload();
       return "downloaded";
     }
 
-    if (localTime > cloudTime || localJson !== nextJson) {
-      return await saveCloudStateNow(localState);
+    if (localTime > cloudTime) {
+      return await saveCloudStateNow(localState, storageKey);
     }
 
-    return "fresh";
+    return stateFingerprint(localState) === stateFingerprint(nextState) ? "fresh" : "conflict";
   } catch (error) {
     console.warn("Cloud sync failed", error);
     return "failed";

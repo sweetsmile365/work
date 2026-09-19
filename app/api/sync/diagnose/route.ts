@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { readSession } from "@/lib/serverAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,9 @@ function classifyFetchError(message: string) {
   return "unknown_fetch_failure";
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const session = readSession(request);
+  if (!session || session.role !== "admin") return NextResponse.json({ error: "管理者ログインが必要です。" }, { status: 401 });
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const familyId = process.env.FAMILY_SYNC_ID ?? "family-schedule-hub";

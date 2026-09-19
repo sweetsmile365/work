@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-打开 `http://localhost:3000`。未配置 Supabase 时会使用浏览器 localStorage demo 数据；登录页可选择妈妈、爸爸、孩子三种角色。
+打开 `http://localhost:3000`。首次部署前必须设置下面的家族登录环境变量；未配置时，登录与云端同步会明确拒绝，不再使用浏览器内的默认密码。
 
 ## Supabase
 
@@ -39,11 +39,22 @@ https://你的-vercel-domain/**
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+FAMILY_SYNC_ID=family-schedule-hub
+FAMILY_SESSION_SECRET=
+FAMILY_ADMIN_PASSWORD=
+FAMILY_PARENT_PASSWORD=
+FAMILY_CHILD_EDITOR_PASSWORD=
+FAMILY_DISPLAY_TOKEN=
 OCR_PROVIDER=google
 GOOGLE_CLOUD_VISION_API_KEY=
 ```
 
-不要提交真实 key。不要创建 `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` 或 `NEXT_PUBLIC_GOOGLE_CLOUD_VISION_API_KEY`。
+`FAMILY_SESSION_SECRET` 和 `FAMILY_DISPLAY_TOKEN` 请使用至少 32 字符的随机字符串。三个角色密码至少设置为 8 个字符且互不相同。不要提交真实 key，也不要创建 `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` 或 `NEXT_PUBLIC_GOOGLE_CLOUD_VISION_API_KEY`。
+
+首次登录后，管理者可在「パスワード設定」中修改三个角色的密码；修改后的摘要只保存在云端状态中，不会发送到浏览器。环境变量里的初始密码只在对应角色尚未设置云端密码时使用。
+
+大屏幕使用 `/display#displayToken=FAMILY_DISPLAY_TOKEN` 打开一次即可建立只读会话；令牌放在 URL 片段中，不会随页面请求发送到服务器。显示页面只能读取日程，不能调用保存接口。
 
 ## OCR
 
@@ -55,7 +66,7 @@ OCR 结果不会自动进入正式日历，必须由 admin/parent 在 Import Inb
 
 1. Push 到 GitHub。
 2. Vercel import GitHub repo。
-3. 设置 `.env.example` 中的环境变量。
+3. 设置 `.env.example` 中的环境变量，以及 `SUPABASE_SERVICE_ROLE_KEY`、`FAMILY_SYNC_ID`、`FAMILY_SESSION_SECRET` 和三个 `FAMILY_*_PASSWORD`。
 4. Deploy。
 5. 在 Supabase Auth 中加入生产域名 Redirect URL。
 
