@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { canAccessFamilyApi } from "@/lib/serverAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -124,7 +125,10 @@ function dailyNatGeo(items: YoutubeItem[], seed: number) {
   return pool[seed % pool.length];
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!canAccessFamilyApi(request)) {
+    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
+  }
   const dayKey = tokyoDayKey();
   const seed = daySeed(dayKey);
 

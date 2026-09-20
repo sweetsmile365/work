@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { canAccessFamilyApi } from "@/lib/serverAuth";
 
 export const revalidate = 60 * 60 * 24 * 7;
 
@@ -522,7 +523,11 @@ async function fetchRakutenHealthyRecipes(
     .slice(0, 12);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!canAccessFamilyApi(request)) {
+    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
+  }
+
   const season = seasonForDate(new Date());
   const maff = await fetchMaffSeasonalProduce(season);
 
@@ -566,8 +571,7 @@ export async function GET() {
     },
     {
       headers: {
-        "Cache-Control":
-          "public, s-maxage=604800, stale-while-revalidate=86400"
+        "Cache-Control": "private, no-store"
       }
     }
   );

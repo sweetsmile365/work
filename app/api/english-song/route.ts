@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { canAccessFamilyApi } from "@/lib/serverAuth";
 
 type DriveFile = { id: string; name: string };
 
@@ -76,6 +77,10 @@ async function readFolder(folderId: string) {
 }
 
 export async function GET(request: NextRequest) {
+  if (!canAccessFamilyApi(request)) {
+    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
+  }
+
   const folderId = ENGLISH_SONGS_FOLDER_ID;
   const lyricId = request.nextUrl.searchParams.get("lyrics");
 

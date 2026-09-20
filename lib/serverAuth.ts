@@ -124,6 +124,14 @@ export function readSession(request: Request): Session | null {
   }
 }
 
+export function canAccessFamilyApi(
+  request: Request,
+  options: { allowDisplay?: boolean } = {}
+) {
+  const session = readSession(request);
+  return Boolean(session && (options.allowDisplay || session.role !== "display"));
+}
+
 export function verifyDisplayToken(token: string) {
   const expected = process.env.FAMILY_DISPLAY_TOKEN;
   return Boolean(expected && token && sameText(token, expected));

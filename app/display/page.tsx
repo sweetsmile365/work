@@ -35,6 +35,7 @@ import {
   statusForDate,
   todayDoneCount
 } from "@/lib/habitStats";
+import type { ChildTask } from "@/types/activities";
 import type { FamilyEvent } from "@/types/events";
 import type {
   SchoolTimetable,

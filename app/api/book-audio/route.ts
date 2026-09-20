@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { canAccessFamilyApi } from "@/lib/serverAuth";
 
 type AudioKind = "reading" | "vocab";
 
@@ -120,6 +121,10 @@ function subtitleUrl(folder: string, filename: string) {
 }
 
 export async function GET(request: NextRequest) {
+  if (!canAccessFamilyApi(request)) {
+    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
+  }
+
   const kindParam = request.nextUrl.searchParams.get("kind");
   const kind: AudioKind = kindParam === "vocab" ? "vocab" : "reading";
   const config = CONFIG[kind];

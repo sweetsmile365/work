@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { canAccessFamilyApi } from "@/lib/serverAuth";
 
 export const revalidate = 60 * 60 * 24;
 
@@ -60,7 +61,11 @@ async function probe(url: string) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!canAccessFamilyApi(request)) {
+    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
+  }
+
   const result = await Promise.all(
     stations.map(async (station) => {
       let healthy = false;
@@ -90,8 +95,7 @@ export async function GET() {
     },
     {
       headers: {
-        "Cache-Control":
-          "public, s-maxage=86400, stale-while-revalidate=21600"
+        "Cache-Control": "private, no-store"
       }
     }
   );

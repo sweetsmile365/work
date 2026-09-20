@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { canAccessFamilyApi } from "@/lib/serverAuth";
 
 export const revalidate = 60 * 60 * 24 * 30;
 
@@ -88,7 +89,11 @@ async function inspect(reference: (typeof references)[number]) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!canAccessFamilyApi(request)) {
+    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
+  }
+
   const items = await Promise.all(references.map(inspect));
 
   return NextResponse.json(
@@ -101,8 +106,7 @@ export async function GET() {
     },
     {
       headers: {
-        "Cache-Control":
-          "public, s-maxage=2592000, stale-while-revalidate=86400"
+        "Cache-Control": "private, no-store"
       }
     }
   );
