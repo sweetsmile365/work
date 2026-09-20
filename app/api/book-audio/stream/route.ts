@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canAccessFamilyApi } from "@/lib/serverAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,10 +8,6 @@ function validDriveId(value: string) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!canAccessFamilyApi(request)) {
-    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
-  }
-
   const id = request.nextUrl.searchParams.get("id") ?? "";
 
   if (!validDriveId(id)) {

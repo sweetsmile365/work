@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canAccessFamilyApi } from "@/lib/serverAuth";
 
 type AudioKind = "reading" | "vocab";
 
@@ -62,11 +61,15 @@ function filenameFromAnchor(inner: string) {
 
 function parseDriveFolder(html: string) {
   const items = new Map<string, { id: string; name: string }>();
+  const normalizedHtml = html
+    .replace(/\\u002F/gi, "/")
+    .replace(/\\\//g, "/")
+    .replace(/\\u0026/gi, "&");
 
   const anchorPattern =
     /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
 
-  for (const match of html.matchAll(anchorPattern)) {
+  for (const match of normalizedHtml.matchAll(anchorPattern)) {
     const href = decodeHtml(match[1]);
     const id = fileIdFromHref(href);
     if (!id) continue;
@@ -75,6 +78,32 @@ function parseDriveFolder(html: string) {
     if (!name) continue;
 
     items.set(id, { id, name });
+  }
+
+  // Google Drive changes the embedded-folder markup periodically. In newer
+  // markup the file link and filename are rendered in separate attributes,
+  // so also recover a small nearby window around each public file link.
+  const fileLinkPattern =
+    /https:\/\/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)\/view/gi;
+
+  for (const match of normalizedHtml.matchAll(fileLinkPattern)) {
+    const id = match[1];
+    const start = Math.max(0, (match.index ?? 0) - 1800);
+    const nearby = normalizedHtml.slice(
+      start,
+      Math.min(normalizedHtml.length, start + 3600)
+    );
+    const candidates = [
+      ...nearby.matchAll(
+        /(?:aria-label|title|data-tooltip|data-name)=["']([^"']+\.(?:mp3|m4a|wav))["']/gi
+      )
+    ].map((candidate) => stripTags(decodeHtml(candidate[1])));
+
+    const textCandidate = stripTags(
+      nearby.match(/>([^<>]{1,180}\.(?:mp3|m4a|wav))</i)?.[1] ?? ""
+    );
+    const name = candidates.find(Boolean) ?? textCandidate;
+    if (name) items.set(id, { id, name });
   }
 
   if (items.size === 0) {
@@ -121,10 +150,6 @@ function subtitleUrl(folder: string, filename: string) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!canAccessFamilyApi(request)) {
-    return NextResponse.json({ error: "ログインが必要です。" }, { status: 401 });
-  }
-
   const kindParam = request.nextUrl.searchParams.get("kind");
   const kind: AudioKind = kindParam === "vocab" ? "vocab" : "reading";
   const config = CONFIG[kind];
