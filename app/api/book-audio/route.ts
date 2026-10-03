@@ -142,8 +142,11 @@ function parseDriveFolder(html: string) {
   );
 }
 
-function subtitleUrl(folder: string, filename: string) {
-  const stem = filename.replace(/\.[^.]+$/, "");
+function subtitleUrl(folder: string, filename: string, kind: AudioKind, index: number) {
+  const stem =
+    kind === "vocab"
+      ? `Week ${index + 1}`
+      : String(index + 1).padStart(2, "0");
   return `/English_Subtitles/${encodeURIComponent(folder)}/${encodeURIComponent(
     stem
   )}.json`;
@@ -186,12 +189,12 @@ export async function GET(request: NextRequest) {
     const html = await response.text();
     const files = parseDriveFolder(html);
 
-    const items = files.map((file) => ({
+    const items = files.map((file, index) => ({
       id: file.id,
-      name: file.name,
+      name: `${kind === "vocab" ? `Week ${index + 1}` : String(index + 1).padStart(2, "0")} · ${file.name}`,
       viewUrl: `https://drive.google.com/file/d/${file.id}/view`,
       audioUrl: `/api/book-audio/stream?id=${encodeURIComponent(file.id)}`,
-      subtitleUrl: subtitleUrl(config.subtitleFolder, file.name)
+      subtitleUrl: subtitleUrl(config.subtitleFolder, file.name, kind, index)
     }));
 
     return NextResponse.json({

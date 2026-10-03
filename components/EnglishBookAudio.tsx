@@ -262,24 +262,32 @@ export default function EnglishBookAudio() {
     ? items.findIndex((item) => item.id === selected.id)
     : -1;
 
+  // Audio files and OCR subtitle JSON can have different leading silence or
+  // encoding durations. Keep both views on one normalized timeline.
+  const subtitleTimingScale =
+    duration > 0 && (subtitle?.duration ?? 0) > 0
+      ? duration / (subtitle?.duration ?? duration)
+      : 1;
+
   const activeSegmentIndex = useMemo(() => {
     const segments = subtitle?.segments ?? [];
     if (segments.length === 0) return -1;
+    const subtitleTime = currentTime / subtitleTimingScale;
 
     const exact = segments.findIndex(
       (segment) =>
-        currentTime >= segment.start &&
-        currentTime < Math.max(segment.end, segment.start + 0.15)
+        subtitleTime >= segment.start &&
+        subtitleTime < Math.max(segment.end, segment.start + 0.15)
     );
 
     if (exact >= 0) return exact;
 
     for (let index = segments.length - 1; index >= 0; index -= 1) {
-      if (currentTime >= segments[index].start) return index;
+      if (subtitleTime >= segments[index].start) return index;
     }
 
     return -1;
-  }, [currentTime, subtitle]);
+  }, [currentTime, subtitle, subtitleTimingScale]);
 
   const studyWords = useMemo(() => {
     const seen = new Set<string>();
@@ -530,7 +538,7 @@ export default function EnglishBookAudio() {
   }
 
   function jumpToSegment(segment: SubtitleSegment) {
-    seekTo(segment.start + 0.01);
+    seekTo(segment.start * subtitleTimingScale + 0.01);
     void audioRef.current?.play().catch(() => setAudioError(true));
   }
 

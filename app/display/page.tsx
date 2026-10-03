@@ -15,6 +15,7 @@ import {
   Music2,
   Pause,
   Play,
+  PlayCircle,
   Volume2
 } from "lucide-react";
 import {
@@ -1428,6 +1429,27 @@ function MobileBookPickPanel({ books }: { books: BookPick[] }) {
   );
 }
 
+function DailyEnglishPanel({ compact = false }: { compact?: boolean }) {
+  return (
+    <Link
+      href="/mealtime"
+      className={`group block h-full rounded-2xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] ${compact ? "p-4" : "p-5"} transition hover:border-sky-200/25 hover:bg-sky-950/60`}
+      aria-label="CNN 10 の今日の英語動画を見る"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <PlayCircle className="h-5 w-5 text-sky-200" />
+          <span className="font-semibold tracking-[0.08em] text-sky-100">DAILY ENGLISH</span>
+        </div>
+        <span className="text-xs text-slate-400">CNN 10</span>
+      </div>
+      <div className={`${compact ? "mt-6 text-2xl" : "mt-8 text-3xl"} font-semibold text-white`}>今日のニュースを英語で見る</div>
+      <div className="mt-3 text-base text-slate-300">最新の CNN 10 動画を再生</div>
+      <div className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-sky-400 px-4 text-sm font-semibold text-slate-950 transition group-hover:bg-sky-300">動画を見る</div>
+    </Link>
+  );
+}
+
 function MusicControl() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [stationId, setStationId] = useState(musicStations[0].id);
@@ -2130,18 +2152,16 @@ export default function DisplayPage() {
           <section className="rounded-2xl bg-sky-300/[0.06] p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-sky-200" />
+                <PlayCircle className="h-5 w-5 text-sky-200" />
                 <div className="font-semibold tracking-[0.08em] text-sky-100">
-                  BOOK OF THE WEEK
+                  DAILY ENGLISH · CNN 10
                 </div>
               </div>
-              <span className="text-[10px] text-slate-300">
-                weekly
-              </span>
+              <span className="text-[10px] text-slate-300">毎日</span>
             </div>
 
             <div className="mt-3">
-              <MobileBookPickPanel books={bookPicks.slice(0, 5)} />
+              <DailyEnglishPanel compact />
             </div>
           </section>
         </div>
@@ -2515,17 +2535,17 @@ export default function DisplayPage() {
             <article className="h-full min-h-0 overflow-hidden rounded-3xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2">
-                  <BookOpen className="h-5 w-5 shrink-0 text-sky-200" />
+                  <PlayCircle className="h-5 w-5 shrink-0 text-sky-200" />
                   <div className="truncate text-[clamp(0.95rem,0.95vw,1.15rem)] font-semibold tracking-[0.08em] text-sky-100">
-                    BOOK OF THE WEEK · 今週の2冊
+                    DAILY ENGLISH · CNN 10
                   </div>
                 </div>
                 <span className="shrink-0 text-[9px] text-slate-400">
-                  ADULT + CHILD
+                  毎日の英語
                 </span>
               </div>
 
-              <DesktopBookPickPanel books={bookPicks.slice(0, 5)} />
+              <DailyEnglishPanel />
             </article>
           </section>
         </div>
