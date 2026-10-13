@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 type AudioKind = "reading" | "vocab";
+type ReadingMode = "tap" | "english" | "hints";
 
 type AudioItem = {
   id: string;
@@ -224,6 +225,18 @@ function readCountKey(itemId: string) {
   return `english-book-read-count:${itemId}`;
 }
 
+function readingModeKey() {
+  if (typeof window === "undefined") return "english-reading-mode:default";
+  try {
+    const raw = window.localStorage.getItem("family-schedule-hub-state");
+    const state = raw ? (JSON.parse(raw) as { currentUser?: { id?: string; role?: string } }) : null;
+    const user = state?.currentUser;
+    return `english-reading-mode:${user?.id ?? user?.role ?? "default"}`;
+  } catch {
+    return "english-reading-mode:default";
+  }
+}
+
 function normalizeWord(value: string) {
   return value.toLowerCase().replace(/^[^a-z]+|[^a-z]+$/g, "");
 }
@@ -248,12 +261,52 @@ export default function EnglishBookAudio() {
   const [audioError, setAudioError] = useState(false);
   const [knownWords, setKnownWords] = useState<string[]>([]);
   const [readCount, setReadCount] = useState(0);
+  const [readingMode, setReadingMode] = useState<ReadingMode>("tap");
+  const [translatedWord, setTranslatedWord] = useState<string | null>(null);
+  const [externalTranslation, setExternalTranslation] = useState("");
+  const [translationLoading, setTranslationLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("audio") === "1") setOpen(true);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem(readingModeKey());
+    if (saved === "tap" || saved === "english" || saved === "hints") {
+      setReadingMode(saved);
+    }
+  }, []);
+
+  function changeReadingMode(mode: ReadingMode) {
+    setReadingMode(mode);
+    setTranslatedWord(null);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(readingModeKey(), mode);
+    }
+  }
+
+  async function translateCurrentSentence() {
+    const text = activeSegmentIndex >= 0 ? subtitle?.segments?.[activeSegmentIndex]?.text ?? "" : "";
+    if (!text || translationLoading) return;
+    setTranslationLoading(true);
+    setExternalTranslation("");
+    try {
+      const response = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      const payload = await response.json().catch(() => null);
+      setExternalTranslation(payload?.translated ?? payload?.error ?? "翻訳できませんでした。");
+    } catch {
+      setExternalTranslation("翻訳サービスに接続できませんでした。");
+    } finally {
+      setTranslationLoading(false);
+    }
+  }
 
   const items = list?.items ?? [];
   const selected =
@@ -319,6 +372,14 @@ export default function EnglishBookAudio() {
       (activeText.match(/[A-Za-z][A-Za-z'-]*/g) ?? []).map(normalizeWord)
     );
   }, [activeSegmentIndex, subtitle]);
+
+  const activeDictionaryWords = useMemo(() => {
+    if (readingMode === "english") return [];
+    const text = activeSegmentIndex >= 0 ? subtitle?.segments?.[activeSegmentIndex]?.text ?? "" : "";
+    return Array.from(new Set((text.match(/[A-Za-z][A-Za-z'-]*/g) ?? []).map(normalizeWord)))
+      .filter((word) => Boolean(EIKEN_STUDY_WORDS[word]))
+      .map((word) => ({ word, ...EIKEN_STUDY_WORDS[word] }));
+  }, [activeSegmentIndex, readingMode, subtitle]);
 
   useEffect(() => {
     if (!open) return;
@@ -777,51 +838,6 @@ export default function EnglishBookAudio() {
                         </button>
                       </div>
 
-                      <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
-                        <button
-                          type="button"
-                          onClick={() => seekBy(-10)}
-                          className="min-h-12 rounded-xl border border-white/[0.08] bg-white/[0.07] px-4 text-sm font-bold text-slate-100"
-                        >
-                          −10s
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={togglePlay}
-                          className="inline-flex min-h-14 min-w-[132px] items-center justify-center gap-2 rounded-xl border-2 border-cyan-100/60 px-5 text-base font-black shadow-[0_0_28px_rgba(103,232,249,0.28)]"
-                          style={{
-                            backgroundColor: "#67e8f9",
-                            color: "#07131f"
-                          }}
-                          aria-label={playing ? "暂停" : "播放"}
-                        >
-                          {playing ? (
-                            <Pause className="h-6 w-6" />
-                          ) : (
-                            <Play className="h-6 w-6" />
-                          )}
-                          {playing ? "PAUSE" : "PLAY"}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={stopPlayback}
-                          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-rose-200/30 bg-rose-300/15 px-4 text-sm font-black text-rose-100"
-                        >
-                          <Square className="h-4 w-4 fill-current" />
-                          STOP
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => seekBy(10)}
-                          className="min-h-12 rounded-xl border border-white/[0.08] bg-white/[0.07] px-4 text-sm font-bold text-slate-100"
-                        >
-                          +10s
-                        </button>
-                      </div>
-
                       <div className="mt-4">
                         <input
                           type="range"
@@ -886,12 +902,34 @@ export default function EnglishBookAudio() {
                     {subtitleOn ? (
                       <section className="mt-4 rounded-2xl border border-violet-300/10 bg-violet-300/[0.035] p-4">
                         <div className="flex items-center justify-between gap-3">
-                          <div>
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex shrink-0 flex-col gap-2">
+                              <button
+                                type="button"
+                                onClick={togglePlay}
+                                className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-xl border-2 border-cyan-100/60 bg-cyan-300 px-3 text-slate-950 shadow-[0_0_24px_rgba(103,232,249,0.25)]"
+                                aria-label={playing ? "一時停止" : "再生"}
+                                title={playing ? "一時停止" : "再生"}
+                              >
+                                {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={stopPlayback}
+                                className="inline-flex min-h-10 min-w-12 items-center justify-center rounded-xl border border-rose-200/30 bg-rose-300/15 px-3 text-rose-100"
+                                aria-label="停止"
+                                title="停止"
+                              >
+                                <Square className="h-4 w-4 fill-current" />
+                              </button>
+                            </div>
+                            <div className="min-w-0">
                             <div className="text-[10px] font-bold tracking-[0.12em] text-violet-200">
                               SYNC SUBTITLE
                             </div>
                             <div className="mt-1 text-base font-semibold text-slate-300">
-                              大屏字幕 · 当前句高亮 · 点击句子重新播放
+                              逐句再生 · 現在の文をハイライト · 文をタップして再生
+                            </div>
                             </div>
                           </div>
 
@@ -900,6 +938,27 @@ export default function EnglishBookAudio() {
                               {subtitle.model}
                             </span>
                           ) : null}
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {([
+                            ["tap", "タップで翻訳"],
+                            ["english", "英語のみ"],
+                            ["hints", "単語ヒント"]
+                          ] as const).map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => changeReadingMode(value)}
+                              className={`min-h-10 rounded-lg px-3 text-xs font-bold transition ${
+                                readingMode === value
+                                  ? "bg-cyan-300 text-slate-950"
+                                  : "bg-white/[0.07] text-slate-300 hover:bg-white/[0.12]"
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          ))}
                         </div>
 
                         {subtitleLoading ? (
@@ -925,6 +984,40 @@ export default function EnglishBookAudio() {
                                   ? subtitle!.segments![activeSegmentIndex]?.text
                                   : subtitle!.segments![0]?.text}
                               </div>
+
+                              {readingMode !== "english" && activeDictionaryWords.length > 0 ? (
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                  {activeDictionaryWords.map((item) => (
+                                    <button
+                                      key={item.word}
+                                      type="button"
+                                      onClick={() => setTranslatedWord(translatedWord === item.word ? null : item.word)}
+                                      className="min-h-10 rounded-lg border border-amber-200/30 bg-amber-200/10 px-3 text-sm font-bold text-amber-100"
+                                    >
+                                      {item.word}
+                                      {readingMode === "hints" || translatedWord === item.word ? ` · ${item.ja}` : ""}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : null}
+
+                              {readingMode === "tap" ? (
+                                <div className="mt-4">
+                                  <button
+                                    type="button"
+                                    onClick={translateCurrentSentence}
+                                    disabled={translationLoading}
+                                    className="min-h-10 rounded-lg border border-violet-200/30 bg-violet-200/10 px-3 text-sm font-bold text-violet-100 disabled:opacity-60"
+                                  >
+                                    {translationLoading ? "翻訳中…" : "Googleでこの文を翻訳"}
+                                  </button>
+                                  {externalTranslation ? (
+                                    <div className="mt-2 rounded-lg bg-violet-200/10 px-3 py-2 text-base font-semibold text-violet-100">
+                                      {externalTranslation}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              ) : null}
 
                               <div className="mt-2 text-sm font-bold tabular-nums text-cyan-200/80 sm:text-base">
                                 {formatTime(
@@ -989,7 +1082,7 @@ export default function EnglishBookAudio() {
                                 })}
                               </div>
 
-                              <aside className="max-h-[50vh] overflow-hidden rounded-2xl border border-amber-200/15 bg-amber-200/[0.045]">
+                              {readingMode === "hints" ? <aside className="max-h-[50vh] overflow-hidden rounded-2xl border border-amber-200/15 bg-amber-200/[0.045]">
                                 <div className="border-b border-white/[0.06] bg-[#111d26]/95 px-4 py-3">
                                   <div className="flex items-start justify-between gap-2">
                                     <div>
@@ -1075,7 +1168,7 @@ export default function EnglishBookAudio() {
                                     </div>
                                   )}
                                 </div>
-                              </aside>
+                              </aside> : null}
                             </div>
                           </>
                         ) : (
