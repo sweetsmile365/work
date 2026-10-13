@@ -810,10 +810,66 @@ export default function EnglishBookAudio() {
                       </button>
                     </div>
 
-                    <div className="mt-2 flex justify-between text-xs font-semibold tabular-nums text-slate-300">
+                    <input
+                      type="range"
+                      min="0"
+                      max={progressMax}
+                      step="0.1"
+                      value={Math.min(currentTime, progressMax)}
+                      onChange={(event) => seekTo(Number(event.target.value))}
+                      className="mt-3 w-full accent-sky-300"
+                      aria-label="再生位置"
+                    />
+                    <div className="mt-1 flex justify-between text-xs font-semibold tabular-nums text-slate-300">
                       <span>{formatTime(currentTime)}</span>
                       <span>{formatTime(progressMax)}</span>
                     </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <div className="text-[10px] leading-relaxed text-emerald-100">
+                        読了 {readCount} 回
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSubtitleOn((value) => !value)}
+                        className={`rounded-full px-3 py-1.5 text-xs font-bold ${
+                          subtitleOn
+                            ? "bg-violet-300/15 text-violet-100"
+                            : "bg-white/[0.05] text-slate-400"
+                        }`}
+                      >
+                        CC {subtitleOn ? "ON" : "OFF"}
+                      </button>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="mb-2 flex items-center gap-2 text-[10px] font-bold tracking-[0.12em] text-slate-400">
+                        <Volume2 className="h-4 w-4" />
+                        再生速度
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {SPEEDS.map((value) => (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setSpeed(value)}
+                            className={`min-h-10 rounded-lg px-2 text-xs font-bold ${
+                              speed === value
+                                ? "bg-emerald-300 text-slate-950"
+                                : "bg-white/[0.06] text-slate-300"
+                            }`}
+                          >
+                            {value.toFixed(value === 1 ? 1 : 2).replace(/0$/, "")}×
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {audioError ? (
+                      <div className="mt-4 rounded-xl border border-amber-300/15 bg-amber-300/[0.07] p-3 text-xs leading-relaxed text-amber-100">
+                        音声を再生できません。Google Drive の共有設定を確認してください。
+                      </div>
+                    ) : null}
 
                     <div className="mt-4 text-[10px] font-bold tracking-[0.12em] text-slate-400">
                       読み方
@@ -878,97 +934,8 @@ export default function EnglishBookAudio() {
 
                 {selected ? (
                   <>
-                    <section className="rounded-2xl border border-sky-300/10 bg-slate-950/35 p-4">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="text-[10px] font-bold tracking-[0.12em] text-sky-200">
-                            {KIND_LABELS[kind]}
-                          </div>
-                          <div className="mt-1 truncate text-lg font-bold">
-                            {selected.name.replace(/\.mp3$/i, "")}
-                          </div>
-
-                          <div className="mt-2 inline-flex items-center rounded-full border border-emerald-200/15 bg-emerald-300/10 px-3 py-1 text-[11px] font-bold text-emerald-100">
-                            この文章を {readCount} 回読了 · 已完整读了 {readCount} 遍
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setSubtitleOn((value) => !value)}
-                          className={`rounded-full px-3 py-1.5 text-xs font-bold ${
-                            subtitleOn
-                              ? "bg-violet-300/15 text-violet-100"
-                              : "bg-white/[0.05] text-slate-400"
-                          }`}
-                        >
-                          CC {subtitleOn ? "ON" : "OFF"}
-                        </button>
-                      </div>
-
-                      <div className="mt-4">
-                        <input
-                          type="range"
-                          min="0"
-                          max={progressMax}
-                          step="0.1"
-                          value={Math.min(currentTime, progressMax)}
-                          onChange={(event) =>
-                            seekTo(Number(event.target.value))
-                          }
-                          className="w-full accent-sky-300"
-                          aria-label="播放进度"
-                        />
-                        <div className="mt-1 flex justify-between text-xs tabular-nums text-slate-400">
-                          <span>{formatTime(currentTime)}</span>
-                          <span>{formatTime(progressMax)}</span>
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="mb-2 flex items-center gap-2 text-[10px] font-bold tracking-[0.12em] text-slate-400">
-                          <Volume2 className="h-4 w-4" />
-                          SPEED
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {SPEEDS.map((value) => (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() => setSpeed(value)}
-                              className={`rounded-lg px-3 py-2 text-xs font-bold ${
-                                speed === value
-                                  ? "bg-emerald-300 text-slate-950"
-                                  : "bg-white/[0.06] text-slate-300"
-                              }`}
-                            >
-                              {value
-                                .toFixed(value === 1 ? 1 : 2)
-                                .replace(/0$/, "")}
-                              ×
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {audioError ? (
-                        <div className="mt-4 rounded-xl border border-amber-300/15 bg-amber-300/[0.07] p-3 text-xs leading-relaxed text-amber-100">
-                          音频无法直接播放。请确认 Google Drive
-                          文件夹已经设置为「知道链接的人可查看」。
-                          <a
-                            href={selected.viewUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="ml-2 font-bold underline"
-                          >
-                            在 Drive 中打开
-                          </a>
-                        </div>
-                      ) : null}
-                    </section>
-
                     {subtitleOn ? (
-                      <section className="mt-4 rounded-2xl border border-violet-300/10 bg-violet-300/[0.035] p-4">
+                      <section className="rounded-2xl border border-violet-300/10 bg-violet-300/[0.035] p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex min-w-0 items-center gap-3">
                             <div className="min-w-0">
@@ -1077,8 +1044,14 @@ export default function EnglishBookAudio() {
                               </div>
                             </div>
 
-                            <div className="mt-4 grid min-h-0 gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
-                              <div className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
+                            <div
+                              className={`mt-4 grid min-h-0 gap-4 ${
+                                readingMode === "hints"
+                                  ? "xl:grid-cols-[minmax(0,1fr)_330px]"
+                                  : "grid-cols-1"
+                              }`}
+                            >
+                              <div className="max-h-[56vh] w-full space-y-2 overflow-y-auto pr-1">
                                 {subtitle!.segments!.map((segment, index) => {
                                   const active =
                                     index === activeSegmentIndex;
