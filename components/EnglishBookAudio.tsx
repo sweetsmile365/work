@@ -263,8 +263,6 @@ export default function EnglishBookAudio() {
   const [readCount, setReadCount] = useState(0);
   const [readingMode, setReadingMode] = useState<ReadingMode>("tap");
   const [translatedWord, setTranslatedWord] = useState<string | null>(null);
-  const [externalTranslation, setExternalTranslation] = useState("");
-  const [translationLoading, setTranslationLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -285,26 +283,6 @@ export default function EnglishBookAudio() {
     setTranslatedWord(null);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(readingModeKey(), mode);
-    }
-  }
-
-  async function translateCurrentSentence() {
-    const text = activeSegmentIndex >= 0 ? subtitle?.segments?.[activeSegmentIndex]?.text ?? "" : "";
-    if (!text || translationLoading) return;
-    setTranslationLoading(true);
-    setExternalTranslation("");
-    try {
-      const response = await fetch("/api/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-      const payload = await response.json().catch(() => null);
-      setExternalTranslation(payload?.translated ?? payload?.error ?? "翻訳できませんでした。");
-    } catch {
-      setExternalTranslation("翻訳サービスに接続できませんでした。");
-    } finally {
-      setTranslationLoading(false);
     }
   }
 
@@ -998,24 +976,6 @@ export default function EnglishBookAudio() {
                                       {readingMode === "hints" || translatedWord === item.word ? ` · ${item.ja}` : ""}
                                     </button>
                                   ))}
-                                </div>
-                              ) : null}
-
-                              {readingMode === "tap" ? (
-                                <div className="mt-4">
-                                  <button
-                                    type="button"
-                                    onClick={translateCurrentSentence}
-                                    disabled={translationLoading}
-                                    className="min-h-10 rounded-lg border border-violet-200/30 bg-violet-200/10 px-3 text-sm font-bold text-violet-100 disabled:opacity-60"
-                                  >
-                                    {translationLoading ? "翻訳中…" : "Googleでこの文を翻訳"}
-                                  </button>
-                                  {externalTranslation ? (
-                                    <div className="mt-2 rounded-lg bg-violet-200/10 px-3 py-2 text-base font-semibold text-violet-100">
-                                      {externalTranslation}
-                                    </div>
-                                  ) : null}
                                 </div>
                               ) : null}
 
