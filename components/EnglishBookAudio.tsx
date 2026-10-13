@@ -263,6 +263,7 @@ export default function EnglishBookAudio() {
   const [readCount, setReadCount] = useState(0);
   const [readingMode, setReadingMode] = useState<ReadingMode>("tap");
   const [translatedWord, setTranslatedWord] = useState<string | null>(null);
+  const [offlineDictionary, setOfflineDictionary] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -277,6 +278,22 @@ export default function EnglishBookAudio() {
       setReadingMode(saved);
     }
   }, []);
+
+  useEffect(() => {
+    if (!open || Object.keys(offlineDictionary).length > 0) return;
+    let cancelled = false;
+    void fetch("/dictionaries/ejdict-subtitle.json")
+      .then((response) => (response.ok ? response.json() : {}))
+      .then((payload) => {
+        if (!cancelled && payload && typeof payload === "object") {
+          setOfflineDictionary(payload as Record<string, string>);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [offlineDictionary, open]);
 
   function changeReadingMode(mode: ReadingMode) {
     setReadingMode(mode);
@@ -358,6 +375,21 @@ export default function EnglishBookAudio() {
       .filter((word) => Boolean(EIKEN_STUDY_WORDS[word]))
       .map((word) => ({ word, ...EIKEN_STUDY_WORDS[word] }));
   }, [activeSegmentIndex, readingMode, subtitle]);
+
+  const activeSentenceText = useMemo(() => {
+    if (!(subtitle?.segments?.length ?? 0)) return "";
+    return activeSegmentIndex >= 0
+      ? subtitle?.segments?.[activeSegmentIndex]?.text ?? ""
+      : subtitle?.segments?.[0]?.text ?? "";
+  }, [activeSegmentIndex, subtitle]);
+
+  const selectedWordMeaning = translatedWord
+    ? offlineDictionary[translatedWord] ?? EIKEN_STUDY_WORDS[translatedWord]?.ja ?? ""
+    : "";
+
+  useEffect(() => {
+    setTranslatedWord(null);
+  }, [activeSegmentIndex]);
 
   useEffect(() => {
     if (!open) return;
@@ -750,6 +782,64 @@ export default function EnglishBookAudio() {
                     </a>
                   </div>
                 ) : null}
+
+                {selected ? (
+                  <div className="mt-4 rounded-xl border border-cyan-200/15 bg-cyan-300/[0.055] p-3">
+                    <div className="text-[10px] font-bold tracking-[0.12em] text-cyan-200">
+                      再生コントロール
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+                      <button
+                        type="button"
+                        onClick={togglePlay}
+                        className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border-2 border-cyan-100/60 bg-cyan-300 px-4 text-base font-black text-slate-950 shadow-[0_0_24px_rgba(103,232,249,0.2)]"
+                        aria-label={playing ? "一時停止" : "再生"}
+                      >
+                        {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
+                        {playing ? "一時停止" : "再生"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={stopPlayback}
+                        className="inline-flex min-h-14 min-w-14 items-center justify-center rounded-xl border border-rose-200/30 bg-rose-300/15 text-rose-100"
+                        aria-label="停止"
+                        title="停止"
+                      >
+                        <Square className="h-5 w-5 fill-current" />
+                      </button>
+                    </div>
+
+                    <div className="mt-2 flex justify-between text-xs font-semibold tabular-nums text-slate-300">
+                      <span>{formatTime(currentTime)}</span>
+                      <span>{formatTime(progressMax)}</span>
+                    </div>
+
+                    <div className="mt-4 text-[10px] font-bold tracking-[0.12em] text-slate-400">
+                      読み方
+                    </div>
+                    <div className="mt-2 grid gap-2">
+                      {([
+                        ["tap", "タップで意味を見る"],
+                        ["english", "英語のみ"],
+                        ["hints", "単語ヒント"]
+                      ] as const).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => changeReadingMode(value)}
+                          className={`min-h-11 rounded-lg px-3 text-sm font-bold transition ${
+                            readingMode === value
+                              ? "bg-cyan-300 text-slate-950"
+                              : "bg-white/[0.07] text-slate-300 hover:bg-white/[0.12]"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </aside>
 
               <main className="min-h-0 overflow-y-auto p-4 sm:p-6">
@@ -881,26 +971,6 @@ export default function EnglishBookAudio() {
                       <section className="mt-4 rounded-2xl border border-violet-300/10 bg-violet-300/[0.035] p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex shrink-0 flex-col gap-2">
-                              <button
-                                type="button"
-                                onClick={togglePlay}
-                                className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-xl border-2 border-cyan-100/60 bg-cyan-300 px-3 text-slate-950 shadow-[0_0_24px_rgba(103,232,249,0.25)]"
-                                aria-label={playing ? "一時停止" : "再生"}
-                                title={playing ? "一時停止" : "再生"}
-                              >
-                                {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={stopPlayback}
-                                className="inline-flex min-h-10 min-w-12 items-center justify-center rounded-xl border border-rose-200/30 bg-rose-300/15 px-3 text-rose-100"
-                                aria-label="停止"
-                                title="停止"
-                              >
-                                <Square className="h-4 w-4 fill-current" />
-                              </button>
-                            </div>
                             <div className="min-w-0">
                             <div className="text-[10px] font-bold tracking-[0.12em] text-violet-200">
                               SYNC SUBTITLE
@@ -916,27 +986,6 @@ export default function EnglishBookAudio() {
                               {subtitle.model}
                             </span>
                           ) : null}
-                        </div>
-
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {([
-                            ["tap", "タップで翻訳"],
-                            ["english", "英語のみ"],
-                            ["hints", "単語ヒント"]
-                          ] as const).map(([value, label]) => (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() => changeReadingMode(value)}
-                              className={`min-h-10 rounded-lg px-3 text-xs font-bold transition ${
-                                readingMode === value
-                                  ? "bg-cyan-300 text-slate-950"
-                                  : "bg-white/[0.07] text-slate-300 hover:bg-white/[0.12]"
-                              }`}
-                            >
-                              {label}
-                            </button>
-                          ))}
                         </div>
 
                         {subtitleLoading ? (
@@ -957,11 +1006,50 @@ export default function EnglishBookAudio() {
                                 NOW READING
                               </div>
 
-                              <div className="mt-3 min-h-[4.8rem] text-[clamp(1.55rem,2.0vw,2.35rem)] font-black leading-[1.38] tracking-[0.005em] text-white">
-                                {activeSegmentIndex >= 0
-                                  ? subtitle!.segments![activeSegmentIndex]?.text
-                                  : subtitle!.segments![0]?.text}
+                              <div className="mt-3 min-h-[4.8rem] text-[clamp(1.55rem,2.0vw,2.35rem)] font-black leading-[1.5] tracking-[0.005em] text-white">
+                                {readingMode === "english"
+                                  ? activeSentenceText
+                                  : activeSentenceText
+                                      .split(/([A-Za-z][A-Za-z'’-]*)/g)
+                                      .map((part, index) => {
+                                        const word = normalizeWord(part);
+                                        const meaning =
+                                          offlineDictionary[word] ?? EIKEN_STUDY_WORDS[word]?.ja;
+                                        if (!meaning || !/[A-Za-z]/.test(part)) {
+                                          return <span key={`${part}-${index}`}>{part}</span>;
+                                        }
+                                        const selectedWord = translatedWord === word;
+                                        return (
+                                          <button
+                                            key={`${part}-${index}`}
+                                            type="button"
+                                            onClick={() => setTranslatedWord(selectedWord ? null : word)}
+                                            className={`mx-0.5 inline rounded-lg px-1 py-0.5 text-left font-black underline decoration-dotted underline-offset-4 transition ${
+                                              selectedWord
+                                                ? "bg-amber-300 text-slate-950 decoration-transparent"
+                                                : "text-white decoration-cyan-300/70 hover:bg-white/10 focus:bg-white/10"
+                                            }`}
+                                            aria-label={`${part} の意味を見る`}
+                                          >
+                                            {part}
+                                          </button>
+                                        );
+                                      })}
                               </div>
+
+                              {translatedWord && selectedWordMeaning ? (
+                                <div className="mt-4 rounded-xl border border-amber-200/30 bg-slate-950/45 px-4 py-3">
+                                  <div className="text-sm font-black uppercase tracking-wide text-amber-200">
+                                    {translatedWord}
+                                  </div>
+                                  <div className="mt-1 text-base font-semibold leading-relaxed text-white">
+                                    {selectedWordMeaning}
+                                  </div>
+                                  <div className="mt-2 text-[10px] text-slate-400">
+                                    EJDict · CC0 · オフライン英和辞典
+                                  </div>
+                                </div>
+                              ) : null}
 
                               {readingMode !== "english" && activeDictionaryWords.length > 0 ? (
                                 <div className="mt-4 flex flex-wrap gap-2">

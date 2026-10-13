@@ -1,0 +1,4 @@
+EJDict-hand English-Japanese dictionary data
+Source: https://github.com/kujirahand/EJDict
+License: CC0 1.0 Universal / Public Domain
+This application includes a material-specific subset generated from EJDict.
