@@ -9,6 +9,9 @@ import {
   Headphones,
   Pause,
   Play,
+  RotateCcw,
+  SkipBack,
+  SkipForward,
   Square,
   Volume2,
   X
@@ -16,6 +19,7 @@ import {
 
 type AudioKind = "reading" | "vocab";
 type ReadingMode = "tap" | "english" | "hints";
+type PlaybackMode = "sentence" | "continuous";
 
 type AudioItem = {
   id: string;
@@ -245,6 +249,8 @@ export default function EnglishBookAudio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const subtitleRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const lastSavedSecond = useRef(-1);
+  const sentenceTargetIndex = useRef<number | null>(null);
+  const pendingAutoPlay = useRef(false);
 
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<AudioKind>("reading");
@@ -262,6 +268,8 @@ export default function EnglishBookAudio() {
   const [knownWords, setKnownWords] = useState<string[]>([]);
   const [readCount, setReadCount] = useState(0);
   const [readingMode, setReadingMode] = useState<ReadingMode>("tap");
+  const [playbackMode, setPlaybackMode] = useState<PlaybackMode>("sentence");
+  const [autoNextTrack, setAutoNextTrack] = useState(false);
   const [translatedWord, setTranslatedWord] = useState<string | null>(null);
   const [offlineDictionary, setOfflineDictionary] = useState<Record<string, string>>({});
 
@@ -388,10 +396,6 @@ export default function EnglishBookAudio() {
     : "";
 
   useEffect(() => {
-    setTranslatedWord(null);
-  }, [activeSegmentIndex]);
-
-  useEffect(() => {
     if (!open) return;
 
     let cancelled = false;
@@ -510,6 +514,8 @@ export default function EnglishBookAudio() {
     setCurrentTime(0);
     setDuration(subtitle?.duration ?? 0);
     setAudioError(false);
+    setTranslatedWord(null);
+    sentenceTargetIndex.current = null;
     lastSavedSecond.current = -1;
   }, [selected?.id]);
 
@@ -568,6 +574,18 @@ export default function EnglishBookAudio() {
 
     try {
       audio.playbackRate = speed;
+      if (playbackMode === "sentence" && (subtitle?.segments?.length ?? 0) > 0) {
+        const index = activeSegmentIndex >= 0 ? activeSegmentIndex : 0;
+        const segment = subtitle!.segments![index];
+        const start = segment.start * subtitleTimingScale;
+        const end = segment.end * subtitleTimingScale;
+        if (audio.currentTime < start - 0.05 || audio.currentTime >= end - 0.08) {
+          seekTo(start + 0.01);
+        }
+        sentenceTargetIndex.current = index;
+      } else {
+        sentenceTargetIndex.current = null;
+      }
       await audio.play();
     } catch {
       setAudioError(true);
@@ -582,6 +600,7 @@ export default function EnglishBookAudio() {
     audio.currentTime = 0;
     setCurrentTime(0);
     setPlaying(false);
+    sentenceTargetIndex.current = null;
   }
 
   function seekTo(value: number) {
@@ -598,19 +617,41 @@ export default function EnglishBookAudio() {
     setCurrentTime(next);
   }
 
-  function seekBy(delta: number) {
-    seekTo(currentTime + delta);
-  }
-
   function pickRelative(offset: number) {
     if (selectedIndex < 0) return;
     const next = items[selectedIndex + offset];
     if (next) setSelectedId(next.id);
   }
 
-  function jumpToSegment(segment: SubtitleSegment) {
+  function playSegment(index: number) {
+    const segment = subtitle?.segments?.[index];
+    if (!segment) return;
+
     seekTo(segment.start * subtitleTimingScale + 0.01);
-    void audioRef.current?.play().catch(() => setAudioError(true));
+    sentenceTargetIndex.current = playbackMode === "sentence" ? index : null;
+    setAudioError(false);
+    void audioRef.current?.play().catch(() => {
+      setAudioError(true);
+      setPlaying(false);
+    });
+  }
+
+  function moveSentence(offset: number) {
+    const segments = subtitle?.segments ?? [];
+    if (segments.length === 0) return;
+    const base = activeSegmentIndex >= 0 ? activeSegmentIndex : 0;
+    playSegment(Math.max(0, Math.min(base + offset, segments.length - 1)));
+  }
+
+  function replaySentence() {
+    const segments = subtitle?.segments ?? [];
+    if (segments.length === 0) return;
+    playSegment(activeSegmentIndex >= 0 ? activeSegmentIndex : 0);
+  }
+
+  function selectWord(word: string) {
+    if (playbackMode === "sentence") audioRef.current?.pause();
+    setTranslatedWord((current) => (current === word ? null : word));
   }
 
   function markWordKnown(word: string) {
@@ -676,7 +717,7 @@ export default function EnglishBookAudio() {
             </header>
 
             <div className="grid min-h-0 flex-1 lg:grid-cols-[300px_minmax(0,1fr)]">
-              <aside className="border-b border-white/[0.07] p-4 lg:border-b-0 lg:border-r">
+              <aside className="max-h-[48vh] overflow-y-auto border-b border-white/[0.07] p-4 lg:max-h-none lg:min-h-0 lg:border-b-0 lg:border-r">
                 <div className="grid grid-cols-2 gap-2">
                   {(["reading", "vocab"] as AudioKind[]).map((value) => (
                     <button
@@ -789,6 +830,32 @@ export default function EnglishBookAudio() {
                       再生コントロール
                     </div>
 
+                    <div className="mt-3 grid grid-cols-2 rounded-xl bg-slate-950/55 p-1">
+                      {([
+                        ["sentence", "一文ずつ"],
+                        ["continuous", "連続再生"]
+                      ] as const).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => {
+                            setPlaybackMode(value);
+                            sentenceTargetIndex.current =
+                              value === "sentence" && activeSegmentIndex >= 0
+                                ? activeSegmentIndex
+                                : null;
+                          }}
+                          className={`min-h-10 rounded-lg px-2 text-xs font-black transition ${
+                            playbackMode === value
+                              ? "bg-cyan-300 text-slate-950"
+                              : "text-slate-300 hover:bg-white/[0.07]"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
                     <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
                       <button
                         type="button"
@@ -807,6 +874,42 @@ export default function EnglishBookAudio() {
                         title="停止"
                       >
                         <Square className="h-5 w-5 fill-current" />
+                      </button>
+                    </div>
+
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => moveSentence(-1)}
+                        disabled={(subtitle?.segments?.length ?? 0) === 0 || activeSegmentIndex <= 0}
+                        className="inline-flex h-12 items-center justify-center rounded-lg bg-white/[0.06] text-slate-200 disabled:opacity-30"
+                        aria-label="前の文"
+                        title="前の文"
+                      >
+                        <SkipBack className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={replaySentence}
+                        disabled={(subtitle?.segments?.length ?? 0) === 0}
+                        className="inline-flex h-12 items-center justify-center rounded-lg bg-white/[0.06] text-slate-200 disabled:opacity-30"
+                        aria-label="現在の文をもう一度"
+                        title="もう一度"
+                      >
+                        <RotateCcw className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveSentence(1)}
+                        disabled={
+                          (subtitle?.segments?.length ?? 0) === 0 ||
+                          activeSegmentIndex >= (subtitle?.segments?.length ?? 0) - 1
+                        }
+                        className="inline-flex h-12 items-center justify-center rounded-lg bg-white/[0.06] text-slate-200 disabled:opacity-30"
+                        aria-label="次の文"
+                        title="次の文"
+                      >
+                        <SkipForward className="h-5 w-5" />
                       </button>
                     </div>
 
@@ -842,6 +945,17 @@ export default function EnglishBookAudio() {
                       </button>
                     </div>
 
+                    <label className="mt-3 flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-lg bg-white/[0.045] px-3 text-xs font-bold text-slate-300">
+                      <span>終了後に次の音声を再生</span>
+                      <input
+                        type="checkbox"
+                        checked={autoNextTrack}
+                        onChange={(event) => setAutoNextTrack(event.target.checked)}
+                        disabled={playbackMode !== "continuous"}
+                        className="h-5 w-5 accent-cyan-300 disabled:opacity-40"
+                      />
+                    </label>
+
                     <div className="mt-4">
                       <div className="mb-2 flex items-center gap-2 text-[10px] font-bold tracking-[0.12em] text-slate-400">
                         <Volume2 className="h-4 w-4" />
@@ -859,7 +973,7 @@ export default function EnglishBookAudio() {
                                 : "bg-white/[0.06] text-slate-300"
                             }`}
                           >
-                            {value.toFixed(value === 1 ? 1 : 2).replace(/0$/, "")}×
+                            {value}×
                           </button>
                         ))}
                       </div>
@@ -906,24 +1020,60 @@ export default function EnglishBookAudio() {
                     const value = event.currentTarget.duration;
                     if (Number.isFinite(value)) setDuration(value);
                     event.currentTarget.playbackRate = speed;
-                    restorePosition();
+                    if (!pendingAutoPlay.current) restorePosition();
+                  }}
+                  onCanPlay={(event) => {
+                    if (!pendingAutoPlay.current) return;
+                    pendingAutoPlay.current = false;
+                    event.currentTarget.currentTime = 0;
+                    event.currentTarget.playbackRate = speed;
+                    void event.currentTarget.play().catch(() => {
+                      setAudioError(true);
+                      setPlaying(false);
+                    });
                   }}
                   onTimeUpdate={(event) => {
                     const value = event.currentTarget.currentTime;
                     setCurrentTime(value);
                     persistPosition(value);
+
+                    const target = sentenceTargetIndex.current;
+                    const segment =
+                      target === null ? null : subtitle?.segments?.[target] ?? null;
+                    if (playbackMode === "sentence" && segment) {
+                      const stopAt = Math.max(
+                        segment.start * subtitleTimingScale,
+                        segment.end * subtitleTimingScale - 0.04
+                      );
+                      if (value >= stopAt) {
+                        event.currentTarget.pause();
+                        event.currentTarget.currentTime = stopAt;
+                        setCurrentTime(stopAt);
+                        sentenceTargetIndex.current = null;
+                      }
+                    }
                   }}
                   onPlay={() => setPlaying(true)}
                   onPause={() => setPlaying(false)}
                   onEnded={() => {
                     setPlaying(false);
+                    sentenceTargetIndex.current = null;
                     if (selected && typeof window !== "undefined") {
-                      const next = readCount + 1;
-                      setReadCount(next);
-                      window.localStorage.setItem(
-                        readCountKey(selected.id),
-                        String(next)
-                      );
+                      setReadCount((current) => {
+                        const next = current + 1;
+                        window.localStorage.setItem(readCountKey(selected.id), String(next));
+                        return next;
+                      });
+                    }
+
+                    if (
+                      playbackMode === "continuous" &&
+                      autoNextTrack &&
+                      selectedIndex >= 0 &&
+                      selectedIndex < items.length - 1
+                    ) {
+                      pendingAutoPlay.current = true;
+                      setSelectedId(items[selectedIndex + 1].id);
                     }
                   }}
                   onError={() => {
@@ -943,7 +1093,9 @@ export default function EnglishBookAudio() {
                               SYNC SUBTITLE
                             </div>
                             <div className="mt-1 text-base font-semibold text-slate-300">
-                              逐句再生 · 現在の文をハイライト · 文をタップして再生
+                              {playbackMode === "sentence"
+                                ? "一文ずつ停止 · 文をタップして練習"
+                                : "連続再生 · 現在の文をハイライト"}
                             </div>
                             </div>
                           </div>
@@ -990,7 +1142,7 @@ export default function EnglishBookAudio() {
                                           <button
                                             key={`${part}-${index}`}
                                             type="button"
-                                            onClick={() => setTranslatedWord(selectedWord ? null : word)}
+                                            onClick={() => selectWord(word)}
                                             className={`mx-0.5 inline rounded-lg px-1 py-0.5 text-left font-black underline decoration-dotted underline-offset-4 transition ${
                                               selectedWord
                                                 ? "bg-amber-300 text-slate-950 decoration-transparent"
@@ -1006,8 +1158,19 @@ export default function EnglishBookAudio() {
 
                               {translatedWord && selectedWordMeaning ? (
                                 <div className="mt-4 rounded-xl border border-amber-200/30 bg-slate-950/45 px-4 py-3">
-                                  <div className="text-sm font-black uppercase tracking-wide text-amber-200">
-                                    {translatedWord}
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="text-sm font-black uppercase tracking-wide text-amber-200">
+                                      {translatedWord}
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => setTranslatedWord(null)}
+                                      className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-slate-300"
+                                      aria-label="単語の意味を閉じる"
+                                      title="閉じる"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </button>
                                   </div>
                                   <div className="mt-1 text-base font-semibold leading-relaxed text-white">
                                     {selectedWordMeaning}
@@ -1018,13 +1181,13 @@ export default function EnglishBookAudio() {
                                 </div>
                               ) : null}
 
-                              {readingMode !== "english" && activeDictionaryWords.length > 0 ? (
+                              {readingMode === "hints" && activeDictionaryWords.length > 0 ? (
                                 <div className="mt-4 flex flex-wrap gap-2">
                                   {activeDictionaryWords.map((item) => (
                                     <button
                                       key={item.word}
                                       type="button"
-                                      onClick={() => setTranslatedWord(translatedWord === item.word ? null : item.word)}
+                                      onClick={() => selectWord(item.word)}
                                       className="min-h-10 rounded-lg border border-amber-200/30 bg-amber-200/10 px-3 text-sm font-bold text-amber-100"
                                     >
                                       {item.word}
@@ -1066,7 +1229,7 @@ export default function EnglishBookAudio() {
                                         subtitleRefs.current[index] = element;
                                       }}
                                       type="button"
-                                      onClick={() => jumpToSegment(segment)}
+                                      onClick={() => playSegment(index)}
                                       className={`block w-full rounded-2xl border px-4 py-3 text-left transition-all duration-200 ${
                                         active
                                           ? "border-cyan-100/70 bg-cyan-300 text-slate-950 shadow-[0_0_26px_rgba(103,232,249,0.28)]"
