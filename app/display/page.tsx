@@ -13,6 +13,7 @@ import {
   Flame,
   MapPin,
   Music2,
+  Newspaper,
   Pause,
   Play,
   PlayCircle,
@@ -1432,25 +1433,35 @@ function MobileBookPickPanel({ books }: { books: BookPick[] }) {
 
 function DailyEnglishPanel({ compact = false }: { compact?: boolean }) {
   return (
-    <Link
-      href="/mealtime"
-      className={`group flex h-full flex-col justify-between ${compact ? "py-2" : "py-3"}`}
-      aria-label="CNN 10 の今日の英語動画を見る"
-    >
+    <div className={`flex h-full flex-col justify-between ${compact ? "py-2" : "py-3"}`}>
       <div>
         <div className="inline-flex items-center gap-2 rounded-full bg-sky-300/10 px-3 py-1.5 text-xs font-semibold text-sky-100">
           <PlayCircle className="h-4 w-4" />
-          10 MIN · NEWS ENGLISH
+          NEWS ENGLISH
         </div>
         <div className={`${compact ? "mt-3 text-2xl" : "mt-4 text-[clamp(1.55rem,1.75vw,2.25rem)]"} font-semibold leading-tight text-white`}>
           今日のニュースを英語で見る
         </div>
       </div>
-      <div className="mt-4 inline-flex min-h-10 w-fit items-center gap-2 rounded-xl border border-white/70 bg-white px-4 text-sm font-bold text-slate-950 transition group-hover:bg-sky-100">
-        <Play className="h-4 w-4 fill-current" />
-        CNN 10 を見る
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Link
+          href="/mealtime#cnn10"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/70 bg-white px-3 text-sm font-bold text-slate-950 transition hover:bg-sky-100"
+          aria-label="CNN 10 の今日の英語動画を見る"
+        >
+          <Play className="h-4 w-4 fill-current" />
+          CNN 10
+        </Link>
+        <Link
+          href="/mealtime#abc-btn"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-amber-200/35 bg-amber-200/10 px-3 text-sm font-bold text-amber-50 transition hover:bg-amber-200/20"
+          aria-label="ABC BTN Newsbreak を見る"
+        >
+          <Newspaper className="h-4 w-4" />
+          ABC BTN
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -2125,7 +2136,7 @@ export default function DisplayPage() {
               <div className="flex items-center gap-2">
                 <PlayCircle className="h-5 w-5 text-sky-200" />
                 <div className="font-semibold tracking-[0.08em] text-sky-100">
-                  DAILY ENGLISH · CNN 10
+                  DAILY ENGLISH · NEWS
                 </div>
               </div>
               <span className="text-[10px] text-slate-300">毎日</span>
@@ -2476,7 +2487,7 @@ export default function DisplayPage() {
                 <div className="flex min-w-0 items-center gap-2">
                   <PlayCircle className="h-5 w-5 shrink-0 text-sky-200" />
                   <div className="truncate text-[clamp(0.95rem,0.95vw,1.15rem)] font-semibold tracking-[0.08em] text-sky-100">
-                    DAILY ENGLISH · CNN 10
+                    DAILY ENGLISH · NEWS
                   </div>
                 </div>
                 <span className="shrink-0 text-[9px] text-slate-400">

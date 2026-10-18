@@ -18,6 +18,7 @@ import {
 
 const CNN10_UPLOADS_PLAYLIST = "UUTOoRgpHTjAQPk6Ak70u-pA";
 const NATGEO_KIDS_NEWEST_PLAYLIST = "PLQlnTldJs0ZQExTCjWSXXkCdfSvpjT5cO";
+const ABC_BTN_NEWSBREAK_URL = "https://www.abc.net.au/btn/newsbreak/13989262";
 
 
 
@@ -499,8 +500,8 @@ export default function MealTimePage() {
         </header>
 
         <section className="mt-6 rounded-[28px] border border-white/[0.06] bg-white/[0.025] p-4 sm:p-5">
-          <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-            <article className="rounded-2xl border border-sky-300/10 bg-slate-950/36 p-4">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <article id="cnn10" className="scroll-mt-5 rounded-2xl border border-sky-300/10 bg-slate-950/36 p-4">
               <div className="flex items-center gap-2 text-xs font-bold tracking-[0.12em] text-sky-200">
                 <Newspaper size={17} />
                 TODAY'S NEWS
@@ -525,33 +526,61 @@ export default function MealTimePage() {
               </div>
             </article>
 
-            <div className="grid gap-4">
-              <article className="rounded-2xl border border-emerald-300/10 bg-slate-950/36 p-4">
-                <div className="flex items-center gap-2 text-xs font-bold tracking-[0.12em] text-emerald-200">
-                  <Globe2 size={17} />
-                  QUICK VIDEO
-                </div>
+            <article id="abc-btn" className="scroll-mt-5 rounded-2xl border border-amber-200/15 bg-slate-950/36 p-4">
+              <div className="flex items-center gap-2 text-xs font-bold tracking-[0.12em] text-amber-200">
+                <Newspaper size={17} />
+                TODAY&apos;S NEWS
+              </div>
 
-                <div className="mt-2 text-lg font-bold">Nat Geo Kids</div>
-                <div className="mt-1 text-xs text-slate-400">
-                  Daily pick · 2–4 min
-                </div>
+              <div className="mt-2 text-xl font-bold">ABC News · BTN</div>
+              <div className="mt-1 text-sm text-slate-400">
+                Newsbreak for children · 約5分
+              </div>
 
-                <div className="mt-3">
-                  <PlaylistPlayer
-                    playlistId={NATGEO_KIDS_NEWEST_PLAYLIST}
-                    index={natGeoIndex}
-                    title="Nat Geo Kids daily video"
-                  />
+              <div className="mt-4 flex aspect-video flex-col items-center justify-center rounded-xl border border-amber-200/10 bg-[radial-gradient(circle_at_50%_20%,rgba(251,191,36,0.13),transparent_55%),rgba(2,6,23,0.72)] px-6 text-center">
+                <Globe2 className="h-9 w-9 text-amber-200" />
+                <div className="mt-3 text-lg font-bold text-white">BTN Newsbreak</div>
+                <div className="mt-1 text-xs leading-relaxed text-slate-300">
+                  子ども向けに世界のニュースを分かりやすく説明
                 </div>
+                <a
+                  href={ABC_BTN_NEWSBREAK_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-amber-200 px-4 text-sm font-bold text-slate-950 transition hover:bg-amber-100"
+                >
+                  ABC BTN を開く
+                  <ExternalLink size={15} />
+                </a>
+              </div>
 
-                <div className="mt-2 text-xs leading-relaxed text-slate-400">
-                  最新動画プレイリストの先頭7本から日付で1本を選択。
-                </div>
-              </article>
-
-            </div>
+              <div className="mt-3 rounded-xl bg-slate-950/30 p-3 text-xs leading-relaxed text-slate-400">
+                ABC公式の子ども向けニュースです。内容は保護者が先に確認してください。
+              </div>
+            </article>
           </div>
+
+          <article className="mt-5 rounded-2xl border border-emerald-300/10 bg-slate-950/36 p-4">
+            <div className="flex items-center gap-2 text-xs font-bold tracking-[0.12em] text-emerald-200">
+              <Globe2 size={17} />
+              QUICK VIDEO
+            </div>
+
+            <div className="mt-2 text-lg font-bold">Nat Geo Kids</div>
+            <div className="mt-1 text-xs text-slate-400">Daily pick · 2–4 min</div>
+
+            <div className="mt-3 max-w-xl">
+              <PlaylistPlayer
+                playlistId={NATGEO_KIDS_NEWEST_PLAYLIST}
+                index={natGeoIndex}
+                title="Nat Geo Kids daily video"
+              />
+            </div>
+
+            <div className="mt-2 text-xs leading-relaxed text-slate-400">
+              最新動画プレイリストの先頭7本から日付で1本を選択。
+            </div>
+          </article>
 
           <section className="mt-5 grid gap-4 lg:grid-cols-2">
             <TimeForKidsReader />
