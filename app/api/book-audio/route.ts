@@ -88,10 +88,12 @@ function parseDriveFolder(html: string) {
 
   for (const match of normalizedHtml.matchAll(fileLinkPattern)) {
     const id = match[1];
-    const start = Math.max(0, (match.index ?? 0) - 1800);
+    if (items.has(id)) continue;
+
+    const start = match.index ?? 0;
     const nearby = normalizedHtml.slice(
       start,
-      Math.min(normalizedHtml.length, start + 3600)
+      Math.min(normalizedHtml.length, start + 1800)
     );
     const candidates = [
       ...nearby.matchAll(
@@ -114,7 +116,7 @@ function parseDriveFolder(html: string) {
       const id = match[1];
       const index = match.index ?? 0;
       const nearby = html.slice(
-        Math.max(0, index - 900),
+        index,
         Math.min(html.length, index + 1800)
       );
 
@@ -142,11 +144,19 @@ function parseDriveFolder(html: string) {
   );
 }
 
-function subtitleUrl(folder: string, filename: string, kind: AudioKind, index: number) {
-  const stem =
-    kind === "vocab"
-      ? `Week ${index + 1}`
-      : String(index + 1).padStart(2, "0");
+function subtitleStem(filename: string, kind: AudioKind) {
+  const stem = filename.replace(/\.(?:mp3|m4a|wav)$/i, "").trim();
+
+  if (kind === "vocab") {
+    const match = stem.match(/^week\s+(\d+)$/i);
+    return match ? `Week ${Number.parseInt(match[1], 10)}` : null;
+  }
+
+  const match = stem.match(/^\d{1,3}$/);
+  return match ? match[0].padStart(2, "0") : null;
+}
+
+function subtitleUrl(folder: string, stem: string) {
   return `/English_Subtitles/${encodeURIComponent(folder)}/${encodeURIComponent(
     stem
   )}.json`;
@@ -189,13 +199,22 @@ export async function GET(request: NextRequest) {
     const html = await response.text();
     const files = parseDriveFolder(html);
 
-    const items = files.map((file, index) => ({
-      id: file.id,
-      name: `${kind === "vocab" ? `Week ${index + 1}` : String(index + 1).padStart(2, "0")} · ${file.name}`,
-      viewUrl: `https://drive.google.com/file/d/${file.id}/view`,
-      audioUrl: `/api/book-audio/stream?id=${encodeURIComponent(file.id)}`,
-      subtitleUrl: subtitleUrl(config.subtitleFolder, file.name, kind, index)
-    }));
+    const unmatchedFiles: string[] = [];
+    const items = files.flatMap((file) => {
+      const stem = subtitleStem(file.name, kind);
+      if (!stem) {
+        unmatchedFiles.push(file.name);
+        return [];
+      }
+
+      return [{
+        id: file.id,
+        name: `${stem} · ${file.name}`,
+        viewUrl: `https://drive.google.com/file/d/${file.id}/view`,
+        audioUrl: `/api/book-audio/stream?id=${encodeURIComponent(file.id)}`,
+        subtitleUrl: subtitleUrl(config.subtitleFolder, stem)
+      }];
+    });
 
     return NextResponse.json({
       ok: items.length > 0,
@@ -203,6 +222,8 @@ export async function GET(request: NextRequest) {
       label: config.folderLabel,
       folderUrl,
       needsSharing: items.length === 0,
+      unmatchedCount: unmatchedFiles.length,
+      unmatchedFiles,
       items
     });
   } catch (error) {
