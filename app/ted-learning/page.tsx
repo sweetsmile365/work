@@ -11,7 +11,7 @@ import {
   RotateCcw
 } from "lucide-react";
 
-type TalkId = "adora" | "grit";
+type TalkId = "adora" | "grit" | "thomas" | "richard" | "science";
 
 type VocabItem = {
   word: string;
@@ -28,7 +28,7 @@ type Talk = {
   duration: string;
   why: string;
   tedUrl: string;
-  tedEdUrl: string;
+  tedEdUrl?: string;
   embedUrl: string;
   vocab: VocabItem[];
   questions: string[];
@@ -102,6 +102,90 @@ const talks: Talk[] = [
       "What surprised you?",
       "Which is more important for success: talent or perseverance? Why?"
     ]
+  },
+  {
+    id: "thomas",
+    title: "A 12-year-old app developer",
+    speaker: "Thomas Suarez",
+    level: "中1〜中2 · ★★☆",
+    duration: "4 min 23 sec",
+    why:
+      "12歳でアプリ開発と学校のアプリクラブに挑戦した話。短く、技術と行動について具体的に聞き取れる。",
+    tedUrl:
+      "https://www.ted.com/talks/thomas_suarez_a_12_year_old_app_developer",
+    embedUrl:
+      "https://embed.ted.com/talks/thomas_suarez_a_12_year_old_app_developer",
+    vocab: [
+      { word: "developer", ja: "開発者", zh: "开发者" },
+      { word: "programming", ja: "プログラミング", zh: "编程" },
+      { word: "platform", ja: "基盤・プラットフォーム", zh: "平台" },
+      { word: "available", ja: "利用できる", zh: "可用的" },
+      { word: "inspire", ja: "刺激を与える", zh: "激励；启发" },
+      { word: "recognize", ja: "認める・気づく", zh: "认可；意识到" },
+      { word: "create", ja: "作り出す", zh: "创造" },
+      { word: "technology", ja: "技術", zh: "技术" }
+    ],
+    questions: [
+      "What did Thomas create?",
+      "How did he help other students?",
+      "What would you like to build with technology?"
+    ]
+  },
+  {
+    id: "richard",
+    title: "My invention that made peace with lions",
+    speaker: "Richard Turere",
+    level: "中1〜中2 · ★★☆",
+    duration: "7 min 07 sec",
+    why:
+      "13歳の発明家が、家畜とライオンの両方を守る仕組みを説明する。問題、試行錯誤、解決の流れが明快。",
+    tedUrl:
+      "https://www.ted.com/talks/richard_turere_my_invention_that_made_peace_with_lions",
+    embedUrl:
+      "https://embed.ted.com/talks/richard_turere_my_invention_that_made_peace_with_lions",
+    vocab: [
+      { word: "invention", ja: "発明", zh: "发明" },
+      { word: "cattle", ja: "牛・家畜", zh: "牛；牲畜" },
+      { word: "attack", ja: "襲う・攻撃", zh: "袭击；攻击" },
+      { word: "predator", ja: "捕食動物", zh: "捕食者" },
+      { word: "scare", ja: "怖がらせる", zh: "吓跑" },
+      { word: "circuit", ja: "電気回路", zh: "电路" },
+      { word: "solar-powered", ja: "太陽光で動く", zh: "太阳能驱动的" },
+      { word: "protect", ja: "守る", zh: "保护" }
+    ],
+    questions: [
+      "What problem did Richard need to solve?",
+      "Why did moving lights work?",
+      "How did his invention help both people and lions?"
+    ]
+  },
+  {
+    id: "science",
+    title: "Science is for everyone, kids included",
+    speaker: "Beau Lotto and Amy O'Toole",
+    level: "中2〜中3 · ★★★",
+    duration: "15 min 08 sec",
+    why:
+      "子どもたちが本物の研究を行い、論文を発表した実話。少し長いので、科学や探究が好きな日に向く。",
+    tedUrl:
+      "https://www.ted.com/talks/beau_lotto_amy_o_toole_science_is_for_everyone_kids_included",
+    embedUrl:
+      "https://embed.ted.com/talks/beau_lotto_amy_o_toole_science_is_for_everyone_kids_included",
+    vocab: [
+      { word: "experiment", ja: "実験", zh: "实验" },
+      { word: "perception", ja: "知覚・見方", zh: "感知；看法" },
+      { word: "curiosity", ja: "好奇心", zh: "好奇心" },
+      { word: "observation", ja: "観察", zh: "观察" },
+      { word: "data", ja: "データ", zh: "数据" },
+      { word: "publish", ja: "発表・出版する", zh: "发表；出版" },
+      { word: "peer-reviewed", ja: "専門家の査読を受けた", zh: "同行评审的" },
+      { word: "discovery", ja: "発見", zh: "发现" }
+    ],
+    questions: [
+      "What question did the children investigate?",
+      "What made their research unusual?",
+      "What small question would you like to investigate?"
+    ]
   }
 ];
 
@@ -118,16 +202,24 @@ type Progress = Record<
 
 const emptyProgress: Progress = {
   adora: { firstWatch: false, secondWatch: false, answered: false },
-  grit: { firstWatch: false, secondWatch: false, answered: false }
+  grit: { firstWatch: false, secondWatch: false, answered: false },
+  thomas: { firstWatch: false, secondWatch: false, answered: false },
+  richard: { firstWatch: false, secondWatch: false, answered: false },
+  science: { firstWatch: false, secondWatch: false, answered: false }
+};
+
+const emptyAnswers: Record<TalkId, string[]> = {
+  adora: ["", "", ""],
+  grit: ["", "", ""],
+  thomas: ["", "", ""],
+  richard: ["", "", ""],
+  science: ["", "", ""]
 };
 
 export default function TedLearningPage() {
   const [selectedId, setSelectedId] = useState<TalkId>("adora");
   const [progress, setProgress] = useState<Progress>(emptyProgress);
-  const [answers, setAnswers] = useState<Record<TalkId, string[]>>({
-    adora: ["", "", ""],
-    grit: ["", "", ""]
-  });
+  const [answers, setAnswers] = useState<Record<TalkId, string[]>>(emptyAnswers);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -135,11 +227,15 @@ export default function TedLearningPage() {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (!saved) return;
       const parsed = JSON.parse(saved) as {
-        progress?: Progress;
-        answers?: Record<TalkId, string[]>;
+        progress?: Partial<Progress>;
+        answers?: Partial<Record<TalkId, string[]>>;
       };
-      if (parsed.progress) setProgress(parsed.progress);
-      if (parsed.answers) setAnswers(parsed.answers);
+      if (parsed.progress) {
+        setProgress({ ...emptyProgress, ...parsed.progress });
+      }
+      if (parsed.answers) {
+        setAnswers({ ...emptyAnswers, ...parsed.answers });
+      }
     } catch {
       // ignore broken local state
     }
@@ -262,7 +358,7 @@ export default function TedLearningPage() {
                   ))}
                 </div>
                 <div className="mt-3 text-xs text-slate-400">
-                  Progress {doneCount}/6
+                  Progress {doneCount}/{talks.length * 3}
                 </div>
               </div>
             </div>
@@ -310,14 +406,16 @@ export default function TedLearningPage() {
                     >
                       TED <ExternalLink size={14} />
                     </a>
-                    <a
-                      href={talk.tedEdUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-violet-300/10 px-3 text-xs font-bold text-violet-100"
-                    >
-                      TED-Ed <ExternalLink size={14} />
-                    </a>
+                    {talk.tedEdUrl ? (
+                      <a
+                        href={talk.tedEdUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-violet-300/10 px-3 text-xs font-bold text-violet-100"
+                      >
+                        TED-Ed <ExternalLink size={14} />
+                      </a>
+                    ) : null}
                   </div>
                 </div>
               </div>

@@ -16,6 +16,7 @@ import {
   Pause,
   Play,
   PlayCircle,
+  Utensils,
   Volume2
 } from "lucide-react";
 import {
@@ -1433,19 +1434,22 @@ function DailyEnglishPanel({ compact = false }: { compact?: boolean }) {
   return (
     <Link
       href="/mealtime"
-      className={`group block h-full rounded-2xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] ${compact ? "p-4" : "p-5"} transition hover:border-sky-200/25 hover:bg-sky-950/60`}
+      className={`group flex h-full flex-col justify-between ${compact ? "py-2" : "py-3"}`}
       aria-label="CNN 10 の今日の英語動画を見る"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <PlayCircle className="h-5 w-5 text-sky-200" />
-          <span className="font-semibold tracking-[0.08em] text-sky-100">DAILY ENGLISH</span>
+      <div>
+        <div className="inline-flex items-center gap-2 rounded-full bg-sky-300/10 px-3 py-1.5 text-xs font-semibold text-sky-100">
+          <PlayCircle className="h-4 w-4" />
+          10 MIN · NEWS ENGLISH
         </div>
-        <span className="text-xs text-slate-400">CNN 10</span>
+        <div className={`${compact ? "mt-3 text-2xl" : "mt-4 text-[clamp(1.55rem,1.75vw,2.25rem)]"} font-semibold leading-tight text-white`}>
+          今日のニュースを英語で見る
+        </div>
       </div>
-      <div className={`${compact ? "mt-6 text-2xl" : "mt-8 text-3xl"} font-semibold text-white`}>今日のニュースを英語で見る</div>
-      <div className="mt-3 text-base text-slate-300">最新の CNN 10 動画を再生</div>
-      <div className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-sky-400 px-4 text-sm font-semibold text-slate-950 transition group-hover:bg-sky-300">動画を見る</div>
+      <div className="mt-4 inline-flex min-h-10 w-fit items-center gap-2 rounded-xl border border-white/70 bg-white px-4 text-sm font-bold text-slate-950 transition group-hover:bg-sky-100">
+        <Play className="h-4 w-4 fill-current" />
+        CNN 10 を見る
+      </div>
     </Link>
   );
 }
@@ -1594,7 +1598,6 @@ export default function DisplayPage() {
   const [bookPicks, setBookPicks] = useState<BookPick[]>([]);
   const activeDayRef = useRef(todayKey(new Date()));
   const currentTodayBackground = todayCardBackgroundForDate(now);
-  const twoDayFlash = twoDayFlashForDate(now);
 
   useEffect(() => {
     let disposed = false;
@@ -1915,19 +1918,6 @@ export default function DisplayPage() {
             </div>
 
             <div className="mt-3">
-              <TwoDayFlashCard
-                flash={twoDayFlash}
-                mode={
-                  data.mainTasks.length >= 4
-                    ? "tiny"
-                    : data.mainTasks.length === 3
-                      ? "compact"
-                      : "full"
-                }
-              />
-            </div>
-
-            <div className="mt-3">
               <TodayInHistoryCard date={now} />
             </div>
           </section>
@@ -1993,25 +1983,6 @@ export default function DisplayPage() {
                 <div className="min-w-0">
                   <div className="text-sm font-bold tracking-[0.08em] text-violet-100">每日阅读</div>
                   <div className="mt-0.5 truncate text-xs text-slate-300">英语原文 · 音频 · 同步字幕 · 跟读</div>
-                </div>
-              </div>
-              <span className="shrink-0 text-xs font-bold text-cyan-200">OPEN →</span>
-            </Link>
-
-            <Link
-              href="/english-song"
-              className="mt-2 flex min-h-[68px] items-center justify-between gap-3 rounded-2xl border border-fuchsia-200/20 bg-[linear-gradient(135deg,rgba(217,70,239,0.16),rgba(59,130,246,0.10))] px-4 py-3 active:bg-fuchsia-300/20"
-              aria-label="English Song 一句一句学英文歌"
-            >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-fuchsia-300/15 text-xl">🎵</div>
-                <div className="min-w-0">
-                  <div className="text-sm font-bold tracking-[0.08em] text-fuchsia-100">
-                    English Song
-                  </div>
-                  <div className="mt-0.5 truncate text-xs text-slate-300">
-                    一句一句学英文歌
-                  </div>
                 </div>
               </div>
               <span className="shrink-0 text-xs font-bold text-cyan-200">OPEN →</span>
@@ -2310,7 +2281,7 @@ export default function DisplayPage() {
             </article>
           </section>
 
-          <section className="grid min-h-0 grid-cols-[1.12fr_0.98fr_1.10fr] gap-4">
+          <section className="grid min-h-0 grid-cols-[1.08fr_1.12fr_1fr] gap-4">
             <article className="h-full min-h-0 overflow-hidden rounded-3xl border border-emerald-200/15 bg-[linear-gradient(145deg,rgba(4,74,71,0.88),rgba(5,50,61,0.94))] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <SectionTitle
@@ -2323,9 +2294,8 @@ export default function DisplayPage() {
                 </span>
               </div>
 
-              <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_0.38fr] gap-4">
-                <div className="grid min-h-0 content-start gap-2">
-                  {data.mainTasks.slice(0, 3).map((task) => (
+              <div className="grid min-h-0 content-start gap-2">
+                  {data.mainTasks.slice(0, 2).map((task) => (
                     <div
                       key={task.id}
                       className="grid min-h-14 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/[0.05] bg-slate-950/24 px-3 py-2"
@@ -2341,7 +2311,7 @@ export default function DisplayPage() {
                       </button>
 
                       <div className="min-w-0">
-                        <div className="line-clamp-2 text-[clamp(1.05rem,1.05vw,1.3rem)] font-medium leading-snug text-white">
+                        <div className="truncate text-[clamp(0.95rem,1vw,1.2rem)] font-medium text-white">
                           {task.title}
                         </div>
                         {task.note ? (
@@ -2373,31 +2343,6 @@ export default function DisplayPage() {
                     </div>
                   ) : null}
 
-                  <Link
-                    href="/learning"
-                    className="flex min-h-10 items-center justify-between rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 text-sm font-semibold text-slate-300 transition active:bg-white/[0.08]"
-                  >
-                    <span>
-                      {data.mainTasks.length > 3
-                        ? `还有 ${data.mainTasks.length - 3} 项`
-                        : "＋ 学習ページを開く"}
-                    </span>
-                    <span>Learning →</span>
-                  </Link>
-                </div>
-
-                <div className="min-h-0">
-                  <TwoDayFlashCard
-                    flash={twoDayFlash}
-                    mode={
-                      data.mainTasks.length >= 4
-                        ? "tiny"
-                        : data.mainTasks.length === 3
-                          ? "compact"
-                          : "full"
-                    }
-                  />
-                </div>
               </div>
             </article>
 
@@ -2414,24 +2359,27 @@ export default function DisplayPage() {
                   <div className="flex shrink-0 items-center gap-1.5">
                     <Link
                       href="/fitness"
-                      className="rounded-full bg-emerald-300/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-100 active:bg-emerald-300/20"
+                      className="grid h-8 w-8 place-items-center rounded-full bg-emerald-300/10 text-emerald-100 active:bg-emerald-300/20"
+                      aria-label="Fitness"
+                      title="Fitness"
                     >
-                      FITNESS
+                      <Dumbbell className="h-3.5 w-3.5" />
                     </Link>
                     <Link
                       href="/recipes"
-                      className="rounded-full bg-amber-300/10 px-2.5 py-1 text-[10px] font-semibold text-amber-100 active:bg-amber-300/20"
+                      className="grid h-8 w-8 place-items-center rounded-full bg-amber-300/10 text-amber-100 active:bg-amber-300/20"
+                      aria-label="Meals"
+                      title="Meals"
                     >
-                      MEALS
+                      <Utensils className="h-3.5 w-3.5" />
                     </Link>
                     <Link
                       href="/calendar"
-                      className="inline-flex items-center gap-1 rounded-full bg-cyan-300/10 px-2.5 py-1 text-[10px] font-semibold text-cyan-100 active:bg-cyan-300/20"
+                      className="grid h-8 w-8 place-items-center rounded-full bg-cyan-300/10 text-cyan-100 active:bg-cyan-300/20"
                       aria-label="日程修改"
                       title="Calendar · 日程修改"
                     >
                       <CalendarDays className="h-3.5 w-3.5" />
-                      日程修改
                     </Link>
                     <Link
                       href="/badminton"
@@ -2455,26 +2403,17 @@ export default function DisplayPage() {
                 <div className="mb-3 grid grid-cols-2 gap-2">
                   <Link
                     href="/mealtime?audio=1"
-                    className="flex min-h-12 items-center gap-2 rounded-xl border border-violet-200/15 bg-violet-300/10 px-3 active:bg-violet-300/20"
+                    className="col-span-2 flex min-h-14 items-center justify-between gap-3 rounded-xl border border-violet-200/15 bg-violet-300/10 px-4 active:bg-violet-300/20"
                     aria-label="每日阅读"
                   >
-                    <span className="text-base">📖</span>
-                    <div className="min-w-0">
-                      <div className="truncate text-[11px] font-bold text-violet-100">每日阅读</div>
-                      <div className="truncate text-[9px] text-slate-400">音频 · 字幕 · 跟读</div>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="text-xl">📖</span>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-bold text-violet-100">每日阅读</div>
+                        <div className="truncate text-[10px] text-slate-300">音频 · 字幕 · 逐句跟读</div>
+                      </div>
                     </div>
-                  </Link>
-
-                  <Link
-                    href="/english-song"
-                    className="flex min-h-12 items-center gap-2 rounded-xl border border-fuchsia-200/15 bg-fuchsia-300/10 px-3 active:bg-fuchsia-300/20"
-                    aria-label="English Song 一句一句学英文歌"
-                  >
-                    <span className="text-base">🎵</span>
-                    <div className="min-w-0">
-                      <div className="truncate text-[11px] font-bold text-fuchsia-100">English Song</div>
-                      <div className="truncate text-[9px] text-slate-400">一句一句学英文歌</div>
-                    </div>
+                    <span className="text-xs font-bold text-violet-100">OPEN →</span>
                   </Link>
 
                   <Link
@@ -2508,7 +2447,7 @@ export default function DisplayPage() {
                       key={task.id}
                       type="button"
                       disabled
-                      className="flex min-h-12 items-center gap-2 rounded-xl border border-white/[0.05] bg-emerald-300/10 px-3 text-left text-[clamp(0.85rem,0.82vw,1rem)] font-semibold text-emerald-50 transition active:scale-[0.98] active:bg-emerald-300/25"
+                      className="flex min-h-10 items-center gap-2 rounded-xl border border-white/[0.05] bg-emerald-300/10 px-3 text-left text-[clamp(0.8rem,0.78vw,0.95rem)] font-semibold text-emerald-50 transition active:scale-[0.98] active:bg-emerald-300/25"
                     >
                       <Circle className="h-5 w-5 shrink-0 text-emerald-200" />
                       <span className="min-w-0 truncate">
@@ -2532,7 +2471,7 @@ export default function DisplayPage() {
               </article>
             </div>
 
-            <article className="h-full min-h-0 overflow-hidden rounded-3xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
+            <article className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-sky-200/10 bg-[linear-gradient(145deg,rgba(18,42,66,0.94),rgba(13,31,51,0.98))] p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <PlayCircle className="h-5 w-5 shrink-0 text-sky-200" />
@@ -2545,7 +2484,9 @@ export default function DisplayPage() {
                 </span>
               </div>
 
-              <DailyEnglishPanel />
+              <div className="min-h-0 flex-1">
+                <DailyEnglishPanel />
+              </div>
             </article>
           </section>
         </div>
